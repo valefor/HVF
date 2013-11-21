@@ -17,7 +17,7 @@ library Commands initializer init /* v0.0.1 by Adrian
 
 /*
 ************************************************************************************************
-*	!Becareful: I recommend to create 'commands' with function, since vJass Compiler will generate such codes
+*	!Be careful: I recommend to create 'commands' with function, since vJass Compiler will generate such codes
 
 call ExecuteFunc("s__Commands___HelloCmd_ChatCommandModule___onInit")
 

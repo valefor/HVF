@@ -1,4 +1,4 @@
-library ChatCommand /* v1.3.0 by Bills
+library ChatCommand/* v1.3.0 by Bills
 ***********************************************************************************************
 *
 *   This system allows fast commands development.
@@ -236,4 +236,5 @@ endglobals
         	call ChatCommand.create(CHAT_COMMAND, function thistype.onCommand)
         endmethod
     endmodule
+
 endlibrary
