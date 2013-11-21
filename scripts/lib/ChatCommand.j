@@ -134,7 +134,6 @@ endglobals
         static method create takes string command, code callback returns thistype
             local thistype this = ic
             static if DEBUG_MODE then
-            	call BJDebugMsg("Debug3 cmd:" + command)
                 if ChatCommand[command] != 0 then
                     call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,60,"[ChatCommand] Warning: Attempted to overwrite \"-"+command+"\" command")
                     return 0
@@ -142,12 +141,12 @@ endglobals
             endif
             set ic = ic + 1
             
-            call BJDebugMsg("Debug1 cmd:" + command)
-            call BJDebugMsg("Debug1 cmd hash:" + I2S(StringHash(command)))
-            call BJDebugMsg("Debug1 this:" + I2S(this))
+            //call BJDebugMsg("Debug1 cmd:" + command)
+            //call BJDebugMsg("Debug1 cmd hash:" + I2S(StringHash(command)))
+            //call BJDebugMsg("Debug1 this:" + I2S(this))
             set instances[StringHash(command)] = this
-            call BJDebugMsg("Debug2 this:" + I2S(this))
-            call BJDebugMsg("Debug2 cmd:" + I2S(instances[StringHash(command)]))
+            //call BJDebugMsg("Debug2 this:" + I2S(this))
+            //call BJDebugMsg("Debug2 cmd:" + I2S(instances[StringHash(command)]))
             set this.command = command
             set this.enabled = true
             set this.callback = Filter(callback)
@@ -193,9 +192,9 @@ endglobals
                 set str = str + char
             endloop
             
-            call BJDebugMsg("Debug str:" + str)
-            call BJDebugMsg("Debug strHash:" + I2S(StringHash(str)))
-            call BJDebugMsg("Debug instance:" + I2S(instances[StringHash(str)]))
+            //call BJDebugMsg("Debug str:" + str)
+            //call BJDebugMsg("Debug strHash:" + I2S(StringHash(str)))
+            //call BJDebugMsg("Debug instance:" + I2S(instances[StringHash(str)]))
             set cmd = ChatCommand[str]
             if cmd != 0 then
             	call BJDebugMsg("Debug cmd:" + cmd.command)
@@ -205,7 +204,8 @@ endglobals
                     exitwhen i >= strlen
                     set data = data + char
                 endloop
-                call cmd.fire(GetTriggerPlayer(),data)
+                
+                call cmd.fire(GetTriggerPlayer(),StringStrip(data, " "))
             endif
             return false
         endmethod
@@ -232,7 +232,7 @@ endglobals
         // endmethod
 
         private static method onInit takes nothing returns nothing
-            call BJDebugMsg("Create command " + CHAT_COMMAND + " via struct")
+            //call BJDebugMsg("Create command " + CHAT_COMMAND + " via struct")
         	call ChatCommand.create(CHAT_COMMAND, function thistype.onCommand)
         endmethod
     endmodule

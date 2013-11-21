@@ -1,4 +1,4 @@
-library_once Core initializer init/* v0.0.1 Adrian
+library Core initializer init/* v0.0.1 Adrian
 *************************************************************************************
 * 	HVF Core library which provides some useful functions
 *
@@ -45,12 +45,12 @@ endfunction
 	**************************************************************************************
 	*/
 	globals
-        boolean GameAllowSave = false
+        boolean GameAllowSave = true
     endglobals
     
     globals
         private dialog DummyDialog = DialogCreate()
-        private timer  Timer  = CreateTimer()
+        private timer  DummyTimer  = CreateTimer()
         private player localplayer
     endglobals
     
@@ -60,7 +60,7 @@ endfunction
     	endif
     endfunction
     
-    private function Exit takes nothing returns boolean
+    private function Exit takes nothing returns nothing
     	call DialogDisplay(localplayer, DummyDialog, false)
     endfunction
     
@@ -68,7 +68,7 @@ endfunction
     	if not GameAllowSave then
     		call DialogDisplay(localplayer, DummyDialog, true)
     	endif
-    	call TimerStart(timer, 0.00, false, function Exit)
+    	call TimerStart(DummyTimer, 0.00, false, function Exit)
     	return false  	
     endfunction
     

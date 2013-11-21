@@ -34,9 +34,9 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 ************************************************************************************************
 */
 	private struct HelloCmd extends array
-		private static constant string CHAT_COMMAND = "hello"
+		readonly static constant string CHAT_COMMAND = "hello"
 		
-		private static method onCommand takes nothing returns nothing
+		static method onCommand takes nothing returns nothing
 			call BJDebugMsg("OnCommand callback")
 			if ChatCommand.eventData == "" then
 				call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hello Player "+ I2S(ChatCommand.eventPlayerId+1))
@@ -47,7 +47,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 			// call ChatCommand.eventCommand.enable(false)
 		endmethod
 	
-		implement ChatCommandModule
+		//implement ChatCommandModule
 	endstruct
 
 	private function CommandResponse takes nothing returns nothing
@@ -59,15 +59,10 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         endif
     endfunction
     
-    private function init takes nothing returns nothing
-        call ChatCommand.create("hi",function CommandResponse)
-        // command "-hi" created
-    endfunction
-    
     private struct SwapCmd extends array
-		private static constant string CHAT_COMMAND = "swap"
+		readonly static constant string CHAT_COMMAND = "swap"
 		
-		private static method onCommand takes nothing returns nothing
+		static method onCommand takes nothing returns nothing
 			call BJDebugMsg("OnCommand callback")
 			if ChatCommand.eventData == "" then
 				call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Swap Player "+ I2S(ChatCommand.eventPlayerId+1))
@@ -78,7 +73,14 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 			// call ChatCommand.eventCommand.enable(false)
 		endmethod
 	
-		implement ChatCommandModule
+		// implement ChatCommandModule
 	endstruct
+	
+	private function init takes nothing returns nothing
+        call ChatCommand.create("hi",function CommandResponse)
+        call ChatCommand.create(HelloCmd.CHAT_COMMAND,function HelloCmd.onCommand)
+        call ChatCommand.create(SwapCmd.CHAT_COMMAND,function SwapCmd.onCommand)
+        // command "-hi" created
+    endfunction
 	
 endlibrary
