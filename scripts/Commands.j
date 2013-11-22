@@ -37,7 +37,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 		readonly static constant string CHAT_COMMAND = "hello"
 		
 		static method onCommand takes nothing returns nothing
-			call BJDebugMsg("OnCommand callback")
+			call BJDebugMsg("OnCommand callbackld")
 			if ChatCommand.eventData == "" then
 				call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hello Player "+ I2S(ChatCommand.eventPlayerId+1))
 			else
