@@ -6,6 +6,7 @@
 
 //! import "scripts\lib\ChatCommand.j"
 //! import "scripts\lib\Dialog.j"
+//! import "scripts\lib\PlayerManager.j"
 
 // HVF vJass Library - for HVF map only
 //! import "scripts\Core.j"

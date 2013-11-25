@@ -179,4 +179,11 @@ struct Players
     struct InactivePlayer extends array
         implement PlayerVars
     endstruct
+    
+    function GetHostPlayer takes nothing returns player
+    	//if not Human.first == null then
+    		//return Human[0].get
+    	//endif
+    	return null
+    endfunction
 endlibrary

@@ -1,4 +1,4 @@
-library Core initializer init/* v0.0.1 Adrian
+library Core initializer init/* v0.0.1 Xandria
 *************************************************************************************
 * 	HVF Core library which provides some useful functions
 *
