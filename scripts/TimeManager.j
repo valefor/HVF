@@ -49,8 +49,10 @@ library TimeManager initializer init/* v0.0.1 Xandria
     endfunction
 
     private function ShowSelectDialog takes nothing returns nothing 
-        local Dialog dgSelection = Dialog.create()
+    	local Dialog dgSelection = Dialog.create()
         local Human human = Human[Human.first]
+        
+        debug call BJDebugMsg("ShowSelectDialog!")
         
         set dgSelection.title  = CST_STR_PLAYTIME_TITLE
         set btsSelect[0] = dgSelection.addButton(AppendHotkey(CST_STR_PLAYTIME_40,    "A"), 'A')
@@ -61,6 +63,7 @@ library TimeManager initializer init/* v0.0.1 Xandria
         call dgSelection.registerClickEvent(Condition(function DialogEvent))
         // only display dialog to human player
         loop
+        	debug call BJDebugMsg("ShowSelectDialog to player:" + GetPlayerName(human.get))
         	call dgSelection.display(human.get, true)
         	set human = human.next
         	exitwhen human.end
@@ -70,13 +73,17 @@ library TimeManager initializer init/* v0.0.1 Xandria
     endfunction
     
     function TimeVote takes nothing returns nothing
+    	debug call BJDebugMsg("Vote for play time!")
+    	call DestroyTimer(GetExpiredTimer())
     	call ShowSelectDialog()
     endfunction
     
     private function init takes nothing returns nothing
     	// set iMultiple to 1 seconds in debug mode to fast debugging
     	set iMultiple = 1
-    	call TimerStart(CreateTimer(), 0, false, function TimeVote)
+    	// dialogs can't be displayed on init and the scope's init-func is run during init
+    	// so we need to use TimerStart to call functions which need to show dialog
+    	//call TimerStart(CreateTimer(), 0, false, function TimeVote)
     endfunction 
     
 endlibrary

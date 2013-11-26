@@ -130,10 +130,9 @@ endfunction
 	function GetHostPlayer takes nothing returns player
 		if pHost == null then
 			// if DetectHost fails, we use first Human player as Host
-			set pHost = Human[Human.first].get
-		else
-			return pHost
+			set pHost = Human[Human.first].get			
 		endif
+		return pHost
 	endfunction
 	
     // library initilaizer
