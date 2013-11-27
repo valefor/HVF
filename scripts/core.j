@@ -48,6 +48,8 @@ function ConditionalTriggerExecute takes trigger trig returns nothing
         call TriggerExecute(trig)
     endif
 endfunction
+
+// Custom hero unit type id
 *************************************************************************************/
 
 	/*
