@@ -17,6 +17,31 @@ library TimeManager initializer init/* v0.0.1 Xandria
         private integer 	iMultiple 	= 60
     endglobals
     
+    private function CountdownPlayTime takes real time returns nothing
+    	local timer tmCountDown = CreateTimer()
+    	local timerdialog dgRemainedTime = CreateTimerDialog(tmCountDown)
+    	
+    	call TimerStart(tmCountDown, R2I(time), false, null)
+    	call TimerDialogSetTitle(dgRemainedTime, CST_STR_REMAINED_TIME)
+    	call TimerDialogDisplay(dgRemainedTime, true)
+    	
+    	debug call BJDebugMsg("Start timer countdown!")
+    	call PolledWait(5.0)
+    	//call PolledWait(R2I(time)-30)
+    	// do something here
+    	debug call BJDebugMsg("30 seconds left!")
+    	//call PolledWait(30)
+    	
+    	// timeout
+    	call PolledWait(5.0)
+    	call TimerDialogDisplay(dgRemainedTime, false)
+    	debug call BJDebugMsg("Timeout!")
+    	call DestroyTimerDialog(dgRemainedTime)
+    	call DestroyTimer(tmCountDown)
+    	set dgRemainedTime = null
+    	set tmCountDown = null
+    endfunction
+    
     private function DialogEvent takes nothing returns boolean
         local Dialog  	dgClicked 	= Dialog.getClickedDialog()
         local button  	btClicked   = Dialog.getClickedButton()
@@ -37,10 +62,14 @@ library TimeManager initializer init/* v0.0.1 Xandria
                 
         if iSelects == Human.count then
         	debug call BJDebugMsg("All players have voted!")
-        	debug call BJDebugMsg("Game time is set to " + I2S(R2I(rPlayTime/iSelects)) + " minutes.")
+        	// calculate play time
+        	set rPlayTime = rPlayTime/iSelects
+        	debug call BJDebugMsg("Game time is set to " + I2S(R2I(rPlayTime)) + " minutes.")
         	call dgClicked.destroy()
-        	set btClicked = null
+        	// show play time dialog
+        	call CountdownPlayTime(rPlayTime)
         endif
+        set btClicked = null
         return false 
     endfunction
     
@@ -48,11 +77,11 @@ library TimeManager initializer init/* v0.0.1 Xandria
         return "|cffffcc00[" + hotkey + "]|r " + source
     endfunction
 
-    private function ShowSelectDialog takes nothing returns nothing 
+    private function ShowVoteDialog takes nothing returns nothing 
     	local Dialog dgSelection = Dialog.create()
         local Human human = Human[Human.first]
         
-        debug call BJDebugMsg("ShowSelectDialog!")
+        debug call BJDebugMsg("ShowVoteDialog!")
         
         set dgSelection.title  = CST_STR_PLAYTIME_TITLE
         set btsSelect[0] = dgSelection.addButton(AppendHotkey(CST_STR_PLAYTIME_40,    "A"), 'A')
@@ -63,7 +92,7 @@ library TimeManager initializer init/* v0.0.1 Xandria
         call dgSelection.registerClickEvent(Condition(function DialogEvent))
         // only display dialog to human player
         loop
-        	debug call BJDebugMsg("ShowSelectDialog to player:" + GetPlayerName(human.get))
+        	debug call BJDebugMsg("ShowVoteDialog to player:" + GetPlayerName(human.get))
         	call dgSelection.display(human.get, true)
         	set human = human.next
         	exitwhen human.end
@@ -75,7 +104,7 @@ library TimeManager initializer init/* v0.0.1 Xandria
     function TimeVote takes nothing returns nothing
     	debug call BJDebugMsg("Vote for play time!")
     	call DestroyTimer(GetExpiredTimer())
-    	call ShowSelectDialog()
+    	call ShowVoteDialog()
     endfunction
     
     private function init takes nothing returns nothing

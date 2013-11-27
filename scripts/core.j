@@ -49,6 +49,13 @@ function ConditionalTriggerExecute takes trigger trig returns nothing
     endif
 endfunction
 
+TriggerSleepAction and PolledWait both can't be less than 0.10
+
+TriggerSleepAction doesn't pause when a player about to disconnet(waiting for player message)
+
+Use PolledWait because of the above reason.
+
+
 // Custom hero unit type id
 *************************************************************************************/
 
