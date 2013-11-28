@@ -8,6 +8,21 @@ library TimeManager initializer init/* v0.0.1 Xandria
 *       */ Dialog /*
 *       */ Core   /*  core functions must be loaded first
 *
+*************************************************************************************
+*** Some useful tips
+Function TimerStart starts any timer whether it's running or not.
+This function takes 4 arguments:
+
+A Timer: The timer that is going to be started.
+A Real: The interval or timeout of the timer.
+A Boolean: Determines whether it's a one-shot timer or a periodic timer.
+A code: The code that will execute whenever a timer expires.
+The function TimerStart has been proven to be faster than ResumeTimer.
+You don't need to pause a timer in order to start it.
+
+Using a timeout of 0 will cause the timer to append the thread, meaning it will execute as soon as the thread finishes execution.
+This is pretty handy, because some things can't be detected or done unless you wait for the next thread. For example, sounds can't be 
+played in the same thread that they are created in, and thus, we use 0-timeout timers to play them.
 *************************************************************************************/
 
 	globals
