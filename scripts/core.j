@@ -40,6 +40,12 @@ native TriggerExecute       takes trigger whichTrigger returns nothing
 *	TriggerEvaluate : Execute Trigger's conditions, ignore Trigger's action
 native TriggerEvaluate      takes trigger whichTrigger returns boolean
 
+Both open a new thread (and so halt the previous one, since jass doesn't support multi-threads).
+But TriggerEvaluate is faster, plus you don't need to remove a trigger-condition when you destroy a trigger, 
+you will have to remove a trigger-action if you destroy a trigger, else you will leak the action (TriggerClearActions only disable actions but doesn't free the memory)
+Use TriggerRemoveAction instead
+Just be aware that obviously you can't use TriggerSleepAction and so also PolledWait in a trigger condition for an obvious reason (which is in most cases hardly a con).
+I believe you can't also use some few functions in a trigger condition, such as PauseGame if i remember correctly.
 
 // Runs the trigger's actions if the trigger's conditions evaluate to true.
 
@@ -54,7 +60,6 @@ TriggerSleepAction and PolledWait both can't be less than 0.10
 TriggerSleepAction doesn't pause when a player about to disconnet(waiting for player message)
 
 Use PolledWait because of the above reason.
-
 
 // Custom hero unit type id
 *************************************************************************************/

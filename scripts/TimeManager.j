@@ -32,29 +32,47 @@ played in the same thread that they are created in, and thus, we use 0-timeout t
         private integer 	iMultiple 	= 60
     endglobals
     
-    private function CountdownPlayTime takes real time returns nothing
+    private function Countdown30sLeft takes nothing returns nothing
+    	debug call BJDebugMsg("30 seconds left!")
+    endfunction
+    
+    private function CountdownEnd takes nothing returns nothing
+    	debug call BJDebugMsg("Timeout!")
+    endfunction
+    
+    private function CountdownPlayTime takes nothing returns nothing
     	local timer tmCountDown = CreateTimer()
     	local timerdialog dgRemainedTime = CreateTimerDialog(tmCountDown)
     	
-    	call TimerStart(tmCountDown, R2I(time), false, null)
+    	call TimerStart(tmCountDown, R2I(rPlayTime), false, null)
     	call TimerDialogSetTitle(dgRemainedTime, CST_STR_REMAINED_TIME)
     	call TimerDialogDisplay(dgRemainedTime, true)
     	
     	debug call BJDebugMsg("Start timer countdown!")
-    	call PolledWait(5.0)
-    	//call PolledWait(R2I(time)-30)
+    	//call PolledWait(5.0)
+    	call PolledWait(R2I(rPlayTime)-30)
     	// do something here
     	debug call BJDebugMsg("30 seconds left!")
-    	//call PolledWait(30)
+    	
+    	call PolledWait(30)
     	
     	// timeout
-    	call PolledWait(5.0)
-    	call TimerDialogDisplay(dgRemainedTime, false)
+    	//call PolledWait(5.0)
     	debug call BJDebugMsg("Timeout!")
+    	call TimerDialogDisplay(dgRemainedTime, false)
     	call DestroyTimerDialog(dgRemainedTime)
     	call DestroyTimer(tmCountDown)
     	set dgRemainedTime = null
     	set tmCountDown = null
+    	// memory leak here!
+    	//TriggerRemoveAction(GetTriggeringTrigger(),CountdownPlayTime)
+    endfunction
+    
+    private function StartCountdownPlayTime takes nothing returns nothing
+    	local trigger tgCdPlayTime = CreateTrigger()
+    	call TriggerAddAction(tgCdPlayTime, function CountdownPlayTime)
+    	
+    	call TriggerExecute(tgCdPlayTime)
     endfunction
     
     private function DialogEvent takes nothing returns boolean
@@ -82,7 +100,7 @@ played in the same thread that they are created in, and thus, we use 0-timeout t
         	debug call BJDebugMsg("Game time is set to " + I2S(R2I(rPlayTime)) + " minutes.")
         	call dgClicked.destroy()
         	// show play time dialog
-        	call CountdownPlayTime(rPlayTime)
+        	call StartCountdownPlayTime()
         endif
         set btClicked = null
         return false 
