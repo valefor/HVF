@@ -73,6 +73,9 @@ played in the same thread that they are created in, and thus, we use 0-timeout t
     	call TriggerAddAction(tgCdPlayTime, function CountdownPlayTime)
     	
     	call TriggerExecute(tgCdPlayTime)
+    	
+    	// nullify local trigger variable
+    	set tgCdPlayTime = null
     endfunction
     
     private function DialogEvent takes nothing returns boolean
