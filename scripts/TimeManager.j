@@ -23,6 +23,10 @@ You don't need to pause a timer in order to start it.
 Using a timeout of 0 will cause the timer to append the thread, meaning it will execute as soon as the thread finishes execution.
 This is pretty handy, because some things can't be detected or done unless you wait for the next thread. For example, sounds can't be 
 played in the same thread that they are created in, and thus, we use 0-timeout timers to play them.
+
+* ! Care about this:
+A dialog pauses the game when testing in single player. Thus why the event doesn't fire.
+In multiplayer however, this trigger should work.
 *************************************************************************************/
 
 	globals
@@ -32,50 +36,43 @@ played in the same thread that they are created in, and thus, we use 0-timeout t
         private integer 	iMultiple 	= 60
     endglobals
     
-    private function Countdown30sLeft takes nothing returns nothing
-    	debug call BJDebugMsg("30 seconds left!")
-    endfunction
-    
-    private function CountdownEnd takes nothing returns nothing
-    	debug call BJDebugMsg("Timeout!")
-    endfunction
-    
     private function CountdownPlayTime takes nothing returns nothing
     	local timer tmCountDown = CreateTimer()
     	local timerdialog dgRemainedTime = CreateTimerDialog(tmCountDown)
+    	local SimpleTrigger tgCdPlayTime = SimpleTrigger.GetSimpleTrigger(GetTriggeringTrigger())
     	
-    	call TimerStart(tmCountDown, R2I(rPlayTime), false, null)
+    	call TimerStart(tmCountDown, R2I(rPlayTime*iMultiple), false, null)
     	call TimerDialogSetTitle(dgRemainedTime, CST_STR_REMAINED_TIME)
+    	call TimerDialogSetTimeColor(dgRemainedTime, 0, 255, 0, 20)
     	call TimerDialogDisplay(dgRemainedTime, true)
     	
     	debug call BJDebugMsg("Start timer countdown!")
-    	//call PolledWait(5.0)
-    	call PolledWait(R2I(rPlayTime)-30)
+    	call PolledWait( (R2I(rPlayTime)-10) * iMultiple )
     	// do something here
-    	debug call BJDebugMsg("30 seconds left!")
+    	debug call BJDebugMsg("10 seconds left!")
+    	call TimerDialogSetTitleColor(dgRemainedTime, 255, 0, 0, 10)
     	
-    	call PolledWait(30)
+    	call PolledWait( 10 * iMultiple )
     	
     	// timeout
-    	//call PolledWait(5.0)
     	debug call BJDebugMsg("Timeout!")
     	call TimerDialogDisplay(dgRemainedTime, false)
     	call DestroyTimerDialog(dgRemainedTime)
     	call DestroyTimer(tmCountDown)
     	set dgRemainedTime = null
     	set tmCountDown = null
-    	// memory leak here!
-    	//TriggerRemoveAction(GetTriggeringTrigger(),CountdownPlayTime)
+    	call tgCdPlayTime.destroy()
     endfunction
     
+    // If we need to use such PolledWait/PauseGame game time functions, trigger action is the only choice 
     private function StartCountdownPlayTime takes nothing returns nothing
-    	local trigger tgCdPlayTime = CreateTrigger()
-    	call TriggerAddAction(tgCdPlayTime, function CountdownPlayTime)
-    	
-    	call TriggerExecute(tgCdPlayTime)
-    	
+    	local SimpleTrigger tgCdPlayTime = SimpleTrigger.create()
+    	//call TriggerAddAction(tgCdPlayTime, function CountdownPlayTime)
+    	//call TriggerExecute(tgCdPlayTime)
+    	call tgCdPlayTime.addAction(function CountdownPlayTime)
+    	call tgCdPlayTime.execute()
     	// nullify local trigger variable
-    	set tgCdPlayTime = null
+    	//set tgCdPlayTime = null
     endfunction
     
     private function DialogEvent takes nothing returns boolean
@@ -95,13 +92,16 @@ played in the same thread that they are created in, and thus, we use 0-timeout t
         elseif btClicked == btsSelect[2] then
             set rPlayTime = rPlayTime + 60.0
         endif
-                
+
+		// hide dialog to player, will destroy it later
+        call dgClicked.display(GetTriggerPlayer(), false)        
+        
+        // if voting is over, countdown play time
         if iSelects == Human.count then
         	debug call BJDebugMsg("All players have voted!")
         	// calculate play time
         	set rPlayTime = rPlayTime/iSelects
         	debug call BJDebugMsg("Game time is set to " + I2S(R2I(rPlayTime)) + " minutes.")
-        	call dgClicked.destroy()
         	// show play time dialog
         	call StartCountdownPlayTime()
         endif
@@ -113,6 +113,40 @@ played in the same thread that they are created in, and thus, we use 0-timeout t
         return "|cffffcc00[" + hotkey + "]|r " + source
     endfunction
 
+    function VoteTimeout takes nothing returns nothing
+    	local SimpleTrigger tgVoteTimeout = SimpleTrigger.GetSimpleTrigger(GetTriggeringTrigger())
+    	local Dialog dgTobeRemoved = tgVoteTimeout.getData()
+    	debug call BJDebugMsg("Time for voting is up," + I2S(Human.count - iSelects) +" players haven't vote yet!")
+    	// clean up
+    	call dgTobeRemoved.destroy()
+    	
+    	if iSelects == Human.count then
+    		return
+    	endif
+    	
+    	loop 
+    		exitwhen iSelects == Human.count
+    		// default play time is 50 minites
+    		set rPlayTime = rPlayTime + 50.0
+    		set iSelects = iSelects + 1
+    	endloop
+    	// calculate play time
+        set rPlayTime = rPlayTime/iSelects 
+    	call StartCountdownPlayTime()
+    endfunction
+    
+    function SetVoteTimeout takes Dialog dg, real timeout returns nothing
+    	local SimpleTrigger tgVoteTimeout = SimpleTrigger.create()
+    	//call TriggerAddAction(tgCdPlayTime, function CountdownPlayTime)
+    	//call TriggerExecute(tgCdPlayTime)
+    	debug call BJDebugMsg("Vote timeout action begin!")
+    	call tgVoteTimeout.setData(dg)
+    	call tgVoteTimeout.addAction(function VoteTimeout)
+    	call TriggerRegisterTimerEvent(tgVoteTimeout.trig, timeout, false)
+    	//call tgVoteTimeout.execute()
+    	debug call BJDebugMsg("Vote timeout action end!")
+    endfunction
+    
     private function ShowVoteDialog takes nothing returns nothing 
     	local Dialog dgSelection = Dialog.create()
         local Human human = Human[Human.first]
@@ -124,7 +158,10 @@ played in the same thread that they are created in, and thus, we use 0-timeout t
         set btsSelect[1] = dgSelection.addButton(AppendHotkey(CST_STR_PLAYTIME_50,    "B"), 'B')
         set btsSelect[2] = dgSelection.addButton(AppendHotkey(CST_STR_PLAYTIME_60,    "C"), 'C')
         
-        // register callback
+        // set timeout for vote
+    	call SetVoteTimeout(dgSelection,15.0)
+    	
+        // register callback for clicking dialog
         call dgSelection.registerClickEvent(Condition(function DialogEvent))
         // only display dialog to human player
         loop
@@ -145,7 +182,7 @@ played in the same thread that they are created in, and thus, we use 0-timeout t
     
     private function init takes nothing returns nothing
     	// set iMultiple to 1 seconds in debug mode to fast debugging
-    	set iMultiple = 1
+    	debug set iMultiple = 1
     	// dialogs can't be displayed on init and the scope's init-func is run during init
     	// so we need to use TimerStart to call functions which need to show dialog
     	//call TimerStart(CreateTimer(), 0, false, function TimeVote)

@@ -61,6 +61,8 @@ TriggerSleepAction doesn't pause when a player about to disconnet(waiting for pl
 
 Use PolledWait because of the above reason.
 
+functions
+GetUnitsOfPlayerAll
 // Custom hero unit type id
 *************************************************************************************/
 
@@ -157,60 +159,5 @@ Use PolledWait because of the above reason.
     	// Detect Host who creates this game
     	call DetectHost()
     endfunction
-
-    /*
-	**************************************************************************************
-	* SimpleTrigger
-	*	Simple Trigger wrapper
-	**************************************************************************************
-	*/
-	globals
-        private hashtable ht
-    endglobals
-    
-	struct SimpleTrigger extends array
-		implement Alloc	
-		
-		trigger trig
-		triggeraction ta
-	
-		static method create takes nothing returns thistype
-			local thistype this = thistype.allocate()
-			set this.trig = CreateTrigger()
-			// before return, bind this customzied 'SimpleTrigger' to real w3c trigger
-			call bind()
-			return this
-		endmethod
-		
-		static method GetSimpleTrigger takes trigger t returns SimpleTrigger
-			return LoadInteger(ht,0,GetHandleId(t) )
-		endmethod
-		
-		private static method onInit takes nothing returns nothing
-            set ht = InitHashtable()
-        endmethod
-		
-        private method bind takes nothing returns nothing
-			call SaveInteger(ht,0,GetHandleId(this.trig), this)
-		endmethod
-		
-		method destroy takes nothing returns nothing
-			if not ta == null then
-				TriggerRemoveAction(this.trig, this.ta)
-				set .ta = null
-			endif
-			call DestroyTrigger(.trig)
-			set this.trig = null
-			call this.deallocate()
-		endmethod
-		
-		method addAction takes code func returns nothing
-			set ta = TriggerAddAction(tgCdPlayTime, func)
-		endmethod
-		
-		method execute takes nothing returns nothing
-			TriggerExecute(this.trig)
-		endmethod
-	endstruct
     
 endlibrary

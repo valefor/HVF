@@ -230,7 +230,7 @@ endglobals
         // static constant string CHAT_COMMAND = "command"
         // static method onCommand takes nothing returns nothing
         // endmethod
-
+        
         private static method onInit takes nothing returns nothing
             //call BJDebugMsg("Create command " + CHAT_COMMAND + " via struct")
         	call ChatCommand.create(CHAT_COMMAND, function thistype.onCommand)

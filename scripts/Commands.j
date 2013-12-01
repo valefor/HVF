@@ -77,10 +77,36 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 		// implement ChatCommandModule
 	endstruct
 	
+	private struct ShufflePlayerCmd extends array
+		readonly static constant string CHAT_COMMAND = "sp"
+		static ChatCommand cmd
+		
+		static method onCommand takes nothing returns nothing
+			call BJDebugMsg("OnCommand callback")
+			
+			call Force.shufflePlayer()
+			
+			// disable this command
+			call ChatCommand.eventCommand.enable(false)
+		endmethod
+		
+		static method disable takes nothing returns nothing
+			// disable this command
+			call ChatCommand.eventCommand.enable(false)
+		endmethod
+	
+		// implement ChatCommandModule
+	endstruct
+	
 	private function init takes nothing returns nothing
         call ChatCommand.create("hi",function CommandResponse)
         call ChatCommand.create(HelloCmd.CHAT_COMMAND,function HelloCmd.onCommand)
         call ChatCommand.create(SwapCmd.CHAT_COMMAND,function SwapCmd.onCommand)
+        
+        // Add 'sp' command to host player
+        if GetLocalPlayer() == GetHostPlayer() then
+        	set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
+        endif
         // command "-hi" created
     endfunction
 	
