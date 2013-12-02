@@ -6,6 +6,8 @@ library ForceManager initializer init/* v0.0.1 Xandria
 * 	HVF Force management : For use of managing HuntersVsFarmers forces
 *
 *************************************************************************************
+
+call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 *************************************************************************************/
 
 	globals
@@ -193,6 +195,14 @@ library ForceManager initializer init/* v0.0.1 Xandria
     		// Register a leave action callback of player leave event
     		call Players.LEAVE.register(Filter(function thistype.rmPlayerFromGroup))
     	endmethod
+    endstruct
+    
+    struct Hunters extends array
+    	player owner
+    	unit hero
+    endstruct
+    
+    struct Farmers extends array
     endstruct
     
     private function init takes nothing returns nothing
