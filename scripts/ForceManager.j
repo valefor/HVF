@@ -3,7 +3,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
 */           PlayerManager /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-error-message-239210/[/url]
 */           PlayerAlliance /*
 *************************************************************************************
-* 	HVF Force management : Use to manage HuntersVsFarmers forces
+* 	HVF Force management : For use of managing HuntersVsFarmers forces
 *
 *************************************************************************************
 *************************************************************************************/
@@ -77,7 +77,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
     		
     	endmethod
     	
-    	// temporary solution
+    	// Temporary solution
     	private static method setupAlly takes nothing returns nothing
     		local ActivePlayer sourcePlayer = ActivePlayer[ActivePlayer.first]
     		local ActivePlayer targetPlayer
@@ -110,7 +110,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
     		
     		debug call BJDebugMsg("Shuffling players!")
     		
-    		// calculate number of hunters/farmers
+    		// Calculate number of hunters/farmers
     		set m = iPlayerNbr/3
     		set n = iPlayerNbr - (m*3)
     		
@@ -121,7 +121,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
     		set iNbrHunters = iHunterMaxNbr
     		set iNbrFarmers = iPlayerNbr - iNbrHunters
     		
-    		// clear force
+    		// Clear force
     		call ForceClear(fcFarmers)
     		call ForceClear(fcHunters)
     		
@@ -158,7 +158,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
     	endmethod
     	
     	// It has default game alliance
-    	static method grouping takes nothing returns nothing
+    	static method defaultGrouping takes nothing returns nothing
     		local ActivePlayer ap = ActivePlayer[ActivePlayer.first]
     		loop
     			if GetPlayerId(ap.get) > 5 and GetPlayerId(ap.get) < 10 then
@@ -190,7 +190,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
     	endmethod
     	
     	private static method onInit takes nothing returns nothing
-    		// register a leave action callback of player leave event
+    		// Register a leave action callback of player leave event
     		call Players.LEAVE.register(Filter(function thistype.rmPlayerFromGroup))
     	endmethod
     endstruct
@@ -199,6 +199,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
     	set fcFarmers = CreateForce()
     	set fcFarmers = CreateForce()
     	
-    	call Force.grouping()
+    	// Grouping players to Hunters/Farmers force by default
+    	call Force.defaultGrouping()
     endfunction
 endlibrary
