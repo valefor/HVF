@@ -7,6 +7,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
 *
 *************************************************************************************
 
+CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 *************************************************************************************/
 
