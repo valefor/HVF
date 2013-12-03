@@ -277,3 +277,96 @@ module PUI
         set .pui_data[pui] = 0
     endmethod
 endmodule
+
+/* Example
+
+scope YourSpell
+
+//===========================================================================
+private struct Data
+    unit whichUnit
+    private static Data array PUI  //<---------
+
+    //-------------------------------------------------------------------------  
+    static method create takes unit whichUnit returns Data
+        local Data ret = Data.allocate()
+        set ret.whichUnit = whichUnit
+        set Data.PUI[GetUnitIndex(whichUnit)] = ret // create unit->Data link
+        return ret
+    endmethod
+    
+    //-------------------------------------------------------------------------  
+    static method Get takes unit whichUnit returns Data
+        local integer index
+    
+        set index = GetUnitIndex(whichUnit) // PUI
+        if Data.PUI[index] == 0 then
+            debug call BJDebugMsg("|c00FFCC00"+"Data struct created on first use for unit: " + GetUnitName(whichUnit))
+            return Data.create(whichUnit)
+        endif
+        
+        return Data.PUI[index]
+    endmethod    
+
+    //-------------------------------------------------------------------------  
+    method onDestroy takes nothing returns nothing
+        set Data.PUI[GetUnitIndex(.whichUnit)] = 0 // break unit->Data link
+    endmethod    
+endstruct
+
+endscope
+
+
+scope StructExample initializer Init
+
+//===========================================================================
+//  If we want struct to be attachable to units we run PUI macro inside it.
+//  Putting 5-6 unit properties inside struct is more efficient 
+//  than declaring 5 PUI_PROPERTY each for itself
+//===========================================================================
+private struct UnitData
+    //! runtextmacro PUI()
+    integer KillCounter = 0
+    
+    // you can add any of your own stuff here
+endstruct
+
+//===========================================================================
+private function Actions takes nothing returns nothing
+    local unit killer = GetKillingUnit()
+    local UnitData dat = UnitData[killer]
+    
+    // is struct attached?
+    if dat == 0 then
+        set dat = UnitData.create() // if not create it
+        set UnitData[killer] = dat // and attach it
+    endif
+
+    // again it is simple
+    set dat.KillCounter = dat.KillCounter + 1
+    
+    // do some other stuff with your struct...
+endfunction
+
+//===========================================================================
+//  WARNING: never destroy PUI structs directly use release() method instead
+//  In fact it is best that you never destroy them manually,
+//  they will be destroyed automatically when unit is removed from game.
+//===========================================================================
+
+//===========================================================================
+private function Conditions takes nothing returns boolean
+    return true
+endfunction
+
+//===========================================================================
+private function Init takes nothing returns nothing
+    local trigger trig = CreateTrigger()
+    call TriggerRegisterAnyUnitEventBJ( trig, EVENT_PLAYER_UNIT_DEATH )
+    call TriggerAddCondition( trig, Condition( function Conditions ) )
+    call TriggerAddAction( trig, function Actions )
+endfunction
+
+endscope
+
+*/

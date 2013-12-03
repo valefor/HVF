@@ -21,7 +21,7 @@
 //
 //          Save the map, close it, reopen it, and then delete the "!" from the
 //          FAR left side of the next lines (so "external" will line up with this line):
-//!          external ObjectMerger w3a Adef AIDS anam "State Detection" ansf "(AIDS)" aart "" arac 0
+//          external ObjectMerger w3a Adef AIDS anam "State Detection" ansf "(AIDS)" aart "" arac 0
 //
 //          At the top of the script, there is a 'UnitIndexingFilter' constant
 //          function. If the function returns true for the unit, then that unit
@@ -746,3 +746,44 @@ library AutoIndex uses AIDS
         endmethod
     endmodule
 endlibrary
+
+/*Example
+
+
+struct FootmanGuardians extends array
+    //! runtextmacro AIDS()
+    // Footmen
+    private unit a
+    private unit b
+    private trigger t
+    
+    private static method OnDamage takes nothing returns boolean
+        // Forwards damage as pure damage.
+        local thistype d=thistype[GetTriggerUnit()]
+        call UnitDamageTargetBJ( GetEventDamageSource(), d.a, GetEventDamage(), ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL )
+        call UnitDamageTargetBJ( GetEventDamageSource(), d.b, GetEventDamage(), ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL )
+        return false
+    endmethod
+    
+    private static method AIDS_filter takes unit u returns boolean
+        return GetUnitTypeId(u)!='hfoo' // Don't make this struct for footmen.
+    endmethod
+    private method AIDS_onCreate takes nothing returns nothing
+        set this.a=CreateUnit(Player(0),'hfoo',GetUnitX(this.unit),GetUnitY(this.unit),0)
+        set this.b=CreateUnit(Player(0),'hfoo',GetUnitX(this.unit),GetUnitY(this.unit),0)
+        
+        set this.t=CreateTrigger()
+        call TriggerAddCondition(this.t,Condition(function thistype.OnDamage))
+        call TriggerRegisterUnitEvent(this.t,this.unit, EVENT_UNIT_DAMAGED )
+    endmethod
+    private method AIDS_onDestroy takes nothing returns nothing
+        call DestroyTrigger(this.t)
+        set this.t=null
+        call RemoveUnit(this.a)
+        call RemoveUnit(this.b)
+        set this.a=null
+        set this.b=null
+    endmethod
+endstruct
+
+*/
