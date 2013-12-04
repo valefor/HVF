@@ -63,6 +63,8 @@ Use PolledWait because of the above reason.
 
 functions
 GetUnitsOfPlayerAll
+The "defend" ability has a bug that make it fire an
+"undefend" order when a unit dies, gets removed or gets revived
 // Custom hero unit type id
 *************************************************************************************/
 
