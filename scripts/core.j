@@ -23,6 +23,7 @@ library Core initializer init/* v0.0.1 Xandria
 *			dialog 	-> dgVar, ``
 *			integer -> iVar, ``
 *			real 	-> rVar, ``
+*			rect	-> rctVar, ``
 *			player 	-> pVar, ``
 *			timer 	-> tmVar, ``
 *			trigger -> tgVar, ``

@@ -86,7 +86,28 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 			
 			call Force.shufflePlayer()
 			
-			// disable this command
+			// this is a one shoot command, disable this command from now
+			call ChatCommand.eventCommand.enable(false)
+		endmethod
+		
+		static method disable takes nothing returns nothing
+			// disable this
+			call ChatCommand.eventCommand.enable(false)
+		endmethod
+	
+		// implement ChatCommandModule
+	endstruct
+	
+	private struct RandomHeroCmd extends array
+		readonly static constant string CHAT_COMMAND = "random"
+		static ChatCommand cmd
+		
+		static method onCommand takes nothing returns nothing
+			debug call BJDebugMsg("OnCommand('random') callback")
+			
+			// do something here
+			
+			// this is a one shoot command, disable this command from now
 			call ChatCommand.eventCommand.enable(false)
 		endmethod
 		
@@ -98,15 +119,22 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 		// implement ChatCommandModule
 	endstruct
 	
+	// Call this function to enable game command
+	function InstallCommand takes nothing returns nothing
+		// Add some test command in debug mode
+        static if (DEBUG_MODE) then
+        	call ChatCommand.create(RandomHeroCmd.CHAT_COMMAND,function RandomHeroCmd.onCommand)
+        endif
+	endfunction
+	
 	private function init takes nothing returns nothing
-        call ChatCommand.create("hi",function CommandResponse)
-        call ChatCommand.create(HelloCmd.CHAT_COMMAND,function HelloCmd.onCommand)
-        call ChatCommand.create(SwapCmd.CHAT_COMMAND,function SwapCmd.onCommand)
+        // The following command need to be set up before game starts
         
         // Add 'sp' command to host player
         if GetLocalPlayer() == GetHostPlayer() then
         	set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
         endif
+        
         // command "-hi" created
     endfunction
 	
