@@ -104,7 +104,7 @@ The "defend" ability has a bug that make it fire an
     	endif
     endfunction
     
-    private function Exit takes nothing returns nothing
+    private function DummyExit takes nothing returns nothing
     	call DialogDisplay(pLocalplayer, dgDummy, false)
     endfunction
     
@@ -112,7 +112,7 @@ The "defend" ability has a bug that make it fire an
     	if not bGameAllowSave then
     		call DialogDisplay(pLocalplayer, dgDummy, true)
     	endif
-    	call TimerStart(tmDummy, 0.00, false, function Exit)
+    	call TimerStart(tmDummy, 0.00, false, function DummyExit)
     	return false  	
     endfunction
     
