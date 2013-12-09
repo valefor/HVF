@@ -94,5 +94,7 @@ GetOwningPlayer
     endstruct
     
     struct Farmers extends array
+    	player owner
+    	unit hero
     endstruct
 endlibrary
