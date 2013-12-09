@@ -179,22 +179,30 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         	endloop
     	endmethod
     	
-    	private static method rmPlayerFromGroup takes nothing returns boolean
+    	// Do clean-up work for leaving player
+    	private static method removePlayer takes nothing returns boolean
     		local player pLeave = GetTriggerPlayer()
-    			if isHunter(pLeave) then
-    				debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Hunters")
-    				call removeHunter(pLeave)
-    			else
-    				debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmers")
-    				call removeFarmer(pLeave)
-    			endif
+    		local boolean bIsHunter = isHunter(pLeave)
+    		
+    		// remove player from group
+    		if bIsHunter then
+    			debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Hunters")
+    			call removeHunter(pLeave)
+    		else
+				debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmers")
+				call removeFarmer(pLeave)
+			endif
+			
+			// remove unit of this player
+			// or share control/vision of leaving player with other playing player?
+			
     		set pLeave = null
     		return false
     	endmethod
     	
     	private static method onInit takes nothing returns nothing
     		// Register a leave action callback of player leave event
-    		call Players.LEAVE.register(Filter(function thistype.rmPlayerFromGroup))
+    		call Players.LEAVE.register(Filter(function thistype.removePlayer))
     	endmethod
     endstruct
     
