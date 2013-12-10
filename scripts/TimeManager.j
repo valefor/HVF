@@ -39,7 +39,7 @@ In multiplayer however, this trigger should work.
     private function CountdownPlayTime takes nothing returns nothing
     	local timer tmCountDown = CreateTimer()
     	local timerdialog dgRemainedTime = CreateTimerDialog(tmCountDown)
-    	local SimpleTrigger tgCdPlayTime = SimpleTrigger.GetSimpleTrigger(GetTriggeringTrigger())
+    	local SimpleTrigger tgCdPlayTime = SimpleTrigger.get(GetTriggeringTrigger())
     	
     	call TimerStart(tmCountDown, R2I(rPlayTime*iMultiple), false, null)
     	call TimerDialogSetTitle(dgRemainedTime, CST_STR_REMAINED_TIME)

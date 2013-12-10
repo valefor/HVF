@@ -25,7 +25,7 @@ library SimpleTrigger /* v0.0.1 Xandria
 			return this
 		endmethod
 		
-		static method GetSimpleTrigger takes trigger t returns SimpleTrigger
+		static method get takes trigger t returns SimpleTrigger
 			return LoadInteger(ht,0,GetHandleId(t) )
 		endmethod
 		
@@ -57,6 +57,10 @@ library SimpleTrigger /* v0.0.1 Xandria
 		
 		method addAction takes code func returns nothing
 			set ta = TriggerAddAction(this.trig, func)
+		endmethod
+		
+		method addCondition takes boolexpr condition returns nothing
+			call TriggerAddCondition(this.trig, condition)
 		endmethod
 		
 		method execute takes nothing returns nothing

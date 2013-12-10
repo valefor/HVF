@@ -194,7 +194,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 			endif
 			
 			// remove unit of this player
-			// or share control/vision of leaving player with other playing player?
+			// or share control/vision of leaving player with other playing players?
 			
     		set pLeave = null
     		return false

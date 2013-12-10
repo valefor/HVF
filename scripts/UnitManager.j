@@ -2,6 +2,10 @@ library UnitManager initializer init/* v0.0.1 Xandria
 *************************************************************************************
 * 	HVF Unit management : For use of managing HuntersVsFarmers units
 *
+*   */ uses /*
+*   
+*       */ Bonus /*
+*       */ Core   /*  core functions must be loaded first
 *************************************************************************************
 
 CreateNeutralPassiveBuildings
@@ -84,8 +88,16 @@ GetOwningPlayer
 		return CreateUnitAtLoc(p, iUnitTypeId, rctLoc, 0)
 	endfunction
 	
-	// Give random hunter hero extra bonus such as life(+500) str(+3) ... 
+	// Give random hunter hero extra bonus such as life(+1000) str(+3) ... 
 	private function BonusRandomHunterHero takes unit hero returns nothing
+		// extra bonus
+		set Bonus_Life[hero]=20
+		set Bonus_Armor[hero]=1
+		set Bonus_Agi[hero]=3
+		set Bonus_Int[hero]=2
+	
+		// give hunter hero 3 skill points
+		// call UnitModifySkillPoints(unit, 3)
 	endfunction
 	
     struct Hunters extends array 
@@ -97,4 +109,25 @@ GetOwningPlayer
     	player owner
     	unit hero
     endstruct
+    
+    private function onSelectHero takes nothing returns boolean
+    	
+    
+    	// destroy this trigger which has not actions, no memory leak
+    	DestroyTrigger(GetTriggeringTrigger())
+    	return false
+    endfunction
+    
+    private function BindSelectedHero takes player p returns nothing
+    	local trigger tgSelectedHero = CreateTrigger()
+    	call TriggerAddCondition( tgSelectedHero,Condition(function this.onSelectHero) )
+    	call TriggerRegisterPlayerUnitEvent(tgSelectedHero, p, EVENT_PLAYER_UNIT_SELL, null)
+    	set tgSelectedHero = null
+    	
+    endfunction
+    
+    private function init takes nothing returns nothing
+    	// Bind Selected Hunter Hero to Player
+    	// call BindSelectedHero()
+    endfunction
 endlibrary
