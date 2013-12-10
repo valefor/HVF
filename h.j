@@ -17,6 +17,7 @@
 //! import "scripts\Commands.j"
 //! import "scripts\SimpleTrigger.j"
 //! import "scripts\ForceManager.j"
+//! import "scripts\UnitManager.j"
 
 // HVF Globals
 //! import "scripts\Globals.j"
