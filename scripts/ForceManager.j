@@ -52,6 +52,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     		return fcHunters
     	endmethod
     	
+    	static method getHunterCount takes nothing returns integer
+    		return iNbrHunters
+    	endmethod
+    	
+    	static method getFarmerCount takes nothing returns integer
+    		return iNbrFarmers
+    	endmethod
+    	
     	static method inSameForce takes player p, player p2 returns boolean
     		if isFarmer(p)  then
     			if isFarmer(p2) then
@@ -155,15 +163,19 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     		endloop
     		
     		debug call BJDebugMsg("Shuffling finished! Number of Farmers:" + I2S(iNbrFarmers) + ", Number of Hunters:" +I2S(iNbrHunters))
+    		
+    		// re-assemble team and alliance after shuffling
     		call setupTeam()
     		call setupAlly()
     		
     	endmethod
     	
     	// It has default game alliance
-    	static method defaultGrouping takes nothing returns nothing
+    	static method defaultSetting takes nothing returns nothing
     		local ActivePlayer ap = ActivePlayer[ActivePlayer.first]
     		loop
+    			// Set max allowed hero to 1
+    			call SetPlayerTechMaxAllowed(CST_INT_MAX_HEROS, CST_INT_TECHID_HERO, ap.get)
     			if GetPlayerId(ap.get) > 5 and GetPlayerId(ap.get) < 10 then
     				debug call BJDebugMsg("Grouping player:" + GetPlayerName(ap.get) + " to Hunters")
     				call ForceAddPlayer(fcHunters, ap.get)
@@ -211,6 +223,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     	set fcFarmers = CreateForce()
     	
     	// Grouping players to Hunters/Farmers force by default
-    	call Force.defaultGrouping()
+    	call Force.defaultSetting()
     endfunction
 endlibrary

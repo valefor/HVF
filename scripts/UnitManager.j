@@ -48,7 +48,7 @@ GetOwningPlayer
 	
 	public function IsUnitHunterHero takes unit u returns boolean
 		// Hunter Heros' raw codes lays between 'U001' - 'U00D',If we find the 
-		// raw code of a unit is in this range, we can consider this unit is a Hunter Hero
+		// raw code of a unit is in this range, we can consider this unit as a Hunter Hero
 		return (GetUnitTypeId(u) < iLastHunterHeroRC) and (GetUnitTypeId(u) > iFirstHunterHeroRC)
 	endfunction
 	
@@ -110,18 +110,27 @@ GetOwningPlayer
     	unit hero
     endstruct
     
-    private function onSelectHero takes nothing returns boolean
+    globals
+		private integer iCountOfSelectedHero=0
+	endglobals
+	
+    private function onSelectHero takes nothing returns boolean    
+    	set Hunters[iCountOfSelectedHero].hero = GetSoldUnit()
+    	set Hunters[iCountOfSelectedHero].owner = GetOwningPlayer(GetSoldUnit())
+    	set iCountOfSelectedHero = iCountOfSelectedHero + 1
     	
-    
-    	// destroy this trigger which has not actions, no memory leak
-    	DestroyTrigger(GetTriggeringTrigger())
+    	if iCountOfSelectedHero == Force.getHunterCount() then
+    		// destroy this trigger which has no actions, no memory leak
+    		call DestroyTrigger(GetTriggeringTrigger())
+    	endif
     	return false
     endfunction
     
-    private function BindSelectedHero takes player p returns nothing
+    private function BindSelectedHero takes nothing returns nothing
     	local trigger tgSelectedHero = CreateTrigger()
     	call TriggerAddCondition( tgSelectedHero,Condition(function this.onSelectHero) )
-    	call TriggerRegisterPlayerUnitEvent(tgSelectedHero, p, EVENT_PLAYER_UNIT_SELL, null)
+    	// Hero Tavern belongs to 'Neutral Passive Player'
+    	call TriggerRegisterPlayerUnitEvent(tgSelectedHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
     	set tgSelectedHero = null
     	
     endfunction

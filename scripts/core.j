@@ -161,6 +161,7 @@ The "defend" ability has a bug that make it fire an
     	
     	// Detect Host who creates this game
     	call DetectHost()
+    	
     endfunction
     
 endlibrary

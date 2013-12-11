@@ -10,4 +10,9 @@ globals
 	constant string CST_STR_HUNTER= "猎人"
 	constant string CST_STR_FARMER= "农民"
 
+	// const - int
+	constant integer CST_INT_TECHID_HERO='HERO'
+	
+	// game parameters
+	constant integer CST_INT_MAX_HEROS=1
 endglobals
