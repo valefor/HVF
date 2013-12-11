@@ -137,7 +137,7 @@ struct Players
         implement Initializer
     endstruct
     
-    private module PlayerVars
+    module PlayerVars
         thistype next_p
         thistype previous_p
         player get_p

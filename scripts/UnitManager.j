@@ -99,14 +99,50 @@ GetOwningPlayer
 		// give hunter hero 3 skill points
 		// call UnitModifySkillPoints(unit, 3)
 	endfunction
-	
-    struct Hunters extends array 
-    	player owner
+
+    struct Hunters extends array
+    	implement PlayerVars
+    	integer killCount
     	unit hero
+    	static integer countOfSeletedHero
+    	
+    	static method add takes player p returns nothing
+    		local integer playerId = GetPlayerId(p)
+    		set .count_p = .count_p + 1
+    		set thistype[16].previous_p.next_p = playerId
+    		set thistype[playerId].previous_p = thistype[16].previous_p
+    		set thistype[16].previous_p = playerId
+    		set thistype[playerId].next_p = 16
+    		set thistype[playerId].get_p = p
+    		set thistype[playerId].killCount = 0
+    		set thistype[playerId].hero = null
+    	endmethod
+    	
+    	static method remove takes player p returns nothing
+    		local integer playerId = GetPlayerId(p)
+    		set .count_p = .count_p - 1
+    		set thistype[playerId].previous_p.next_p = thistype[playerId].next_p
+    		set thistype[playerId].next_p.previous_p = thistype[playerId].previous_p
+    		set thistype[playerId].get_p = null
+    		set thistype[playerId].killCount = 0
+    		set thistype[playerId].hero = null
+    	endmethod
+    	
+    	private static method onInit takes nothing returns nothing
+    		set thistype[16].end_p = true
+    		set thistype[16].next_p = 16
+    		set thistype[16].previous_p = 16
+    		set thistype[16].get_p = null
+    		
+    		set thistype[16].hero = null
+    	endmethod
+    	
     endstruct
     
     struct Farmers extends array
-    	player owner
+    	implement PlayerVars
+    	
+    	integer deathCount
     	unit hero
     endstruct
     

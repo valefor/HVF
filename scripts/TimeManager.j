@@ -7,6 +7,7 @@ library TimeManager initializer init/* v0.0.1 Xandria
 *   
 *       */ Dialog /*
 *       */ Core   /*  core functions must be loaded first
+*       */ TimerUtils /*
 *
 *************************************************************************************
 *** Some useful tips
@@ -178,6 +179,18 @@ In multiplayer however, this trigger should work.
     	debug call BJDebugMsg("Vote for play time!")
     	call DestroyTimer(GetExpiredTimer())
     	call ShowVoteDialog()
+    endfunction
+    
+    // Action for 15s periodic timer
+    private function OnTimerExpired15s takes nothing returns nothing
+    	
+    endfunction 
+    
+    // Action for 60s periodic timer
+    private function OnTimerExpired60s takes nothing returns nothing
+    	// Give free gold to farmer according to times of being killed
+    	// Give bonus gold to hunter for killing farmers
+    	// call Force.addGoldToForce(Force.getHunterForce())
     endfunction
     
     private function init takes nothing returns nothing

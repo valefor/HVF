@@ -16,6 +16,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         private force fcHunters = null	// Force Hunter
         private integer iNbrFarmers	// Number of Farmer
         private integer iNbrHunters	// Number of Hunter
+        
+        // For local use, adding gold/lumber to player
+        private integer iGold = 0
+        private integer iLumber = 0
     endglobals
     
     struct Force extends array
@@ -71,6 +75,33 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     			endif
     		endif
     		return false
+    	endmethod
+    	
+    	// Enumeration Method
+    	static method addGoldEnum takes player p returns nothing
+    		call AdjustPlayerStateSimpleBJ(GetEnumPlayer(), PLAYER_STATE_GOLD_GATHERED, iGold)
+    	endmethod
+    	
+    	static method addLumberEnum takes player p returns nothing
+    		call AdjustPlayerStateSimpleBJ(GetEnumPlayer(), PLAYER_STATE_RESOURCE_LUMBER, iLumber)
+    	endmethod
+    	
+    	static method addGoldToForce takes force fc, integer gold returns nothing
+    		set iGold = gold
+    		call ForForce(fc, function this.addGoldEnum)
+    	endmethod
+    	
+    	static method addLumberToForce takes force fc, integer lumber returns nothing
+    		set iLumber = lumber
+    		call ForForce(fc, function this.addLumberEnum)
+    	endmethod
+    	
+    	static method addGoldToPlayer takes player p, integer gold returns nothing
+    		call AdjustPlayerStateSimpleBJ(p, PLAYER_STATE_GOLD_GATHERED, gold)
+    	endmethod
+    	
+    	static method addLumberToPlayer takes player p, integer lumber returns nothing
+    		call AdjustPlayerStateSimpleBJ(p, PLAYER_STATE_GOLD_GATHERED, lumber)
     	endmethod
     	
     	private static method setupTeam takes nothing returns nothing

@@ -15,4 +15,6 @@ globals
 	
 	// game parameters
 	constant integer CST_INT_MAX_HEROS=1
+	constant integer CST_INT_MAX_HUNTERS=4
+	constant integer CST_INT_MAX_FARMERS=8
 endglobals
