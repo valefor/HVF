@@ -115,7 +115,7 @@ In multiplayer however, this trigger should work.
     endfunction
 
     function VoteTimeout takes nothing returns nothing
-    	local SimpleTrigger tgVoteTimeout = SimpleTrigger.GetSimpleTrigger(GetTriggeringTrigger())
+    	local SimpleTrigger tgVoteTimeout = SimpleTrigger.get(GetTriggeringTrigger())
     	local Dialog dgTobeRemoved = tgVoteTimeout.getData()
     	debug call BJDebugMsg("Time for voting is up," + I2S(Human.count - iSelects) +" players haven't vote yet!")
     	// clean up
