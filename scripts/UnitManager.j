@@ -1,17 +1,17 @@
 library UnitManager initializer init/* v0.0.1 Xandria
-*************************************************************************************
+********************************************************************************
 * 	HVF Unit management : For use of managing HuntersVsFarmers units
 *
 *   */ uses /*
 *   
 *       */ Bonus /*
 *       */ Core   /*  core functions must be loaded first
-*************************************************************************************
+********************************************************************************
 
 CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 GetOwningPlayer
-*************************************************************************************/
+*******************************************************************************/
 	/***************************************************************************
 	* Used Object Id:
 	*	Hunter Heros:
@@ -36,8 +36,11 @@ GetOwningPlayer
 	*		'h001'	:	Pigen
 	*		'h00U'	:	SnakeHole
 	*		'h00V'	:	Cage
-	****************************************************************************/
+	***************************************************************************/
 
+	/***************************************************************************
+	* Globals
+	***************************************************************************/
 	globals
 		private integer iMaxHunterHeroType	= 9
 		private integer iFirstHunterHeroRC	= 'U001'	// First Hunter Hero Raw Code
@@ -46,6 +49,54 @@ GetOwningPlayer
 		//private location locHeroShop = Location(- 6240.0, - 2208.0)
 	endglobals
 	
+	/***************************************************************************
+	* Prerequisite Functions
+	***************************************************************************/
+	
+	/***************************************************************************
+	* Modules
+	***************************************************************************/
+	// Unit related utils	
+    private module HunterUnitVars
+    	private unit hero
+    	static integer heroSelectedCount = 0
+    	
+    	public method operator hasHero takes nothing returns boolean
+            return hero != null
+        endmethod
+        
+        public method setHero takes unit hero returns nothing
+        	if not this.hasHero then
+        		// set hero
+        		if hero != null then
+        			set heroSelectedCount = heroSelectedCount + 1
+        		endif
+        	else
+        		// delete hero
+        		if hero == null then
+        			set heroSelectedCount = heroSelectedCount - 1 
+        		endif
+        	endif
+        	set this.hero = hero
+        endmethod
+        
+    endmodule
+    
+    private module FarmerUnitVars
+    	unit hero
+        
+        // Randomize location of farmer hero
+        public method randomizeHeroLoc takes nothing returns nothing
+        endmethod
+    endmodule
+	
+    /***************************************************************************
+	* Structs
+	***************************************************************************/
+	
+	/***************************************************************************
+	* Common Use Functions
+	***************************************************************************/
 	public function IsUnitHunterHero takes unit u returns boolean
 		// Hunter Heros' raw codes lays between 'U001' - 'U00D',If we find the 
 		// raw code of a unit is in this range, we can consider this unit as a Hunter Hero
@@ -91,71 +142,25 @@ GetOwningPlayer
 	// Give random hunter hero extra bonus such as life(+1000) str(+3) ... 
 	private function BonusRandomHunterHero takes unit hero returns nothing
 		// extra bonus
-		set Bonus_Life[hero]=20
-		set Bonus_Armor[hero]=1
-		set Bonus_Agi[hero]=3
-		set Bonus_Int[hero]=2
+		set Bonus_Life[hero]=CST_INT_RANDBONUS_LIFE
+		set Bonus_Armor[hero]=CST_INT_RANDBONUS_ARMOR
+		set Bonus_Agi[hero]=CST_INT_RANDBONUS_AGI
+		set Bonus_Int[hero]=CST_INT_RANDBONUS_INT
 	
 		// give hunter hero 3 skill points
 		// call UnitModifySkillPoints(unit, 3)
 	endfunction
-
-    struct Hunters extends array
-    	implement PlayerVars
-    	integer killCount
-    	unit hero
-    	static integer countOfSeletedHero
-    	
-    	static method add takes player p returns nothing
-    		local integer playerId = GetPlayerId(p)
-    		set .count_p = .count_p + 1
-    		set thistype[16].previous_p.next_p = playerId
-    		set thistype[playerId].previous_p = thistype[16].previous_p
-    		set thistype[16].previous_p = playerId
-    		set thistype[playerId].next_p = 16
-    		set thistype[playerId].get_p = p
-    		set thistype[playerId].killCount = 0
-    		set thistype[playerId].hero = null
-    	endmethod
-    	
-    	static method remove takes player p returns nothing
-    		local integer playerId = GetPlayerId(p)
-    		set .count_p = .count_p - 1
-    		set thistype[playerId].previous_p.next_p = thistype[playerId].next_p
-    		set thistype[playerId].next_p.previous_p = thistype[playerId].previous_p
-    		set thistype[playerId].get_p = null
-    		set thistype[playerId].killCount = 0
-    		set thistype[playerId].hero = null
-    	endmethod
-    	
-    	private static method onInit takes nothing returns nothing
-    		set thistype[16].end_p = true
-    		set thistype[16].next_p = 16
-    		set thistype[16].previous_p = 16
-    		set thistype[16].get_p = null
-    		
-    		set thistype[16].hero = null
-    	endmethod
-    	
-    endstruct
-    
-    struct Farmers extends array
-    	implement PlayerVars
-    	
-    	integer deathCount
-    	unit hero
-    endstruct
-    
-    globals
-		private integer iCountOfSelectedHero=0
-	endglobals
 	
-    private function onSelectHero takes nothing returns boolean    
-    	set Hunters[iCountOfSelectedHero].hero = GetSoldUnit()
-    	set Hunters[iCountOfSelectedHero].owner = GetOwningPlayer(GetSoldUnit())
-    	set iCountOfSelectedHero = iCountOfSelectedHero + 1
+	/***************************************************************************
+	* Functions that would be called on event fired
+	***************************************************************************/
+    private function OnSelectHero takes nothing returns boolean    
+    	call Hunters[GetPlayerId(p)].setHero(GetSoldUnit())
+    	// Give hunter hero 3 skill points at beginning
+    	call UnitModifySkillPoints(GetSoldUnit(), 3)
     	
-    	if iCountOfSelectedHero == Force.getHunterCount() then
+    	// All Hunter players have selected a hero
+    	if Hunter.heroSelectedCount == Hunter.count then
     		// destroy this trigger which has no actions, no memory leak
     		call DestroyTrigger(GetTriggeringTrigger())
     	endif
@@ -164,13 +169,22 @@ GetOwningPlayer
     
     private function BindSelectedHero takes nothing returns nothing
     	local trigger tgSelectedHero = CreateTrigger()
-    	call TriggerAddCondition( tgSelectedHero,Condition(function this.onSelectHero) )
+    	call TriggerAddCondition( tgSelectedHero,Condition(function this.OnSelectHero) )
     	// Hero Tavern belongs to 'Neutral Passive Player'
     	call TriggerRegisterPlayerUnitEvent(tgSelectedHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
     	set tgSelectedHero = null
     	
     endfunction
     
+	/***************************************************************************
+	* Functions that would be called on timer expired
+	***************************************************************************/
+	function OnHeroSelectTimerExpired takes nothing returns nothing
+	endfunction
+	
+	/***************************************************************************
+	* Library Initiation
+	***************************************************************************/
     private function init takes nothing returns nothing
     	// Bind Selected Hunter Hero to Player
     	// call BindSelectedHero()

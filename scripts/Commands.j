@@ -84,7 +84,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 		static method onCommand takes nothing returns nothing
 			call BJDebugMsg("OnCommand callback")
 			
-			call Force.shufflePlayer()
+			call ShufflePlayer()
 			
 			// this is a one shoot command, disable this command from now
 			call ChatCommand.eventCommand.enable(false)

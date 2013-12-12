@@ -17,4 +17,10 @@ globals
 	constant integer CST_INT_MAX_HEROS=1
 	constant integer CST_INT_MAX_HUNTERS=4
 	constant integer CST_INT_MAX_FARMERS=8
+	
+	constant integer CST_INT_RANDBONUS_LIFE=20
+	constant integer CST_INT_RANDBONUS_ARMOR=1
+	constant integer CST_INT_RANDBONUS_STR=0
+	constant integer CST_INT_RANDBONUS_AGI=3
+	constant integer CST_INT_RANDBONUS_INT=2
 endglobals
