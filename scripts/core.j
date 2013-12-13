@@ -67,13 +67,13 @@ GetUnitsOfPlayerAll
 The "defend" ability has a bug that make it fire an
 "undefend" order when a unit dies, gets removed or gets revived
 // Custom hero unit type id
-*************************************************************************************/
+*******************************************************************************/
 
 	/*
-	**************************************************************************************
+	****************************************************************************
 	* IsSinglePlayer takes nothing returns boolean
 	*	Detect whether player is soloing
-	**************************************************************************************
+	****************************************************************************
 	*/
 	globals
 		private boolean bSinglePlayer 	= ReloadGameCachesFromDisk()
@@ -126,10 +126,10 @@ The "defend" ability has a bug that make it fire an
     endfunction
     
     /*
-	**************************************************************************************
+	****************************************************************************
 	* GetHostPlayer takes nothing returns player
 	*	Detect Host who creates this game
-	**************************************************************************************
+	****************************************************************************
 	*/
 	globals
         private player pHost = null

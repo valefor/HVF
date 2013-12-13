@@ -5,7 +5,8 @@ library UnitManager initializer init/* v0.0.1 Xandria
 *   */ uses /*
 *   
 *       */ Bonus /*
-*       */ Core   /*  core functions must be loaded first
+*       */ Core   		/*  core functions must be loaded first
+*       */ ForceManager /*
 ********************************************************************************
 
 CreateNeutralPassiveBuildings
@@ -56,39 +57,6 @@ GetOwningPlayer
 	/***************************************************************************
 	* Modules
 	***************************************************************************/
-	// Unit related utils	
-    private module HunterUnitVars
-    	private unit hero
-    	static integer heroSelectedCount = 0
-    	
-    	public method operator hasHero takes nothing returns boolean
-            return hero != null
-        endmethod
-        
-        public method setHero takes unit hero returns nothing
-        	if not this.hasHero then
-        		// set hero
-        		if hero != null then
-        			set heroSelectedCount = heroSelectedCount + 1
-        		endif
-        	else
-        		// delete hero
-        		if hero == null then
-        			set heroSelectedCount = heroSelectedCount - 1 
-        		endif
-        	endif
-        	set this.hero = hero
-        endmethod
-        
-    endmodule
-    
-    private module FarmerUnitVars
-    	unit hero
-        
-        // Randomize location of farmer hero
-        public method randomizeHeroLoc takes nothing returns nothing
-        endmethod
-    endmodule
 	
     /***************************************************************************
 	* Structs
@@ -155,12 +123,14 @@ GetOwningPlayer
 	* Functions that would be called on event fired
 	***************************************************************************/
     private function OnSelectHero takes nothing returns boolean    
-    	call Hunters[GetPlayerId(p)].setHero(GetSoldUnit())
-    	// Give hunter hero 3 skill points at beginning
-    	call UnitModifySkillPoints(GetSoldUnit(), 3)
+    	debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetSoldUnit()))+ ":Selecte a Hero") 
+    	if Hunter.contain(GetOwningPlayer(GetSoldUnit())) then
+    		call Hunter[GetPlayerId(GetOwningPlayer(GetSoldUnit()))].setHero(GetSoldUnit())
+    	endif
     	
     	// All Hunter players have selected a hero
     	if Hunter.heroSelectedCount == Hunter.count then
+    		debug call BJDebugMsg("All Hunter players have selected a hero")
     		// destroy this trigger which has no actions, no memory leak
     		call DestroyTrigger(GetTriggeringTrigger())
     	endif
@@ -169,7 +139,7 @@ GetOwningPlayer
     
     private function BindSelectedHero takes nothing returns nothing
     	local trigger tgSelectedHero = CreateTrigger()
-    	call TriggerAddCondition( tgSelectedHero,Condition(function this.OnSelectHero) )
+    	call TriggerAddCondition( tgSelectedHero,Condition(function OnSelectHero) )
     	// Hero Tavern belongs to 'Neutral Passive Player'
     	call TriggerRegisterPlayerUnitEvent(tgSelectedHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
     	set tgSelectedHero = null
@@ -186,6 +156,6 @@ GetOwningPlayer
 	***************************************************************************/
     private function init takes nothing returns nothing
     	// Bind Selected Hunter Hero to Player
-    	// call BindSelectedHero()
+    	call BindSelectedHero()
     endfunction
 endlibrary

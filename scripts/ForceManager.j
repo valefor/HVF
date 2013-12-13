@@ -1,8 +1,8 @@
 library ForceManager initializer init/* v0.0.1 Xandria
 */  uses 	 Alloc         /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-alloc-alternative-221493/[/url]
 */           PlayerManager /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-error-message-239210/[/url]
-*/           PlayerAlliance /*
-*/           UnitManager 	/*
+*/           PlayerAlliance /*List
+*/           List 			/*
 ********************************************************************************
 * 	HVF Force management : For use of managing HuntersVsFarmers forces
 *
@@ -11,18 +11,58 @@ library ForceManager initializer init/* v0.0.1 Xandria
 CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 *******************************************************************************/
-    
 	/***************************************************************************
 	* Modules
 	***************************************************************************/
+	// Unit related utils	
+    private module HunterUnitVars
+    	private unit hero
+    	static integer heroSelectedCount = 0
+    	
+    	public method operator hasHero takes nothing returns boolean
+            return hero != null
+        endmethod
+        
+        public method setHero takes unit hero returns nothing
+        	local boolean bInitHero = false
+        	if not this.hasHero then
+        		// set and initiate hero
+        		if hero != null then
+        			set heroSelectedCount = heroSelectedCount + 1
+        			set bInitHero = true
+        		endif
+        	else
+        		// delete hero
+        		if hero == null then
+        			set heroSelectedCount = heroSelectedCount - 1 
+        		endif
+        	endif
+        	set this.hero = hero
+        	if bInitHero then
+        		// Give hunter hero 3 skill points at beginning
+        		call UnitModifySkillPoints(this.hero, CST_INT_HT_INIT_SKILLPOINTS - GetHeroSkillPoints(this.hero))
+        	endif
+        endmethod
+        
+    endmodule
+    
+    private module FarmerUnitVars
+    	unit hero
+        
+        // Randomize location of farmer hero
+        public method randomizeHeroLoc takes unit hero   returns nothing
+        endmethod
+    endmodule
+	
 	// Force related utils	
     private module ForceVars
+    	implement DualLinkedList
     	static force fc
     	
     	// Static Methods
-		private static method addToForce takes player p returns nothing
+		public static method addToForce takes player p returns nothing
     		local integer playerId = GetPlayerId(p)
-    		set .count_p = .count_p + 1
+    		set thistype.count_p = thistype.count_p + 1
     		set thistype[16].previous_p.next_p = playerId
     		set thistype[playerId].previous_p = thistype[16].previous_p
     		set thistype[16].previous_p = playerId
@@ -31,22 +71,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     		call ForceAddPlayer(thistype.fc, p)
     	endmethod
     	
-    	private static method removeFromForce takes player p returns nothing
+    	public static method removeFromForce takes player p returns nothing
     		local integer playerId = GetPlayerId(p)
-    		set .count_p = .count_p - 1
+    		set thistype.count_p = thistype.count_p - 1
     		set thistype[playerId].previous_p.next_p = thistype[playerId].next_p
     		set thistype[playerId].next_p.previous_p = thistype[playerId].previous_p
     		set thistype[playerId].get_p = null
     		call ForceRemovePlayer(thistype.fc, p)
     	endmethod
     	
-    	public static method contain takes player p returns thistype
+    	public static method contain takes player p returns boolean
     		return IsPlayerInForce(p, thistype.fc)
-    	method
+    	endmethod
     	
     	public static method findByPlayer takes player p returns thistype
     		return thistype[GetPlayerId(p)]
-    	method
+    	endmethod
     	
     	public static method clear takes nothing returns nothing
     		local thistype role = thistype.first
@@ -56,7 +96,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     			set role = role.next
     		endloop
     		call ForceClear(thistype.fc)
-    	method
+    	endmethod
     	
     	private static method onInit takes nothing returns nothing
     		set thistype[16].end_p = true
@@ -74,21 +114,21 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 	***************************************************************************/
 	// Associate players with their force , units, data.
     struct Hunter extends array
-    	implement PlayerVars
+    	
     	implement ForceVars
     	implement HunterUnitVars
     	
     	// specific attributes
-    	integer killCount = 0
+    	integer killCount
     	
     	// Static Methods
 		public static method add takes player p returns nothing
-    		call addToForce(p)
+    		call thistype.addToForce(p)
     	endmethod
     	
     	public static method remove takes player p returns nothing
-    		call removeFromForce(p)
-    		call setHero(null)
+    		call thistype.removeFromForce(p)
+    		call thistype[GetPlayerId(p)].setHero(null)
     	endmethod
     	
     	public method randomizeHeroLoc takes nothing returns nothing
@@ -97,10 +137,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public static method goldBonusForKilling takes nothing returns nothing
         	local thistype h = thistype[thistype.first]
         	local integer iGold = 0
+        	local integer iLumber = 0
         	loop
 				exitwhen h.end
-				set iGold = 5 * h.killCount
+				set iGold = CST_INT_GOLDMAG_HT_KILL * h.killCount
+				set iLumber = h.killCount
 				call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_GOLD_GATHERED, iGold)
+				call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_RESOURCE_LUMBER, iLumber)
 				set h= h.next
 			endloop
         endmethod
@@ -108,11 +151,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     endstruct
     
     struct Farmer extends array
-    	implement PlayerVars
     	implement ForceVars
     	implement FarmerUnitVars
     	
-    	integer deathCount = 0
+    	integer deathCount
     	
     	// Static Methods
 		public static method add takes player p returns nothing
@@ -126,13 +168,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     	public static method goldCompensateForDeath takes nothing returns nothing
         	local thistype f = thistype[thistype.first]
         	local integer iGold = 0
-        	local integer iLumber = 0
         	loop
 				exitwhen f.end
-				set iGold = 5 * f.deathCount
-				set iLumber = f.deathCount
+				set iGold = CST_INT_GOLDMAG_FM_DEAD * f.deathCount
 				call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, iGold)
-				call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_RESOURCE_LUMBER, iLumber)
 				set f= f.next
 			endloop
     	endmethod
@@ -262,7 +301,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 		local ActivePlayer ap = ActivePlayer[ActivePlayer.first]
 		loop
 			// Set max allowed hero to 1
-			call SetPlayerTechMaxAllowed(CST_INT_MAX_HEROS, CST_INT_TECHID_HERO, ap.get)
+			call SetPlayerTechMaxAllowed(ap.get, CST_INT_MAX_HEROS, CST_INT_TECHID_HERO)
 			if GetPlayerId(ap.get) > 5 and GetPlayerId(ap.get) < 10 then
 				debug call BJDebugMsg("Grouping player:" + GetPlayerName(ap.get) + " to Hunter")
 				call Hunter.add(ap.get)
