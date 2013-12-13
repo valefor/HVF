@@ -173,7 +173,6 @@ GetOwningPlayer
     	// Hero Tavern belongs to 'Neutral Passive Player'
     	call TriggerRegisterPlayerUnitEvent(tgSelectedHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
     	set tgSelectedHero = null
-    	
     endfunction
     
 	/***************************************************************************
