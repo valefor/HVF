@@ -1,15 +1,15 @@
 library List/* by Xanria
 ********************************************************************************
-* 	Library Instruction
+*     Library Instruction
 *
 *******************************************************************************/
 
-	/***************************************************************************
-	* Modules
-	***************************************************************************/
-	// Data Structure
-	// Dual Linked List
-	module DualLinkedList
+    /***************************************************************************
+    * Modules
+    ***************************************************************************/
+    // Data Structure
+    // Dual Linked List
+    module DualLinkedList
         thistype next_p
         thistype previous_p
         player get_p
@@ -39,5 +39,5 @@ library List/* by Xanria
         endmethod
     endmodule
 
-endlibrary	
-	
+endlibrary    
+    

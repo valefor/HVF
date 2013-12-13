@@ -56,12 +56,12 @@ library TimerUtils initializer init
         private          integer VOFFSET    = OFFSET
               
         //Timers to preload at map init:
-        private constant integer QUANTITY   = 256
+        private constant integer QUANTITY   = 20
         
         //Changing this  to something big will allow you to keep recycling
         // timers even when there are already AN INCREDIBLE AMOUNT of timers in
         // the stack. But it will make things far slower so that's probably a bad idea...
-        private constant integer ARRAY_SIZE = 8190
+        private constant integer ARRAY_SIZE = 100
 
     endglobals
 

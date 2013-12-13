@@ -1,7 +1,14 @@
-library Utils
+library Utils/*
+********************************************************************************
+*     Utils library that contais many functions for miscellaneous use
+*
+*******************************************************************************/
 
-	// String uitls
-	function StringStripLeft takes string text, string chars returns string 
+    /***************************************************************************
+    * Common Use Functions
+    ***************************************************************************/
+    // String uitls
+    function StringStripLeft takes string text, string chars returns string 
         local integer len    = StringLength(text)
         local integer ch_len = StringLength(chars)
         local integer index  = 0
@@ -55,5 +62,10 @@ library Utils
     function StringStrip takes string text, string chars returns string 
         set text = StringStripLeft(text, chars)
         return StringStripRight(text, chars)
+    endfunction
+    
+    // Append hot key, highlight the key
+    function AppendHotkey takes string source, string hotkey returns string
+        return "|cffffcc00[" + hotkey + "]|r " + source
     endfunction
 endlibrary
