@@ -2,7 +2,8 @@ library ForceManager initializer init/* v0.0.1 Xandria
 */  uses    Alloc           /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-alloc-alternative-221493/[/url]
 */          PlayerManager   /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-error-message-239210/[/url]
 */          PlayerAlliance  /*  List
-*/          List            /*
+*/          TimeManager     /*
+*/          UnitManager     /*
 ********************************************************************************
 *     HVF Force management : For use of managing HuntersVsFarmers forces
 *
@@ -16,7 +17,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     ***************************************************************************/
     // Unit related utils    
     private module HunterUnitVars
-        private unit hero
+        unit hero
         static integer heroSelectedCount = 0
         
         public method operator hasHero takes nothing returns boolean
@@ -55,7 +56,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     endmodule
     
     // Force related utils    
-    private module ForceVars
+    module ForceVars
         implement DualLinkedList
         static force fc
         
@@ -124,6 +125,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Static Methods
         public static method add takes player p returns nothing
             call thistype.addToForce(p)
+            set thistype[GetPlayerId(p)].killCount = 0
         endmethod
         
         public static method remove takes player p returns nothing
@@ -131,13 +133,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call thistype[GetPlayerId(p)].setHero(null)
         endmethod
         
-        public method randomizeHeroLoc takes nothing returns nothing
-        endmethod
-        
-        public static method goldBonusForKilling takes nothing returns nothing
+        // Give bonus gold for killing farmers for every 60s
+        private static method goldBonusForKilling takes nothing returns boolean
             local thistype h = thistype[thistype.first]
             local integer iGold = 0
             local integer iLumber = 0
+            
+            debug call BJDebugMsg("Give bonus gold for killing farmers")
+            
             loop
                 exitwhen h.end
                 set iGold = CST_INT_GOLDMAG_HT_KILL * h.killCount
@@ -146,6 +149,27 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_RESOURCE_LUMBER, iLumber)
                 set h= h.next
             endloop
+            return false
+        endmethod
+        
+        // Select a random hero for players who haven't select a hero
+        private static method onSelectHeroExpire takes nothing returns boolean
+            local thistype h = thistype[thistype.first]
+            debug call BJDebugMsg("Select a random hero for players who haven't select a hero")
+            loop
+                exitwhen h.end
+                if h.hero == null then
+                    debug call BJDebugMsg(GetPlayerName(h.get)+" hasn't selected hero")
+                    //set h.hero = GenRandomHunterHeroForPlayer(h.get, null)
+                endif
+                set h= h.next
+            endloop
+            return false
+        endmethod
+        
+        private static method onInit takes nothing returns nothing
+            call TimerManager.register(CST_PT_60s, Filter(function thistype.goldBonusForKilling))
+            call TimerManager.register(CST_OT_SELECTHERO, Filter(function thistype.onSelectHeroExpire))
         endmethod
         
     endstruct
@@ -168,12 +192,21 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public static method goldCompensateForDeath takes nothing returns nothing
             local thistype f = thistype[thistype.first]
             local integer iGold = 0
+            
+            debug call BJDebugMsg("Give bonus gold for farmers")
+            
             loop
                 exitwhen f.end
+                debug call BJDebugMsg("Give bonus to farmer:" + GetPlayerName(f.get))
                 set iGold = CST_INT_GOLDMAG_FM_DEAD * f.deathCount
-                call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, iGold)
+                call AdjustPlayerStateBJ(10, f.get, PLAYER_STATE_RESOURCE_GOLD)
+                //call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, 10)
                 set f= f.next
             endloop
+        endmethod
+        
+        private static method onInit takes nothing returns nothing
+            call TimerManager.register(CST_PT_60s, Filter(function thistype.goldCompensateForDeath))
         endmethod
     endstruct
     
@@ -295,13 +328,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         call SetupAlly()
         
     endfunction
-        
+    
     // It has default game alliance
     private function LoadDefaultSetting takes nothing returns nothing
         local ActivePlayer ap = ActivePlayer[ActivePlayer.first]
         loop
             // Set max allowed hero to 1
-            call SetPlayerTechMaxAllowed(ap.get, CST_INT_MAX_HEROS, CST_INT_TECHID_HERO)
+            // call SetPlayerTechMaxAllowed(ap.get, CST_INT_MAX_HEROS, CST_INT_TECHID_HERO)
             if GetPlayerId(ap.get) > 5 and GetPlayerId(ap.get) < 10 then
                 debug call BJDebugMsg("Grouping player:" + GetPlayerName(ap.get) + " to Hunter")
                 call Hunter.add(ap.get)
@@ -314,9 +347,35 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             exitwhen ap.end
         endloop
     endfunction
+    
+    /***************************************************************************
+    * Functions that would be called on event fired
+    ***************************************************************************/
+    private function OnSelectHero takes nothing returns boolean    
+        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetSoldUnit()))+ ":Selecte a Hero") 
+        if Hunter.contain(GetOwningPlayer(GetSoldUnit())) then
+            call Hunter[GetPlayerId(GetOwningPlayer(GetSoldUnit()))].setHero(GetSoldUnit())
+        endif
         
+        // Every Hunter players has selected a hero
+        if Hunter.heroSelectedCount == Hunter.count then
+            debug call BJDebugMsg("Every Hunter players has selected a hero")
+            // destroy this trigger which has no actions, no memory leak
+            call DestroyTrigger(GetTriggeringTrigger())
+        endif
+        return false
+    endfunction
+    
+    private function BindSelectedHero takes nothing returns nothing
+        local trigger tgSelectedHero = CreateTrigger()
+        call TriggerAddCondition( tgSelectedHero,Condition(function OnSelectHero) )
+        // Hero Tavern belongs to 'Neutral Passive Player'
+        call TriggerRegisterPlayerUnitEvent(tgSelectedHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
+        set tgSelectedHero = null
+    endfunction  
+    
     // Do clean-up work for leaving player
-    private function RemoveLeavingPlayer takes nothing returns boolean
+    private function OnPlayerLeave takes nothing returns boolean
         local player pLeave = GetTriggerPlayer()
         local boolean bIsHunter = Hunter.contain(pLeave)
         
@@ -337,12 +396,20 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     endfunction
     
     /***************************************************************************
+    * Functions that would be called on timer expired
+    ***************************************************************************/
+    function OnHeroSelectTimerExpired takes nothing returns nothing
+    endfunction
+    
+    /***************************************************************************
     * Library Initiation
     ***************************************************************************/
     private function init takes nothing returns nothing
         // Register a leave action callback of player leave event
-        call Players.LEAVE.register(Filter(function RemoveLeavingPlayer))
+        call Players.LEAVE.register(Filter(function OnPlayerLeave))
         // Grouping players to Hunter/Farmer force by default
         call LoadDefaultSetting()
+        // Bind selected Hunter Hero to Player
+        call BindSelectedHero()
     endfunction
 endlibrary

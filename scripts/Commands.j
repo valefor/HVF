@@ -8,7 +8,7 @@ library Commands initializer init /* v0.0.1 by Adrian
 *   */ uses /*
 *   
 *       */ ChatCommand  /*  hiveworkshop.com/forums/submissions-414/system-chatcommand-219132/#post2181374
-*       */ Core            /*  core functions must be loaded first
+*       */ Core         /*  core functions must be loaded first
 *       */ ForceManager /*  core functions must be loaded first
 *
 ************************************************************************************************
@@ -33,8 +33,16 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 * Notice the "s__ChatCommand_onInit" is the last function call! That means when we try to do onInit on struct HelloCmd, 
 * required onInit of struct ChatCommand hasn't been initialized at all...it unsafe i think
 *
-************************************************************************************************
-*/
+*******************************************************************************/
+
+    /***************************************************************************
+	* Prerequisite Functions(private only)
+	***************************************************************************/
+    
+    
+    /***************************************************************************
+	* Structs
+	***************************************************************************/
     private struct HelloCmd extends array
         readonly static constant string CHAT_COMMAND = "hello"
         
@@ -88,7 +96,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
             call ShufflePlayer()
             
             // this is a one shoot command, disable this command from now
-            call ChatCommand.eventCommand.enable(false)
+            // call ChatCommand.eventCommand.enable(false)
         endmethod
         
         static method disable takes nothing returns nothing
@@ -128,6 +136,9 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         endif
     endfunction
     
+    /***************************************************************************
+	* Library Initiation
+	***************************************************************************/
     private function init takes nothing returns nothing
         // The following command need to be set up before game starts
         

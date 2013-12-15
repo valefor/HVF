@@ -24,10 +24,12 @@ globals
     
     // *** Timers - Onetime Timer
     // Game host has 10 seconds to choose game mode
-    constant real CST_OT_GAMEMODE=10.0
+    constant real CST_OT_GAMEMODE=10.1
     // You have 15 seconds to vote for your favorite play time
-    constant real CST_OT_VOTE=15.0
-    constant integer CST_INT_MAXOT = 2
+    constant real CST_OT_VOTE=15.1
+    // Hunter player should select a hero within 45s after game starts
+    constant real CST_OT_SELECTHERO=45.1
+    constant integer CST_INT_MAXOT = 3
     
     // *** Timers - Periodic Timer
     constant real CST_PT_1s=1.0

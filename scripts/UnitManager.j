@@ -6,7 +6,6 @@ library UnitManager initializer init/* v0.0.1 Xandria
 *   
 *       */ Bonus /*
 *       */ Core           /*  core functions must be loaded first
-*       */ ForceManager /*
 ********************************************************************************
 
 CreateNeutralPassiveBuildings
@@ -76,7 +75,7 @@ GetOwningPlayer
     endfunction
     
     // Generate a randome hunter hero for player
-    private function GenRandomHunterHeroForPlayer takes player p, location loc returns unit
+    function GenRandomHunterHeroForPlayer takes player p, location loc returns unit
         local integer iRandom = GetRandomInt(1, iMaxHunterHeroType)
         // Notice, 'location' would leak
         local location rctLoc = GetRectCenter(rctDefaultBirthPlace)
@@ -108,7 +107,7 @@ GetOwningPlayer
     endfunction
     
     // Give random hunter hero extra bonus such as life(+1000) str(+3) ... 
-    private function BonusRandomHunterHero takes unit hero returns nothing
+    function BonusRandomHunterHero takes unit hero returns nothing
         // extra bonus
         set Bonus_Life[hero]=CST_INT_RANDBONUS_LIFE
         set Bonus_Armor[hero]=CST_INT_RANDBONUS_ARMOR
@@ -120,42 +119,8 @@ GetOwningPlayer
     endfunction
     
     /***************************************************************************
-    * Functions that would be called on event fired
-    ***************************************************************************/
-    private function OnSelectHero takes nothing returns boolean    
-        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetSoldUnit()))+ ":Selecte a Hero") 
-        if Hunter.contain(GetOwningPlayer(GetSoldUnit())) then
-            call Hunter[GetPlayerId(GetOwningPlayer(GetSoldUnit()))].setHero(GetSoldUnit())
-        endif
-        
-        // Every Hunter players has selected a hero
-        if Hunter.heroSelectedCount == Hunter.count then
-            debug call BJDebugMsg("Every Hunter players has selected a hero")
-            // destroy this trigger which has no actions, no memory leak
-            call DestroyTrigger(GetTriggeringTrigger())
-        endif
-        return false
-    endfunction
-    
-    private function BindSelectedHero takes nothing returns nothing
-        local trigger tgSelectedHero = CreateTrigger()
-        call TriggerAddCondition( tgSelectedHero,Condition(function OnSelectHero) )
-        // Hero Tavern belongs to 'Neutral Passive Player'
-        call TriggerRegisterPlayerUnitEvent(tgSelectedHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
-        set tgSelectedHero = null
-    endfunction
-    
-    /***************************************************************************
-    * Functions that would be called on timer expired
-    ***************************************************************************/
-    function OnHeroSelectTimerExpired takes nothing returns nothing
-    endfunction
-    
-    /***************************************************************************
     * Library Initiation
     ***************************************************************************/
     private function init takes nothing returns nothing
-        // Bind Selected Hunter Hero to Player
-        call BindSelectedHero()
     endfunction
 endlibrary

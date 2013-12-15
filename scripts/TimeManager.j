@@ -57,9 +57,14 @@ In multiplayer however, this trigger should work.
         private static TimerPointer pt30s
         private static TimerPointer pt60s
         
+        // Onetime Timers(OT)
+        private static TimerPointer otSelectHero
+        
         static method getTimer takes real timeout returns TimerPointer
-            if timeout == CST_PT_1s then
-                return pt1s
+            if timeout == CST_OT_SELECTHERO then
+                return otSelectHero
+            elseif timeout == CST_PT_1s then
+                return pt10s
             elseif timeout == CST_PT_10s then
                 return pt10s
             elseif timeout == CST_PT_15s then
@@ -69,24 +74,50 @@ In multiplayer however, this trigger should work.
             elseif timeout == CST_PT_60s then
                 return pt60s
             else
-                debug call BJDebugMsg("Unsupported Timeout:" + R2S(timeout))
+                debug call BJDebugMsg("Unsupported timeout:" + R2S(timeout))
             endif
-            return null
+            return 0
+        endmethod
+        
+        static method setTimerData takes real timeout, integer data returns nothing
+            set thistype.getTimer(timeout).count = data
+        endmethod
+        
+        static method getTimerData takes real timeout returns integer
+            return thistype.getTimer(timeout).count
         endmethod
         
         private static method onExpire takes nothing returns nothing
-            call TriggerEvaluate(TimerPool[GetExpiredTimer()].trig)
+            debug call BJDebugMsg("Periodic timer timeout")
+            /*
+            if TimerPool[GetExpiredTimer()] == pt1s then
+                debug call BJDebugMsg("Periodic timer(1s) timeout")
+            elseif TimerPool[GetExpiredTimer()] == pt10s then
+                debug call BJDebugMsg("Periodic timer(10s) timeout")
+            elseif TimerPool[GetExpiredTimer()] == pt15s then
+                debug call BJDebugMsg("Periodic timer(15s) timeout")
+            elseif TimerPool[GetExpiredTimer()] == pt30s then
+                debug call BJDebugMsg("Periodic timer(30s) timeout")
+            elseif TimerPool[GetExpiredTimer()] == pt60s then
+                debug call BJDebugMsg("Periodic timer(60s) timeout")
+            endif
+            */
+            call TriggerEvaluate(TimerPool[GetExpiredTimer()].trigger)
         endmethod
         
-        static method register takes real timeout, boolexpr action returns nothing
-            
+        static method register takes real timeout, boolexpr action returns triggercondition
+            return thistype.getTimer(timeout).register(action)
         endmethod
         
         static method start takes nothing returns nothing
-            call TimerStart(thistype.pt10s.timer, CST_PT_10s, true, thistype.onExpire)
-            call TimerStart(thistype.pt15s.timer, CST_PT_15s, true, thistype.onExpire)
-            call TimerStart(thistype.pt30s.timer, CST_PT_30s, true, thistype.onExpire)
-            call TimerStart(thistype.pt60s.timer, CST_PT_60s, true, thistype.onExpire)
+            // PT
+            call TimerStart(thistype.pt10s.timer, CST_PT_10s, true, function thistype.onExpire)
+            call TimerStart(thistype.pt15s.timer, CST_PT_15s, true, function thistype.onExpire)
+            call TimerStart(thistype.pt30s.timer, CST_PT_30s, true, function thistype.onExpire)
+            call TimerStart(thistype.pt60s.timer, CST_PT_60s, true, function thistype.onExpire)
+            
+            // OT
+            call TimerStart(thistype.otSelectHero.timer, CST_OT_SELECTHERO, false, function thistype.onExpire)
         endmethod
         
         private static method onInit takes nothing returns nothing
@@ -95,6 +126,8 @@ In multiplayer however, this trigger should work.
             set pt15s = TimerPointer.create()
             set pt30s = TimerPointer.create()
             set pt60s = TimerPointer.create()
+            
+            set otSelectHero = TimerPointer.create()
         endmethod
         
     endstruct
@@ -102,8 +135,8 @@ In multiplayer however, this trigger should work.
     struct PlayTime extends array
         private static Dialog voteDialog
         //private static button array selectionBts
-        private static real playTime
-        private static integer selects
+        private static real playTime = 0.0
+        private static integer selects = 0
     
         // Static Methods
         private static method countdownPlayTime takes nothing returns nothing
@@ -133,11 +166,13 @@ In multiplayer however, this trigger should work.
             set dgRemainedTime = null
             set tmCountDown = null
             call tgCdPlayTime.destroy()
+            // 
         endmethod
         
-        private static method gameStart takes nothing returns boolean
+        private static method gameStart takes nothing returns nothing
             // Start play time countdown
             local SimpleTrigger tgCdPlayTime = SimpleTrigger.create()
+            debug call BJDebugMsg("Game Start!")
             // If we need to use such PolledWait/PauseGame game time functions, 
             // trigger action is the only choice 
             call tgCdPlayTime.addAction(function thistype.countdownPlayTime)
@@ -149,10 +184,10 @@ In multiplayer however, this trigger should work.
         
         // callback for clicking vote buttons
         private static method onVote takes nothing returns boolean
-            local Dialog      dgClicked     = Dialog.getClickedDialog()
+            local Dialog      dgClicked  = Dialog.getClickedDialog()
             local button      btClicked   = Dialog.getClickedButton()
             
-            debug call BJDebugMsg("Dialog button clicked")
+            debug call BJDebugMsg("Dialog button clicked!!!")
             set thistype.selects = thistype.selects + 1
             if btClicked == btsSelect[0] then
                 set thistype.playTime = thistype.playTime + 40.0
@@ -162,9 +197,11 @@ In multiplayer however, this trigger should work.
                 set thistype.playTime = thistype.playTime + 60.0
             endif
     
+            debug call BJDebugMsg("Hide dialog to player")
             // hide dialog to player, will destroy it later
             call dgClicked.display(GetTriggerPlayer(), false)        
             
+            debug call BJDebugMsg("Vote check")
             // if voting is over, countdown play time
             if thistype.selects == Human.count then
                 debug call BJDebugMsg("All players have voted!")
@@ -175,6 +212,8 @@ In multiplayer however, this trigger should work.
                 //call StartCountdownPlayTime()
                 call thistype.gameStart()
             endif
+            debug call BJDebugMsg("Seletes:" + I2S(thistype.selects))
+            debug call BJDebugMsg("Total:" + I2S(Human.count))
             set btClicked = null
             return false 
         endmethod
@@ -187,7 +226,7 @@ In multiplayer however, this trigger should work.
             call voteDialog.destroy()
             
             if thistype.selects == Human.count then
-                return
+                return false
             endif
             
             loop 
@@ -215,6 +254,7 @@ In multiplayer however, this trigger should work.
         endmethod
         
         private static method startVote takes nothing returns nothing
+            local Human human = Human[Human.first]
             debug call BJDebugMsg("Vote for play time!")
             call DestroyTimer(GetExpiredTimer())
         
@@ -222,10 +262,10 @@ In multiplayer however, this trigger should work.
             call thistype.createVoteDialog()
             
             // Register callback for clicking dialog.
-            call voteDialog.registerClickEvent(Condition(function thistype.onVote))
+            call thistype.voteDialog.registerClickEvent(Condition(function thistype.onVote))
             
             // Set timeout for vote
-            call TimerStart(CreateTimer(), I2R(CST_INT_OT_VOTE), false, function thistype.onVoteTimeExpired)
+            call TimerStart(CreateTimer(), CST_OT_VOTE, false, function thistype.onVoteTimeExpired)
 
             // Only display dialog to human player
             loop
@@ -241,6 +281,10 @@ In multiplayer however, this trigger should work.
             // so we need to use TimerStart to call functions which need to show dialog
             call TimerStart(CreateTimer(), 0, false, function thistype.startVote)
             // register a onetime timer to terminate voting after 15 seconds
+        endmethod
+        
+        private static method onInit takes nothing returns nothing
+            
         endmethod
     endstruct
     
