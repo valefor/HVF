@@ -13,14 +13,15 @@
 //! import "scripts\lib\TimerUtils.j"
 //! import "scripts\lib\TimerPool.j"
 
-
 // HVF vJass Library - for HVF map only
+//! import "scripts\List.j"
 //! import "scripts\Core.j"
 //! import "scripts\Utils.j"
-//! import "scripts\Commands.j"
 //! import "scripts\SimpleTrigger.j"
 //! import "scripts\ForceManager.j"
 //! import "scripts\UnitManager.j"
+//! import "scripts\Commands.j"
+//! import "scripts\GameManager.j"
 
 // HVF Globals
 //! import "scripts\Globals.j"
