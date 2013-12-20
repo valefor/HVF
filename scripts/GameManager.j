@@ -33,9 +33,22 @@ library GameManager initializer init /*
             call SetPlayerTechMaxAllowed(GetLocalPlayer(), CST_INT_MAX_HEROS, CST_INT_TECHID_HERO)
 	        
             debug call BJDebugMsg("Initializing game...")
-	        call TriggerSleepAction(3.0)
+	        call TriggerSleepAction(2.0)
 	        debug call BJDebugMsg("Initializing finished...")
-	        
+	        debug call BJDebugMsg("Waiting host for chosing game mode...")
+	        if GetHostPlayer() == GetLocalPlayer() then
+	            call DisplayTextToPlayer(GetLocalPlayer(), "Please select game mode in 10 seconds")
+	        else
+	            call DisplayTextToPlayer(GetLocalPlayer(), "Waiting host for chosing game mode...")
+	        endif
+	        call TriggerSleepAction(10.0)
+	        // Disable host commands
+	        if GetHostPlayer() == GetLocalPlayer() then
+	            call ShufflePlayerCmd.disable()
+	        endif
+	        // Enable game utils commands
+	        BJDebugMsg("Please vote for play time...")
+	        // Vote for play time
 	        call PlayTime.vote()
 	    endmethod  
 	endstruct

@@ -99,6 +99,26 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call ForceClear(thistype.fc)
         endmethod
         
+        private static method win takes nothing returns boolean
+            local thistype role = thistype[thistype.first]
+            loop
+                exitwhen role.end
+                CustomVictoryBJ(role.get, true, true)
+                set role= role.next
+            endloop
+            return false
+        endmethod
+        
+        private static method lose takes nothing returns boolean
+            local thistype role = thistype[thistype.first]
+            loop
+                exitwhen role.end
+                CustomDefeatBJ(role.get, "You lose! Game over...")
+                set role= role.next
+            endloop
+            return false
+        endmethod
+        
         private static method onInit takes nothing returns nothing
             set thistype[16].end_p = true
             set thistype[16].next_p = 16
@@ -168,8 +188,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         private static method onInit takes nothing returns nothing
-            call TimerManager.register(CST_PT_60s, Filter(function thistype.goldBonusForKilling))
-            call TimerManager.register(CST_OT_SELECTHERO, Filter(function thistype.onSelectHeroExpire))
+            call TimerManager.pt60s.register(Filter(function thistype.goldBonusForKilling))
+            call TimerManager.otSelectHero.register(Filter(function thistype.onSelectHeroExpire))
+            // Play time is over, hunters win
+            call TimerManager.otPlayTimeOver.register(Filter(function thistype.win))
         endmethod
         
     endstruct
@@ -199,14 +221,16 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 exitwhen f.end
                 debug call BJDebugMsg("Give bonus to farmer:" + GetPlayerName(f.get))
                 set iGold = CST_INT_GOLDMAG_FM_DEAD * f.deathCount
-                call AdjustPlayerStateBJ(10, f.get, PLAYER_STATE_RESOURCE_GOLD)
+                call AdjustPlayerStateBJ(iGold, f.get, PLAYER_STATE_RESOURCE_GOLD)
                 //call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, 10)
                 set f= f.next
             endloop
         endmethod
         
         private static method onInit takes nothing returns nothing
-            call TimerManager.register(CST_PT_60s, Filter(function thistype.goldCompensateForDeath))
+            call TimerManager.pt60s.register(Filter(function thistype.goldCompensateForDeath))
+            // Play time is over, farmers lose
+            call TimerManager.otPlayTimeOver.register(Filter(function thistype.lose))
         endmethod
     endstruct
     

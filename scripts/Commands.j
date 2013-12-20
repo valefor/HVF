@@ -86,7 +86,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         // implement ChatCommandModule
     endstruct
     
-    private struct ShufflePlayerCmd extends array
+    struct ShufflePlayerCmd extends array
         readonly static constant string CHAT_COMMAND = "sp"
         static ChatCommand cmd
         
@@ -137,12 +137,22 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     endfunction
     
     /***************************************************************************
+	* Common Use Functions
+	***************************************************************************/
+	public function DisableHostCommands takes nothing returns nothing
+	    call ShufflePlayerCmd.disable()
+	endfunction
+	
+	public function EnableGameUtilCommands takes nothing returns nothing
+	endfunction
+	
+    /***************************************************************************
 	* Library Initiation
 	***************************************************************************/
     private function init takes nothing returns nothing
         // The following command need to be set up before game starts
         
-        // Add 'sp' command to host player
+        // Add 'sp' command to host player at beginning
         if GetLocalPlayer() == GetHostPlayer() then
             set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
         endif

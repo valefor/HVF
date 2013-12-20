@@ -5,10 +5,11 @@ library TimeManager initializer init/* v0.0.1 Xandria
 *
 *   */ uses /*
 *   
-*       */ Dialog /*
-*       */ Core   /*  core functions must be loaded first
+*       */ Dialog   /*
+*       */ Core     /*  core functions must be loaded first
+*       */ Event    /*
 *       */ TimerUtils /*
-*       */ TimerPool /*
+*       */ TimerPool/*
 *
 *************************************************************************************
 *** Some useful tips
@@ -36,7 +37,6 @@ In multiplayer however, this trigger should work.
     ***************************************************************************/    
     globals
         private button array btsSelect
-        private integer iMultiple     = 60
     endglobals
     /***************************************************************************
     * Prerequisite Functions(private only)
@@ -51,14 +51,17 @@ In multiplayer however, this trigger should work.
     ***************************************************************************/
     struct TimerManager extends array
         // Periodic Timers(PT)
-        private static TimerPointer pt1s
-        private static TimerPointer pt10s
-        private static TimerPointer pt15s
-        private static TimerPointer pt30s
-        private static TimerPointer pt60s
+        readonly static TimerPointer pt1s
+        readonly static TimerPointer pt10s
+        readonly static TimerPointer pt15s
+        readonly static TimerPointer pt30s
+        readonly static TimerPointer pt60s
         
         // Onetime Timers(OT)
-        private static TimerPointer otSelectHero
+        readonly static TimerPointer otSelectHero
+        readonly static TimerPointer otDetectionOn
+        readonly static TimerPointer otDetectionOff
+        readonly static TimerPointer otPlayTimeOver
         
         static method getTimer takes real timeout returns TimerPointer
             if timeout == CST_OT_SELECTHERO then
@@ -79,16 +82,25 @@ In multiplayer however, this trigger should work.
             return 0
         endmethod
         
-        static method setTimerData takes real timeout, integer data returns nothing
-            set thistype.getTimer(timeout).count = data
+        // Format any reals to OT timer count, something like 10.01, xx.01
+        static method formatOtCount takes real c returns real
+            local integer n = 0
+            set n = c/1
+            return I2R(n)+0.01
         endmethod
         
-        static method getTimerData takes real timeout returns integer
-            return thistype.getTimer(timeout).count
+        static method isPeriodicTimer takes real timeout returns boolean
+            local integer n = timeout/1
+            if (timeout - n) != 0.00 then
+                debug call BJDebugMsg("Is not a periodic timer")
+                return false
+            endif
+            return true
         endmethod
         
         private static method onExpire takes nothing returns nothing
-            debug call BJDebugMsg("Periodic timer timeout")
+            debug call BJDebugMsg("Timer timeout")
+            local TimerPointer tp = TimerPool[GetExpiredTimer()]
             /*
             if TimerPool[GetExpiredTimer()] == pt1s then
                 debug call BJDebugMsg("Periodic timer(1s) timeout")
@@ -102,7 +114,12 @@ In multiplayer however, this trigger should work.
                 debug call BJDebugMsg("Periodic timer(60s) timeout")
             endif
             */
-            call TriggerEvaluate(TimerPool[GetExpiredTimer()].trigger)
+            call TriggerEvaluate(tp.trigger)
+            
+            // If timer is not periodic timer, recycle it
+            if not isPeriodicTimer(tp.count) then
+                call tp.destroy()
+            endif
         endmethod
         
         static method register takes real timeout, boolexpr action returns triggercondition
@@ -111,54 +128,91 @@ In multiplayer however, this trigger should work.
         
         static method start takes nothing returns nothing
             // PT
-            call TimerStart(thistype.pt10s.timer, CST_PT_10s, true, function thistype.onExpire)
-            call TimerStart(thistype.pt15s.timer, CST_PT_15s, true, function thistype.onExpire)
-            call TimerStart(thistype.pt30s.timer, CST_PT_30s, true, function thistype.onExpire)
-            call TimerStart(thistype.pt60s.timer, CST_PT_60s, true, function thistype.onExpire)
+            call TimerStart(thistype.pt10s.timer, thistype.pt10s.count, true, function thistype.onExpire)
+            call TimerStart(thistype.pt15s.timer, thistype.pt15s.count, true, function thistype.onExpire)
+            call TimerStart(thistype.pt30s.timer, thistype.pt30s.count, true, function thistype.onExpire)
+            call TimerStart(thistype.pt60s.timer, thistype.pt60s.count, true, function thistype.onExpire)
             
             // OT
-            call TimerStart(thistype.otSelectHero.timer, CST_OT_SELECTHERO, false, function thistype.onExpire)
+            call TimerStart(thistype.otSelectHero.timer, thistype.otSelectHero.count, false, function thistype.onExpire)
+            call TimerStart(thistype.otDetectionOn.timer, thistype.otPlayTimeOver.count, false, function thistype.onExpire)
+            // Detection off time depends on play time
+            set thistype.otDetectionOff.count = thistype.otPlayTimeOver.count - thistype.otDetectionOn.count + 0.01
+            call TimerStart(thistype.otDetectionOff.timer, thistype.otDetectionOff.count, false, function thistype.onExpire)
+            call TimerStart(thistype.otPlayTimeOver.timer, thistype.otPlayTimeOver.count, false, function thistype.onExpire)
         endmethod
         
         private static method onInit takes nothing returns nothing
+            // PT
             set pt1s = TimerPointer.create()
             set pt10s = TimerPointer.create()
             set pt15s = TimerPointer.create()
             set pt30s = TimerPointer.create()
             set pt60s = TimerPointer.create()
+            // !Don't forget to set timeout for these timers
+            set pt1s.count = CST_PT_1s
+            set pt10s.count = CST_PT_10s
+            set pt15s.count = CST_PT_15s
+            set pt30s.count = CST_PT_30s
+            set pt60s.count = CST_PT_60s
             
+            // OT
             set otSelectHero = TimerPointer.create()
+            set otDetectionOn = TimerPointer.create()
+            set otDetectionOff = TimerPointer.create()
+            set otPlayTimeOver = TimerPointer.create()
+            // !Don't forget to set timeout for these timers
+            set otSelectHero.count = CST_OT_SELECTHERO
+            set otDetectionOn.count = CST_OT_DETECT
+            set otPlayTimeOver.count = CST_OT_PLAYTIME
         endmethod
         
     endstruct
     
     struct PlayTime extends array
         private static Dialog voteDialog
+        private static timerdialog remainedTimeDialog
+        //private static Event TIMEOVER
         //private static button array selectionBts
         private static real playTime = 0.0
         private static integer selects = 0
     
+        // Is used by other module to register actions when play time expired
+        /*
+        static method timeover takes nothing returns nothing
+            call TIMEOVER.fire()
+        endmethod
+        
+        static method registerTimeoverEvent takes boolexpr c returns nothing
+            call TIMEOVER.register(c)
+        endmethod
+        */
+        private static method yellowAlert takes nothing returns nothing
+        endmethod
+        
+        private static method redAlert takes nothing returns nothing
+            debug call BJDebugMsg("10 seconds left!")
+            call TimerDialogSetTitleColor(thistype.remainedTimeDialog, 255, 0, 0, 10)
+        endmethod
+        
         // Static Methods
-        private static method countdownPlayTime takes nothing returns nothing
-            local timer tmCountDown = NewTimer()
-            local timerdialog dgRemainedTime = CreateTimerDialog(tmCountDown)
-            local SimpleTrigger tgCdPlayTime = SimpleTrigger.get(GetTriggeringTrigger())
+        private static method showTimerDialog takes nothing returns nothing
+            //local timer tmCountDown = NewTimer()
+            //local SimpleTrigger tgCdPlayTime = SimpleTrigger.get(GetTriggeringTrigger())
+            set thistype.remainedTimeDialog = CreateTimerDialog(TimerManager.otPlayTimeOver.timer)
             
             // Show Timer Dialog
-            call TimerStart(tmCountDown, R2I(thistype.playTime*iMultiple), false, null)
-            call TimerDialogSetTitle(dgRemainedTime, CST_STR_REMAINED_TIME)
-            call TimerDialogSetTimeColor(dgRemainedTime, 0, 255, 0, 20)
-            call TimerDialogDisplay(dgRemainedTime, true)
+            //call TimerStart(tmCountDown, R2I(thistype.playTime*iMultiple), false, timeover)
+            call TimerDialogSetTitle(thistype.remainedTimeDialog, CST_STR_REMAINED_TIME)
+            call TimerDialogSetTimeColor(thistype.remainedTimeDialog, 0, 255, 0, 20)
+            call TimerDialogDisplay(thistype.remainedTimeDialog, true)
             
-            debug call BJDebugMsg("Start timer countdown!")
-            call PolledWait( (R2I(thistype.playTime)-10) * iMultiple )
+            // call PolledWait( (R2I(thistype.playTime)-10) * iMultiple )
             // do something here
-            debug call BJDebugMsg("10 seconds left!")
-            call TimerDialogSetTitleColor(dgRemainedTime, 255, 0, 0, 10)
-            
-            call PolledWait( 10 * iMultiple )
-            
+
+            // call PolledWait( 10 * iMultiple )
             // timeout
+            /*
             debug call BJDebugMsg("Timeout!")
             call TimerDialogDisplay(dgRemainedTime, false)
             call DestroyTimerDialog(dgRemainedTime)
@@ -166,18 +220,25 @@ In multiplayer however, this trigger should work.
             set dgRemainedTime = null
             set tmCountDown = null
             call tgCdPlayTime.destroy()
-            // 
+            */ 
         endmethod
         
         private static method gameStart takes nothing returns nothing
-            // Start play time countdown
-            local SimpleTrigger tgCdPlayTime = SimpleTrigger.create()
-            debug call BJDebugMsg("Game Start!")
             // If we need to use such PolledWait/PauseGame game time functions, 
-            // trigger action is the only choice 
-            call tgCdPlayTime.addAction(function thistype.countdownPlayTime)
-            call tgCdPlayTime.execute()
+            // trigger action is the only choice
+            // local SimpleTrigger tgCdPlayTime = SimpleTrigger.create()
+            // call tgCdPlayTime.addAction(function thistype.countdownPlayTime)
+            // call tgCdPlayTime.execute()
+            // Start play time countdown
+            debug call BJDebugMsg("Game Start!")
             
+            debug call BJDebugMsg("Start timer countdown!")
+            // Set timer count 
+            set TimerManager.otPlayTimeOver.count = TimerManager.formatOtCount(thistype.playTime*VAR_DLT_PLAYTIME)
+            call TimerManager.otDetectionOff.register(thistype.redAlert)
+            // Create and show timer dialog
+            call thistype.showTimerDialog()
+
             // Start Timers
             call TimerManager.start()
         endmethod
@@ -276,7 +337,7 @@ In multiplayer however, this trigger should work.
             endloop
         endmethod
         
-        public static method vote takes nothing returns nothing
+        static method vote takes nothing returns nothing
             // dialogs can't be displayed on init and the scope's init-func is run during init
             // so we need to use TimerStart to call functions which need to show dialog
             call TimerStart(CreateTimer(), 0, false, function thistype.startVote)
@@ -284,7 +345,7 @@ In multiplayer however, this trigger should work.
         endmethod
         
         private static method onInit takes nothing returns nothing
-            
+            set TIMEOVER = CreateEvent
         endmethod
     endstruct
     
@@ -304,8 +365,8 @@ In multiplayer however, this trigger should work.
     endfunction
     
     private function init takes nothing returns nothing
-        // set iMultiple to 1 seconds in debug mode to fast debugging
-        debug set iMultiple = 1
+        // set VAR_DLT_PLAYTIME to 1 seconds in debug mode to fast debugging
+        debug set VAR_DLT_PLAYTIME = 1
         // dialogs can't be displayed on init and the scope's init-func is run during init
         // so we need to use TimerStart to call functions which need to show dialog
         //call TimerStart(CreateTimer(), 0, false, function TimeVote)

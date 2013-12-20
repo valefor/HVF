@@ -1,4 +1,6 @@
 globals
+    /* ==============================Constants=============================== */
+
     /***************************************************************************
     * Literalization
     ***************************************************************************/
@@ -22,13 +24,17 @@ globals
     constant integer CST_INT_MAX_HUNTERS=4
     constant integer CST_INT_MAX_FARMERS=8
     
-    // *** Timers - Onetime Timer
+    // *** Timers - Onetime Timer(postfix must be '.01')
     // Game host has 10 seconds to choose game mode
-    constant real CST_OT_GAMEMODE=10.1
+    constant real CST_OT_GAMEMODE=10.01
     // You have 15 seconds to vote for your favorite play time
-    constant real CST_OT_VOTE=15.1
+    constant real CST_OT_VOTE=15.01
     // Hunter player should select a hero within 45s after game starts
-    constant real CST_OT_SELECTHERO=45.1
+    constant real CST_OT_SELECTHERO=45.01
+    // Detect
+    constant real CST_OT_DETECT=600.01
+    // Default play time
+    constant real CST_OT_PLAYTIME=3000.01
     constant integer CST_INT_MAXOT = 3
     
     // *** Timers - Periodic Timer
@@ -51,7 +57,13 @@ globals
     constant integer CST_INT_GOLDMAG_HT_KILL=5    
     constant integer CST_INT_LUMBERMAG_HT_KILL=1
     
-    // ** Skill points of initial hero
+    // *** Skill points of initial hero
     constant integer CST_INT_HT_INIT_SKILLPOINTS=3
     constant integer CST_INT_FM_INIT_SKILLPOINTS=2
+    
+    
+    /* ==============================Variables=============================== */
+    // *** Deltas, for debug use
+    // 60 seconds, 1 means one minute, 1 means one second in debug mode
+    integer VAR_DLT_PLAYTIME=60
 endglobals

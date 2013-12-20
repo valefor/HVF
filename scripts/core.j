@@ -11,28 +11,28 @@ library Core initializer init/* v0.0.1 Xandria
 ********************************************************************************
 *    *** NAMING ***
 *    I'd like to put name convention here
-*    struct            :    struct StructName
+*    struct             :    struct StructName
 *    function/method    :
-*        normal funcion        :    function FunctionName
-*        struct.method        :    method methodName
-*        struct.initializer    :    onInit
+*        normal funcion         :    function FunctionName
+*        struct.method          :    method methodName
+*        struct.initializer     :    onInit
 *        library.initializer    :     init
 *    constant :    
-*        global    :    CST_$TYPE$_NAME
-*        local    :    $TYPE-UPPERCASE$_NAME, and they should always be defined as a global
+*        global     :    CST_$TYPE$_NAME
+*        local      :    $TYPE-UPPERCASE$_NAME, and they should always be defined as a global
 *    variable :    
 *    "I don't intent to seperate global and local variable since we can mix them together
 *    in vJass, but we shall keep in mind what kind they are"
 *        primitive and normal declaration : 
-*            boolean -> bVar, bsVarArray
+*            boolean    -> bVar, bsVarArray
 *            button     -> btVar, btsVarArray
 *            dialog     -> dgVar, ``
-*            integer -> iVar, ``
-*            real     -> rVar, ``
-*            rect    -> rctVar, ``
+*            integer    -> iVar, ``
+*            real       -> rVar, ``
+*            rect       -> rctVar, ``
 *            player     -> pVar, ``
-*            timer     -> tmVar, ``
-*            trigger -> tgVar, ``
+*            timer      -> tmVar, ``
+*            trigger    -> tgVar, ``
 
 *        Declarations in Struct : free style, choose what you like, keep name simple & meaningful
 *

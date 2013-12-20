@@ -7,7 +7,9 @@ library UnitManager initializer init/* v0.0.1 Xandria
 *       */ Bonus /*
 *       */ Core           /*  core functions must be loaded first
 ********************************************************************************
-
+* This library is the under layout of system since it depends on predefined 
+*   units buildings of map, that means if you update/add/delete units/buildings
+*   rectangles, pls also update this library
 CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 GetOwningPlayer
