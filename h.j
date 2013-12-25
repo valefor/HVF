@@ -22,6 +22,7 @@
 //! import "scripts\UnitManager.j"
 //! import "scripts\Commands.j"
 //! import "scripts\GameManager.j"
+//! import "scripts\TimeManager.j"
 
 // HVF Globals
 //! import "scripts\Globals.j"

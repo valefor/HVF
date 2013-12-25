@@ -93,15 +93,20 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         static method onCommand takes nothing returns nothing
             call BJDebugMsg("OnCommand callback")
             
-            call ShufflePlayer()
+            // Only do shuffling when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                call BJDebugMsg("ShufflePlayer")
+                call ShufflePlayer()
+                // this is a one shoot command, disable this command from now
+                //call ChatCommand.eventCommand.enable(false)
+            endif
             
-            // this is a one shoot command, disable this command from now
-            // call ChatCommand.eventCommand.enable(false)
+            
         endmethod
         
         static method disable takes nothing returns nothing
-            // disable this
-            call ChatCommand.eventCommand.enable(false)
+            // disable this command
+            call cmd.enable(false)
         endmethod
     
         // implement ChatCommandModule
@@ -151,11 +156,11 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 	***************************************************************************/
     private function init takes nothing returns nothing
         // The following command need to be set up before game starts
-        
+        set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
         // Add 'sp' command to host player at beginning
-        if GetLocalPlayer() == GetHostPlayer() then
-            set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
-        endif
+        // !!!! Here GetLocalPlayer would cause desync !!!!
+        //if GetLocalPlayer() == GetHostPlayer() then
+        //endif
         
         // command "-hi" created
     endfunction

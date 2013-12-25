@@ -31,10 +31,10 @@ globals
     constant real CST_OT_VOTE=15.01
     // Hunter player should select a hero within 45s after game starts
     constant real CST_OT_SELECTHERO=45.01
-    // Detect
-    constant real CST_OT_DETECT=600.01
-    // Default play time
-    constant real CST_OT_PLAYTIME=3000.01
+    // Detect (Minitues)
+    constant real CST_OT_DETECT=10.0
+    // Default play time (Minitues)
+    constant real CST_OT_PLAYTIME=60.0
     constant integer CST_INT_MAXOT = 3
     
     // *** Timers - Periodic Timer

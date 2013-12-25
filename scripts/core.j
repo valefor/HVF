@@ -125,7 +125,6 @@ The "defend" ability has a bug that make it fire an
     
     private function PreventSave takes nothing returns nothing
         local trigger tgGameSave = CreateTrigger()
-        //set pLocalplayer = GetLocalPlayer()
         
         call TriggerRegisterGameEvent(tgGameSave, EVENT_GAME_SAVE)
         call TriggerAddCondition(tgGameSave, function StopSave)

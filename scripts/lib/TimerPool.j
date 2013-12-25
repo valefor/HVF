@@ -60,6 +60,7 @@ endglobals
         private timer array timers_p     //timer instances
         private trigger array onExpire_p //timer.trigger
         private integer array count_p
+        private real array timeout_p
         
         private integer array recycler
     endglobals
@@ -80,6 +81,9 @@ endglobals
         method operator count takes nothing returns integer
             return count_p[this]
         endmethod
+        method operator timeout takes nothing returns real
+            return timeout_p[this]
+        endmethod
         
         private method operator timer= takes timer v returns nothing
             set timers_p[this] = v
@@ -89,6 +93,10 @@ endglobals
         endmethod
         method operator count= takes integer v returns nothing
             set count_p[this] = v
+        endmethod
+        
+        method operator timeout= takes real v returns nothing
+            set timeout_p[this] = v
         endmethod
     
         method register takes boolexpr onExpire returns triggercondition

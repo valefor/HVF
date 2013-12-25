@@ -30,24 +30,28 @@ library GameManager initializer init /*
 	
 	    static method initialize takes nothing returns nothing
 	        // Set max allowed hero to 1
-            call SetPlayerTechMaxAllowed(GetLocalPlayer(), CST_INT_MAX_HEROS, CST_INT_TECHID_HERO)
+	        // !!!! Here GetLocalPlayer would cause desync !!!!
+            //call SetPlayerTechMaxAllowed(GetLocalPlayer(), CST_INT_TECHID_HERO, CST_INT_MAX_HEROS)
 	        
             debug call BJDebugMsg("Initializing game...")
 	        call TriggerSleepAction(2.0)
 	        debug call BJDebugMsg("Initializing finished...")
-	        debug call BJDebugMsg("Waiting host for chosing game mode...")
+	        //debug call BJDebugMsg("Waiting host for chosing game mode...")
+	        
 	        if GetHostPlayer() == GetLocalPlayer() then
-	            call DisplayTextToPlayer(GetLocalPlayer(), "Please select game mode in 10 seconds")
+	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, "Please select game mode in 10 seconds")
 	        else
-	            call DisplayTextToPlayer(GetLocalPlayer(), "Waiting host for chosing game mode...")
+	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, "Waiting host for chosing game mode...")
 	        endif
-	        call TriggerSleepAction(10.0)
+
+	        call TriggerSleepAction(20.0)
+	        debug call BJDebugMsg("Debug1")
+	        
 	        // Disable host commands
-	        if GetHostPlayer() == GetLocalPlayer() then
-	            call ShufflePlayerCmd.disable()
-	        endif
+	        call ShufflePlayerCmd.cmd.enable(false)
+	        
 	        // Enable game utils commands
-	        BJDebugMsg("Please vote for play time...")
+	        call BJDebugMsg("Please vote for play time...")
 	        // Vote for play time
 	        call PlayTime.vote()
 	    endmethod  
