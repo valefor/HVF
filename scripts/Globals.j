@@ -19,22 +19,22 @@ globals
     * Game Parameters
     ***************************************************************************/
     // *** Limitaition
-    constant integer CST_INT_TECHID_HERO='HERO'
-    constant integer CST_INT_MAX_HEROS=1
-    constant integer CST_INT_MAX_HUNTERS=4
-    constant integer CST_INT_MAX_FARMERS=8
+    constant integer CST_INT_TechidHero='HERO'
+    constant integer CST_INT_MaxHeros=1
+    constant integer CST_INT_MaxHunters=4
+    constant integer CST_INT_MaxFarmers=8
     
     // *** Timers - Onetime Timer(postfix must be '.01')
     // Game host has 10 seconds to choose game mode
-    constant real CST_OT_GAMEMODE=10.01
+    constant real CST_OT_GameMode=10.01
     // You have 15 seconds to vote for your favorite play time
-    constant real CST_OT_VOTE=15.01
+    constant real CST_OT_Vote=15.01
     // Hunter player should select a hero within 45s after game starts
-    constant real CST_OT_SELECTHERO=45.01
+    constant real CST_OT_SelectHero=45.01
     // Detect (Minitues)
-    constant real CST_OT_DETECT=10.0
+    constant real CST_OT_Detect=10.0
     // Default play time (Minitues)
-    constant real CST_OT_PLAYTIME=60.0
+    constant real CST_OT_PlayTime=60.0
     constant integer CST_INT_MAXOT = 3
     
     // *** Timers - Periodic Timer
@@ -46,24 +46,24 @@ globals
     constant integer CST_INT_MAXPT = 5
     
     // *** Extra bonus for random hero
-    constant integer CST_INT_RANDBONUS_LIFE=20
-    constant integer CST_INT_RANDBONUS_ARMOR=1
-    constant integer CST_INT_RANDBONUS_STR=0
-    constant integer CST_INT_RANDBONUS_AGI=3
-    constant integer CST_INT_RANDBONUS_INT=2
+    constant integer CST_INT_RandomBonusLife=20
+    constant integer CST_INT_RandomBonusArmor=1
+    constant integer CST_INT_RandomBonusStr=0
+    constant integer CST_INT_RandomBonusAgi=3
+    constant integer CST_INT_RandomBonusInt=2
     
     // *** Magnification of resource bonus
-    constant integer CST_INT_GOLDMAG_FM_DEAD=20
-    constant integer CST_INT_GOLDMAG_HT_KILL=5    
-    constant integer CST_INT_LUMBERMAG_HT_KILL=1
+    constant integer CST_INT_GoldMagForDeath=20
+    constant integer CST_INT_GoldMagForKilling=5   
+    constant integer CST_INT_LumberMagForKilling=1
     
     // *** Skill points of initial hero
-    constant integer CST_INT_HT_INIT_SKILLPOINTS=3
-    constant integer CST_INT_FM_INIT_SKILLPOINTS=2
+    constant integer CST_INT_InitHunterSkillPoints=3
+    constant integer CST_INT_InitFarmerSkillPoints=2
     
     
     /* ==============================Variables=============================== */
     // *** Deltas, for debug use
     // 60 seconds, 1 means one minute, 1 means one second in debug mode
-    integer VAR_DLT_PLAYTIME=60
+    integer VAR_INT_PlayTimeDelta=60
 endglobals

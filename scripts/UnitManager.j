@@ -31,18 +31,18 @@ GetOwningPlayer
     public function IsUnitHunterHero takes unit u returns boolean
         // Hunter Heros' raw codes lays between 'U002' - 'U00D',If we find the 
         // raw code of a unit is in this range, we can consider this unit as a Hunter Hero
-        return (GetUnitTypeId(u) < iLastHunterHeroRC) and (GetUnitTypeId(u) > iFirstHunterHeroRC)
+        return (GetUnitTypeId(u) < CST_UTI_HunterHeroLastcode) and (GetUnitTypeId(u) > CST_UTI_HunterHeroFirstcode)
     endfunction
     
     public function IsUnitFarmerHero takes unit u returns boolean
-        return GetUnitTypeId(u) == 'H00P'
+        return GetUnitTypeId(u) == CST_UTI_FarmerHero
     endfunction
     
     // Generate a randome hunter hero for player
     function GenRandomHunterHeroForPlayer takes player p, location loc returns unit
-        local integer iRandom = GetRandomInt(1, iMaxHunterHeroType)
+        local integer iRandom = GetRandomInt(1, CST_INT_MaxHunterHeroType)
         // Notice, 'location' would leak
-        local location rctLoc = GetRectCenter(rctDefaultBirthPlace)
+        local location rctLoc = GetRectCenter(CST_RCT_DefaultBirthPlace)
         local integer iUnitTypeId
         
         if loc !=null then
@@ -69,16 +69,16 @@ GetOwningPlayer
             set iUnitTypeId = 'U00B'
         endif
         */
-        return CreateUnitAtLoc(p, iFirstCodeHunterHero+iRandom, rctLoc, 0)
+        return CreateUnitAtLoc(p, CST_UTI_HunterHeroFirstcode+iRandom, rctLoc, 0)
     endfunction
     
     // Give random hunter hero extra bonus such as life(+1000) str(+3) ... 
     function BonusRandomHunterHero takes unit hero returns nothing
         // extra bonus
-        set Bonus_Life[hero]=CST_INT_RANDBONUS_LIFE
-        set Bonus_Armor[hero]=CST_INT_RANDBONUS_ARMOR
-        set Bonus_Agi[hero]=CST_INT_RANDBONUS_AGI
-        set Bonus_Int[hero]=CST_INT_RANDBONUS_INT
+        set Bonus_Life[hero]=CST_INT_RandomBonusLife
+        set Bonus_Armor[hero]=CST_INT_RandomBonusArmor
+        set Bonus_Agi[hero]=CST_INT_RandomBonusAgi
+        set Bonus_Int[hero]=CST_INT_RandomBonusInt
     
         // give hunter hero 3 skill points
         // call UnitModifySkillPoints(unit, 3)

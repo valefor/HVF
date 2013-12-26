@@ -64,7 +64,7 @@ In multiplayer however, this trigger should work.
         readonly static TimerPointer otPlayTimeOver
         
         static method getTimer takes real timeout returns TimerPointer
-            if timeout == CST_OT_SELECTHERO then
+            if timeout == CST_OT_SelectHero then
                 return otSelectHero
             elseif timeout == CST_PT_1s then
                 return pt10s
@@ -150,8 +150,8 @@ In multiplayer however, this trigger should work.
         endmethod
         
         private static method onInit takes nothing returns nothing
-            // set VAR_DLT_PLAYTIME to 1 seconds in debug mode to fast debugging
-            debug set VAR_DLT_PLAYTIME = 1
+            // set VAR_INT_PlayTimeDelta to 1 seconds in debug mode to fast debugging
+            debug set VAR_INT_PlayTimeDelta = 1
             
             // PT
             set pt1s = TimerPointer.create()
@@ -172,9 +172,9 @@ In multiplayer however, this trigger should work.
             set otDetectionOff = TimerPointer.create()
             set otPlayTimeOver = TimerPointer.create()
             // !Don't forget to set timeout for these timers
-            set otSelectHero.timeout = CST_OT_SELECTHERO
-            set otDetectionOn.timeout = thistype.formatOtTimeout(CST_OT_DETECT*VAR_DLT_PLAYTIME)
-            set otPlayTimeOver.timeout = thistype.formatOtTimeout(CST_OT_PLAYTIME*VAR_DLT_PLAYTIME)
+            set otSelectHero.timeout = CST_OT_SelectHero
+            set otDetectionOn.timeout = thistype.formatOtTimeout(CST_OT_Detect*VAR_INT_PlayTimeDelta)
+            set otPlayTimeOver.timeout = thistype.formatOtTimeout(CST_OT_PlayTime*VAR_INT_PlayTimeDelta)
         endmethod
         
     endstruct
@@ -245,7 +245,7 @@ In multiplayer however, this trigger should work.
             debug call BJDebugMsg("Game Start!")
             
             // Set timer timeout 
-            set TimerManager.otPlayTimeOver.timeout = TimerManager.formatOtTimeout(thistype.playTime*VAR_DLT_PLAYTIME)
+            set TimerManager.otPlayTimeOver.timeout = TimerManager.formatOtTimeout(thistype.playTime*VAR_INT_PlayTimeDelta)
             call TimerManager.otDetectionOff.register(Filter(function thistype.redAlert))
             // Create and show timer dialog
             call thistype.showTimerDialog()
@@ -337,7 +337,7 @@ In multiplayer however, this trigger should work.
             call thistype.voteDialog.registerClickEvent(Condition(function thistype.onVote))
             
             // Set timeout for vote
-            call TimerStart(CreateTimer(), CST_OT_VOTE, false, function thistype.onVoteTimeExpired)
+            call TimerStart(CreateTimer(), CST_OT_Vote, false, function thistype.onVoteTimeExpired)
 
             // Only display dialog to human player
             debug call BJDebugMsg("Total number players:" + I2S(Human.count))
