@@ -6,7 +6,8 @@ library Core initializer init/* v0.0.1 Xandria
 *
 *   */ uses /*
 *   
-*       New*/ Utils /*
+*       */ Utils /*
+*       */ Glue  /* 
 *
 ********************************************************************************
 *    *** NAMING ***

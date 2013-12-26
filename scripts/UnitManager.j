@@ -7,49 +7,11 @@ library UnitManager initializer init/* v0.0.1 Xandria
 *       */ Bonus /*
 *       */ Core           /*  core functions must be loaded first
 ********************************************************************************
-* This library is the under layout of system since it depends on predefined 
-*   units buildings of map, that means if you update/add/delete units/buildings
-*   rectangles, pls also update this library
 CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 GetOwningPlayer
 *******************************************************************************/
-    /***************************************************************************
-    * Used Object Id:
-    *    Hunter Heros:
-    *        'U008'    :    Assaulter    (冲锋者)
-    *        'U009'    :    Darter        (飞奔者)
-    *        'U004'    :    Peeper        (窥视者)
-    *        'U003'    :    Miner        (埋雷者)
-    *        'U00A'    :    Balancer    (平衡者)
-    *        'U007'    :    Sneaker        (偷袭者)
-    *        'U006'    :    Pelter        (投雷者)
-    *        'U00B'    :    Butcher        (屠宰者)
-    *        'U005'    :    Dogger        (训犬者)
-    *        'U00C'    :    RandomHero    (随机猎人)
-    *        'U00D'    :    LastRawCodeIdx
-    *        'U001'    :    FirstRawCodeIdx
-    *        
-    *    Farmer Heros:
-    *        'H00P'    :    FarmerHero
-    *
-    *    Buildings    -    Animal    [IsUnitType(unit, UNIT_TYPE_STRUCTURE)]
-    *        'h002'    :    SheepFold
-    *        'h001'    :    Pigen
-    *        'h00U'    :    SnakeHole
-    *        'h00V'    :    Cage
-    ***************************************************************************/
 
-    /***************************************************************************
-    * Globals
-    ***************************************************************************/
-    globals
-        private integer iMaxHunterHeroType    = 9
-        private integer iFirstHunterHeroRC    = 'U001'    // First Hunter Hero Raw Code
-        private integer iLastHunterHeroRC    = 'U00D'    // Last Hunter Hero Raw Code
-        private rect    rctDefaultBirthPlace = Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
-        //private location locHeroShop = Location(- 6240.0, - 2208.0)
-    endglobals
     
     /***************************************************************************
     * Prerequisite Functions
@@ -67,7 +29,7 @@ GetOwningPlayer
     * Common Use Functions
     ***************************************************************************/
     public function IsUnitHunterHero takes unit u returns boolean
-        // Hunter Heros' raw codes lays between 'U001' - 'U00D',If we find the 
+        // Hunter Heros' raw codes lays between 'U002' - 'U00D',If we find the 
         // raw code of a unit is in this range, we can consider this unit as a Hunter Hero
         return (GetUnitTypeId(u) < iLastHunterHeroRC) and (GetUnitTypeId(u) > iFirstHunterHeroRC)
     endfunction
@@ -86,6 +48,7 @@ GetOwningPlayer
         if loc !=null then
             set rctLoc = loc
         endif
+        /*
         if iRandom == 1 then
             set iUnitTypeId = 'U003'
         elseif iRandom == 2 then
@@ -105,7 +68,8 @@ GetOwningPlayer
         elseif iRandom == 9 then
             set iUnitTypeId = 'U00B'
         endif
-        return CreateUnitAtLoc(p, iUnitTypeId, rctLoc, 0)
+        */
+        return CreateUnitAtLoc(p, iFirstCodeHunterHero+iRandom, rctLoc, 0)
     endfunction
     
     // Give random hunter hero extra bonus such as life(+1000) str(+3) ... 

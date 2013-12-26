@@ -121,6 +121,7 @@ In multiplayer however, this trigger should work.
             endif
         endmethod
         
+        // It's used by other module to register actions at timer expired
         static method register takes real timeout, boolexpr action returns triggercondition
             return thistype.getTimer(timeout).register(action)
         endmethod
@@ -186,7 +187,7 @@ In multiplayer however, this trigger should work.
         private static real playTime = 0.0
         private static integer selects = 0
     
-        // Is used by other module to register actions when play time expired
+        
         /*
         static method timeover takes nothing returns nothing
             call TIMEOVER.fire()
@@ -243,7 +244,7 @@ In multiplayer however, this trigger should work.
             // Start play time countdown
             debug call BJDebugMsg("Game Start!")
             
-            // Set timer count 
+            // Set timer timeout 
             set TimerManager.otPlayTimeOver.timeout = TimerManager.formatOtTimeout(thistype.playTime*VAR_DLT_PLAYTIME)
             call TimerManager.otDetectionOff.register(Filter(function thistype.redAlert))
             // Create and show timer dialog
