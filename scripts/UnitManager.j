@@ -72,7 +72,7 @@ GetOwningPlayer
         return CreateUnitAtLoc(p, CST_UTI_HunterHeroFirstcode+iRandom, rctLoc, 0)
     endfunction
     
-    // Give random hunter hero extra bonus such as life(+1000) str(+3) ... 
+    // Give random hunter hero extra bonus such as life(+2000) agi(+3) int(+2)... 
     function BonusRandomHunterHero takes unit hero returns nothing
         // extra bonus
         set Bonus_Life[hero]=CST_INT_RandomBonusLife
