@@ -17,6 +17,7 @@
 //! import "scripts\List.j"
 //! import "scripts\Core.j"
 //! import "scripts\Utils.j"
+//! import "scripts\Glue.j"
 //! import "scripts\SimpleTrigger.j"
 //! import "scripts\ForceManager.j"
 //! import "scripts\UnitManager.j"
