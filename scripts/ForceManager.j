@@ -41,7 +41,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set this.hero = hero
             if bInitHero then
                 // Give hunter hero 3 skill points at beginning
-                call UnitModifySkillPoints(this.hero, CST_INT_HT_INIT_SKILLPOINTS - GetHeroSkillPoints(this.hero))
+                call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
             endif
         endmethod
         
@@ -163,7 +163,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             loop
                 exitwhen h.end
-                set iGold = CST_INT_GOLDMAG_HT_KILL * h.killCount
+                set iGold = CST_INT_GoldMagForKilling * h.killCount
                 set iLumber = h.killCount
                 call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_GOLD_GATHERED, iGold)
                 call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_RESOURCE_LUMBER, iLumber)
@@ -220,7 +220,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             loop
                 exitwhen f.end
                 debug call BJDebugMsg("Give bonus to farmer:" + GetPlayerName(f.get))
-                set iGold = CST_INT_GOLDMAG_FM_DEAD * f.deathCount
+                set iGold = CST_INT_GoldMagForDeath * f.deathCount
                 call AdjustPlayerStateBJ(iGold, f.get, PLAYER_STATE_RESOURCE_GOLD)
                 //call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, 10)
                 set f= f.next
@@ -358,7 +358,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         local ActivePlayer ap = ActivePlayer[ActivePlayer.first]
         loop
             // Set max allowed hero to 1
-            call SetPlayerTechMaxAllowed(ap.get, CST_INT_TECHID_HERO, CST_INT_MAX_HEROS)
+            call SetPlayerTechMaxAllowed(ap.get, CST_INT_TechidHero, CST_INT_MaxHeros)
             if GetPlayerId(ap.get) > 5 and GetPlayerId(ap.get) < 10 then
                 debug call BJDebugMsg("Grouping player:" + GetPlayerName(ap.get) + " to Hunter")
                 call Hunter.add(ap.get)

@@ -23,6 +23,13 @@ library Glue /* v0.0.1 Xandria
     *    Farmer Heros:
     *        'H00P'    :    FarmerHero
     *
+    *    Animals:
+    *        'nshe'    :    Sheep
+    *        'npig'    :    Pig
+    *        'n000'    :    Snake
+    *        'nech'    :    Chicken
+    *
+    *
     *    Buildings    -    Animal    [IsUnitType(unit, UNIT_TYPE_STRUCTURE)]
     *        'h002'    :    SheepFold
     *        'h001'    :    Pigen
@@ -34,11 +41,34 @@ library Glue /* v0.0.1 Xandria
     * Globals
     ***************************************************************************/
     globals
-        private integer iMaxHunterHeroType  = 9
-        private integer iFirstCodeHunterHero= 'U002'// First Raw Code of Hunter Hero
-        private integer iLastCodeHunterHero = 'U00D'// Last Raw Code of Hunter Hero
-        private rect    rctDefaultBirthPlace= Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
+        
+        constant rect    CST_RCT_DefaultBirthPlace= Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
         //private location locHeroShop = Location(- 6240.0, - 2208.0)
+        
+        
+        /***********************************************************************
+        * UnitTypeId (UTI)
+        ***********************************************************************/
+        // *** Hunter
+        constant integer CST_INT_MaxHunterHeroType  = 9
+        constant integer CST_UTI_HunterHeroFirstcode='U002'// First Raw Code of Hunter Hero
+        constant integer CST_UTI_HunterHeroLastcode ='U00D'// Last Raw Code of Hunter Hero
+        
+        // *** Farmer
+        constant integer CST_UTI_FarmerHero ='H00P'
+        
+        // *** Animal
+        constant integer CST_UTI_Sheep      ='nshe'
+        constant integer CST_UTI_Pig        ='npig'
+        constant integer CST_UTI_Snake      ='n000'
+        constant integer CST_UTI_Chicken    ='nech'
+        
+        // *** BuildingTypeId (BTI)
+        constant integer CST_BTI_SheepFold  ='h002'
+        constant integer CST_BTI_Pigen      ='h001'
+        constant integer CST_BTI_SnakeHole  ='h00U'
+        constant integer CST_BTI_Cage       ='h00V'
+        
     endglobals
 
 endlibrary
