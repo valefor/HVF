@@ -4,6 +4,7 @@ library ForceManager initializer init/* v0.0.1 Xandria
 */          PlayerAlliance  /*  List
 */          TimeManager     /*
 */          UnitManager     /*
+*/          Board           /*
 ********************************************************************************
 *     HVF Force management : For use of managing HuntersVsFarmers forces
 *
@@ -12,9 +13,21 @@ library ForceManager initializer init/* v0.0.1 Xandria
 CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 *******************************************************************************/
+    private keyword Farmer
     /***************************************************************************
     * Modules
     ***************************************************************************/
+    // Statistics
+    private module StatsBoardVars
+        static Board statsBoard = -1
+        integer rowIndex
+        integer erowIndex
+        
+        static method createStatsBoard takes nothing returns nothing
+            set statsBoard = Board.create()
+        endmethod
+    endmodule
+    
     // Unit related utils    
     private module HunterUnitVars
         unit hero
@@ -138,6 +151,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         implement ForceVars
         implement HunterUnitVars
+        implement StatsBoardVars
         
         // specific attributes
         integer killCount
@@ -149,8 +163,17 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         public static method remove takes player p returns nothing
+            local thistype h = thistype[GetPlayerId(p)]
+
+            if statsBoard != -1 then
+                set thistype.statsBoard[2][h.rowIndex].text = "Left"
+                set Farmer.statsBoard[2][h.erowIndex].text = "Left"
+            else
+                debug call BJDebugMsg("Stats Board is uninitialized")
+            endif
+            
             call thistype.removeFromForce(p)
-            call thistype[GetPlayerId(p)].setHero(null)
+            call h.setHero(null)
         endmethod
         
         // Give bonus gold for killing farmers in every 60s
@@ -169,6 +192,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_RESOURCE_LUMBER, iLumber)
                 set h= h.next
             endloop
+            
             return false
         endmethod
         
@@ -187,8 +211,74 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             return false
         endmethod
         
+        static method initStatsBoard takes nothing returns boolean
+            local thistype h = thistype[thistype.first]
+            local Farmer f = Farmer[Farmer.first]
+            local integer i = 2
+            call thistype.createStatsBoard()
+            call thistype.statsBoard.clear()
+            set statsBoard.title = "Hunter Score Board"
+            set statsBoard.all.width = 0.02
+            call statsBoard.all.setDisplay(true, false)
+            set statsBoard[0][0].text = "The Hunter"
+            set statsBoard[0][0].color = 0xFFFF00
+            set statsBoard[0][1].text = "Player"
+            set statsBoard[1][1].text = "Kills"
+            set statsBoard[2][1].text = "Status"
+            debug set statsBoard[9][1].text = "Row"
+            loop
+                exitwhen h.end
+                set h.rowIndex = i
+                set statsBoard[0][i].text = GetPlayerName(h.get)
+                set statsBoard[1][i].text = I2S(h.killCount)
+                set statsBoard[2][i].text = "Playing"
+                debug set statsBoard[9][i].text = I2S(i)
+                set i = i + 1
+                set h= h.next
+                
+            endloop
+            
+            // Enemy Stats
+            set statsBoard[0][i].text   = "The Farmer"
+            set statsBoard[0][i].width  = 0.04
+            set i = i + 1
+            set statsBoard[0][i].text = "Player"
+            set statsBoard[1][i].text = "Deaths"
+            set statsBoard[2][i].text = "Status"
+            set i = i + 1
+            loop
+                exitwhen f.end
+                set f.erowIndex = i
+                set statsBoard[0][i].text = GetPlayerName(f.get)
+                set statsBoard[1][i].text = I2S(f.deathCount)
+                set statsBoard[2][i].text = "Playing"
+                debug set statsBoard[9][i].text = I2S(i)
+                set i = i + 1
+                set f= f.next
+            endloop
+            set statsBoard.col[0].width = 0.04
+            set statsBoard.col[2].width = 0.03
+            return false
+        endmethod
+        
+        // display stats board
+        static method displayStatsBoard takes nothing returns boolean
+            local thistype h = thistype[thistype.first]
+            call thistype.initStatsBoard()
+            loop
+                exitwhen h.end
+                debug call BJDebugMsg("Display board to hunter:" + GetPlayerName(h.get))
+                set statsBoard.visible[h.get] = true
+                set h= h.next
+            endloop
+            
+            return false
+        endmethod
+
         private static method onInit takes nothing returns nothing
             call TimerManager.pt60s.register(Filter(function thistype.goldBonusForKilling))
+            // Init and display multiboard at game start
+            call TimerManager.otGameStart.register(Filter(function thistype.displayStatsBoard))
             call TimerManager.otSelectHero.register(Filter(function thistype.onSelectHeroExpire))
             // Play time is over, hunters win
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.win))
@@ -196,9 +286,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
     endstruct
     
+    // *** Farmer
     struct Farmer extends array
         implement ForceVars
         implement FarmerUnitVars
+        implement StatsBoardVars
         
         integer deathCount
         
@@ -208,7 +300,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         public static method remove takes player p returns nothing
-            call removeFromForce(p)
+            local thistype f = thistype[GetPlayerId(p)]
+
+            if statsBoard != -1 then
+                set thistype.statsBoard[2][f.rowIndex].text = "Left"
+                set Hunter.statsBoard[2][f.erowIndex].text = "Left"
+            else
+                debug call BJDebugMsg("Stats Board is uninitialized")
+            endif
+            call thistype.removeFromForce(p)
         endmethod
         
         public static method goldCompensateForDeath takes nothing returns nothing
@@ -227,8 +327,74 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endloop
         endmethod
         
+        static method initStatsBoard takes nothing returns boolean
+            local thistype f = thistype[thistype.first]
+            local Hunter h = Hunter[Hunter.first]
+            local integer i = 2
+            call thistype.createStatsBoard()
+            call thistype.statsBoard.clear()
+            set statsBoard.title = "Farmer Score Board"
+            set statsBoard.all.width = 0.02
+            call statsBoard.all.setDisplay(true, false)
+            set statsBoard[0][0].text = "The Farmer"
+            set statsBoard[0][0].color = 0xFFFF00
+            set statsBoard[0][1].text = "Player"
+            set statsBoard[1][1].text = "Deaths"
+            set statsBoard[2][1].text = "Status"
+            debug set statsBoard[9][1].text = "Row"
+
+            loop
+                exitwhen f.end
+                set f.rowIndex = i
+                set statsBoard[0][i].text = GetPlayerName(f.get)
+                set statsBoard[1][i].text = I2S(f.deathCount)
+                set statsBoard[2][i].text = "Playing"
+                debug set statsBoard[9][i].text = I2S(i)
+                set i = i + 1
+                set f= f.next
+            endloop
+            
+            // Enemy Stats
+            set statsBoard[0][i].text   = "The Hunter"
+            set statsBoard[0][i].width  = 0.04
+            set i = i + 1
+            set statsBoard[0][i].text = "Player"
+            set statsBoard[1][i].text = "Kills"
+            set statsBoard[2][i].text = "Status"
+            set i = i + 1
+            loop
+                exitwhen h.end
+                set h.erowIndex = i
+                set statsBoard[0][i].text = GetPlayerName(h.get)
+                set statsBoard[1][i].text = I2S(h.killCount)
+                set statsBoard[2][i].text = "Playing"
+                debug set statsBoard[9][i].text = I2S(i)
+                set i = i + 1
+                set h= h.next
+            endloop
+            set statsBoard.col[0].width = 0.04
+            set statsBoard.col[2].width = 0.03
+            return false
+        endmethod
+        
+        // display stats board
+        static method displayStatsBoard takes nothing returns boolean
+            local thistype f = thistype[thistype.first]
+            call thistype.initStatsBoard()
+            loop
+                exitwhen f.end
+                debug call BJDebugMsg("Display board to farmer:" + GetPlayerName(f.get))
+                set statsBoard.visible[f.get] = true
+                set f = f.next
+            endloop
+            
+            return false
+        endmethod
+        
         private static method onInit takes nothing returns nothing
             call TimerManager.pt60s.register(Filter(function thistype.goldCompensateForDeath))
+            // Init and display multiboard at game start
+            call TimerManager.otGameStart.register(Filter(function thistype.displayStatsBoard))
             // Play time is over, farmers lose
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.lose))
         endmethod
@@ -347,7 +513,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         debug call BJDebugMsg("Shuffling finished! Number of Farmer:" + I2S(iNbrFarmers) + ", Number of Hunter:" +I2S(iNbrHunters))
         
-        // re-assemble team and alliance after shuffling
+        // Re-assemble team and alliance after shuffling
         call SetupTeam()
         call SetupAlly()
         

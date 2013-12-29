@@ -30,7 +30,7 @@ globals
     // You have 15 seconds to vote for your favorite play time
     constant real CST_OT_Vote=15.01
     // Hunter player should select a hero within 45s after game starts
-    constant real CST_OT_SelectHero=45.01
+    constant real CST_OT_SelectHero=5.01
     // Detect (Minitues)
     constant real CST_OT_Detect=10.0
     // Default play time (Minitues)

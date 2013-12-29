@@ -58,11 +58,13 @@ In multiplayer however, this trigger should work.
         readonly static TimerPointer pt60s
         
         // Onetime Timers(OT)
+        readonly static TimerPointer otGameStart
         readonly static TimerPointer otSelectHero
         readonly static TimerPointer otDetectionOn
         readonly static TimerPointer otDetectionOff
         readonly static TimerPointer otPlayTimeOver
         
+        // !DEPRECATED
         static method getTimer takes real timeout returns TimerPointer
             if timeout == CST_OT_SelectHero then
                 return otSelectHero
@@ -134,6 +136,7 @@ In multiplayer however, this trigger should work.
             call TimerStart(thistype.pt60s.timer, thistype.pt60s.timeout, true, function thistype.onExpire)
             
             // OT
+            call TimerStart(thistype.otGameStart.timer, 0.01, false, function thistype.onExpire)
             call TimerStart(thistype.otSelectHero.timer, thistype.otSelectHero.timeout, false, function thistype.onExpire)
             call TimerStart(thistype.otDetectionOn.timer, thistype.otDetectionOn.timeout, false, function thistype.onExpire)
             // Detection off time depends on play time
@@ -167,6 +170,7 @@ In multiplayer however, this trigger should work.
             set pt60s.timeout = CST_PT_60s
             
             // OT
+            set otGameStart = TimerPointer.create()
             set otSelectHero = TimerPointer.create()
             set otDetectionOn = TimerPointer.create()
             set otDetectionOff = TimerPointer.create()

@@ -41,10 +41,10 @@ library GameManager initializer init /*
 	        if GetHostPlayer() == GetLocalPlayer() then
 	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, "Please select game mode in 10 seconds")
 	        else
-	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, "Waiting host for chosing game mode...")
+	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, "Waiting host:" +GetPlayerName(GetHostPlayer())+ " for chosing game mode...")
 	        endif
 
-	        call TriggerSleepAction(20.0)
+	        call TriggerSleepAction(15.0)
 	        debug call BJDebugMsg("Debug1")
 	        
 	        // Disable host commands

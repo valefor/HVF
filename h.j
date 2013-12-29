@@ -1,11 +1,14 @@
 // Standard vJass Library - for common use
+//! import "scripts\lib\Alloc.j"
+//! import "scripts\lib\AIDS.j"
+//! import "scripts\lib\ARGB.j"
+//! import "scripts\lib\Board.j"
+//! import "scripts\lib\Bonus.j"
 //! import "scripts\lib\ErrorMessage.j"
 //! import "scripts\lib\Event.j"
-//! import "scripts\lib\Alloc.j"
 //! import "scripts\lib\Table.j"
 
-//! import "scripts\lib\AIDS.j"
-//! import "scripts\lib\Bonus.j"
+
 //! import "scripts\lib\ChatCommand.j"
 //! import "scripts\lib\Dialog.j"
 //! import "scripts\lib\PlayerManager.j"
