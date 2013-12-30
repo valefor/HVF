@@ -9,7 +9,7 @@ library Commands initializer init /* v0.0.1 by Adrian
 *   
 *       */ ChatCommand  /*  hiveworkshop.com/forums/submissions-414/system-chatcommand-219132/#post2181374
 *       */ Core         /*  core functions must be loaded first
-*       */ ForceManager /*  core functions must be loaded first
+*       */ HVF          /*  HVF main functionality
 *
 ************************************************************************************************
 *

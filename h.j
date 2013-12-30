@@ -16,13 +16,18 @@
 //! import "scripts\lib\TimerUtils.j"
 //! import "scripts\lib\TimerPool.j"
 
+// AIDS Library
+//! import "scripts\aids\HunterUnits.j"
+//! import "scripts\aids\FarmerUnits.j"
+
+
 // HVF vJass Library - for HVF map only
 //! import "scripts\List.j"
 //! import "scripts\Core.j"
 //! import "scripts\Utils.j"
 //! import "scripts\Glue.j"
+//! import "scripts\HVF.j"
 //! import "scripts\SimpleTrigger.j"
-//! import "scripts\ForceManager.j"
 //! import "scripts\UnitManager.j"
 //! import "scripts\Commands.j"
 //! import "scripts\GameManager.j"

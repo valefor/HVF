@@ -1,12 +1,15 @@
 library GameManager initializer init /*
 ********************************************************************************
 * 	Library for game control
+*       Currently supported game mode:
+*           -sp : shuffle player
+*           -nv : no voting
+*           -ni : no infighting
 *
 ********************************************************************************
 *
 *   */ uses /*
 *   
-*       */ ForceManager /*
 *       */ TimeManager /*
 *       */ Commands /*
 *

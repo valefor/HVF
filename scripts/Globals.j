@@ -5,15 +5,15 @@ globals
     * Literalization
     ***************************************************************************/
     // For game time voting
-    constant string CST_STR_PLAYTIME_TITLE= "请选择游戏时间"
-    constant string CST_STR_PLAYTIME_40="40分钟游戏时间(对猎人有利)"
-    constant string CST_STR_PLAYTIME_50="50分钟游戏时间"
-    constant string CST_STR_PLAYTIME_60="60分钟游戏时间(对农民有利)"
+    constant string CST_STR_PlayTimeTitle= "请选择游戏时间"
+    constant string CST_STR_PlayTime40m="40分钟游戏时间(对猎人有利)"
+    constant string CST_STR_PlayTime50m="50分钟游戏时间"
+    constant string CST_STR_PlayTime60m="60分钟游戏时间(对农民有利)"
     
-    constant string CST_STR_REMAINED_TIME="剩余游戏时间"
+    constant string CST_STR_RemainedTime="剩余游戏时间"
     
-    constant string CST_STR_HUNTER= "猎人"
-    constant string CST_STR_FARMER= "农民"
+    constant string CST_STR_Hunter= "猎人"
+    constant string CST_STR_Farmer= "农民"
 
     /***************************************************************************
     * Game Parameters
@@ -61,6 +61,14 @@ globals
     constant integer CST_INT_InitHunterSkillPoints=3
     constant integer CST_INT_InitFarmerSkillPoints=2
     
+    // *** Board layout
+    // Board Column
+    constant integer CST_BDCOL_PN=0   // Player name
+    constant integer CST_BDCOL_KL=1   // Kills
+    constant integer CST_BDCOL_DE=1   // Deaths
+    constant integer CST_BDCOL_ST=2   // Status
+    
+    constant integer CST_BDCOL_DF=9   // DEBUG FLAG
     
     /* ==============================Variables=============================== */
     // *** Deltas, for debug use

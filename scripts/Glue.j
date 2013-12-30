@@ -71,4 +71,11 @@ library Glue /* v0.0.1 Xandria
         
     endglobals
 
+    function IsUnitFarmerAnimal takes unit u returns boolean
+        return GetUnitTypeId(u)==CST_UTI_Sheep or GetUnitTypeId(u)==CST_UTI_Pig or GetUnitTypeId(u)==CST_UTI_Snake or GetUnitTypeId(u)==CST_UTI_Chicken
+    endfunction
+    
+    function IsUnitFarmerBuilding takes unit u returns boolean
+        return GetUnitTypeId(u)==CST_BTI_SheepFold or GetUnitTypeId(u)==CST_BTI_Pigen or GetUnitTypeId(u)==CST_BTI_SnakeHole or GetUnitTypeId(u)==CST_BTI_Cage
+    endfunction
 endlibrary

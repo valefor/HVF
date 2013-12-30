@@ -20,6 +20,8 @@ library SimpleTrigger /* v0.0.1 Xandria
         static method create takes nothing returns thistype
             local thistype this = thistype.allocate()
             set this.trig = CreateTrigger()
+            set this.ta = null
+            set this.data = 0
             // before return, bind this customzied 'SimpleTrigger' to real w3c trigger
             call bind()
             return this

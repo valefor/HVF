@@ -219,7 +219,7 @@ In multiplayer however, this trigger should work.
             
             // Show Timer Dialog
             //call TimerStart(tmCountDown, R2I(thistype.playTime*iMultiple), false, timeover)
-            call TimerDialogSetTitle(thistype.remainedTimeDialog, CST_STR_REMAINED_TIME)
+            call TimerDialogSetTitle(thistype.remainedTimeDialog, CST_STR_RemainedTime)
             call TimerDialogSetTimeColor(thistype.remainedTimeDialog, 0, 255, 0, 20)
             call TimerDialogDisplay(thistype.remainedTimeDialog, true)
             
@@ -323,10 +323,10 @@ In multiplayer however, this trigger should work.
             //debug call BJDebugMsg("ShowVoteDialog!")
             
             set voteDialog = Dialog.create()
-            set voteDialog.title  = CST_STR_PLAYTIME_TITLE
-            set btsSelect[0] = voteDialog.addButton(AppendHotkey(CST_STR_PLAYTIME_40,    "A"), 'A')
-            set btsSelect[1] = voteDialog.addButton(AppendHotkey(CST_STR_PLAYTIME_50,    "B"), 'B')
-            set btsSelect[2] = voteDialog.addButton(AppendHotkey(CST_STR_PLAYTIME_60,    "C"), 'C')
+            set voteDialog.title  = CST_STR_PlayTimeTitle
+            set btsSelect[0] = voteDialog.addButton(AppendHotkey(CST_STR_PlayTime40m,    "A"), 'A')
+            set btsSelect[1] = voteDialog.addButton(AppendHotkey(CST_STR_PlayTime50m,    "B"), 'B')
+            set btsSelect[2] = voteDialog.addButton(AppendHotkey(CST_STR_PlayTime60m,    "C"), 'C')
         endmethod
         
         private static method startVote takes nothing returns nothing

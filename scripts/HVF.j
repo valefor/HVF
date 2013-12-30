@@ -1,4 +1,4 @@
-library ForceManager initializer init/* v0.0.1 Xandria
+library HVF initializer init/* v0.0.1 Xandria
 */  uses    Alloc           /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-alloc-alternative-221493/[/url]
 */          PlayerManager   /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-error-message-239210/[/url]
 */          PlayerAlliance  /*  List
@@ -157,6 +157,16 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         integer killCount
         
         // Static Methods
+        static method operator kills takes nothing returns integer
+            return this.killCount
+        endmethod
+        
+        static method operator kills= takes integer val returns nothing
+            set this.killCount = val
+            // fresh board
+            set thistype.statsBoard[CST_BDCOL_KL][rowIndex] = I2S(this.killCount)
+        endmethod
+        
         public static method add takes player p returns nothing
             call thistype.addToForce(p)
             set thistype[GetPlayerId(p)].killCount = 0
@@ -166,8 +176,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local thistype h = thistype[GetPlayerId(p)]
 
             if statsBoard != -1 then
-                set thistype.statsBoard[2][h.rowIndex].text = "Left"
-                set Farmer.statsBoard[2][h.erowIndex].text = "Left"
+                set thistype.statsBoard[CST_COL_ST][h.rowIndex].text = "Left"
+                set Farmer.statsBoard[CST_COL_ST][h.erowIndex].text = "Left"
             else
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
@@ -222,17 +232,17 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call statsBoard.all.setDisplay(true, false)
             set statsBoard[0][0].text = "The Hunter"
             set statsBoard[0][0].color = 0xFFFF00
-            set statsBoard[0][1].text = "Player"
-            set statsBoard[1][1].text = "Kills"
-            set statsBoard[2][1].text = "Status"
-            debug set statsBoard[9][1].text = "Row"
+            set statsBoard[CST_BDCOL_PN][1].text = "Player"
+            set statsBoard[CST_BDCOL_KL][1].text = "Kills"
+            set statsBoard[CST_BDCOL_ST][1].text = "Status"
+            debug set statsBoard[CST_BDCOL_DF][1].text = "Row"
             loop
                 exitwhen h.end
                 set h.rowIndex = i
-                set statsBoard[0][i].text = GetPlayerName(h.get)
-                set statsBoard[1][i].text = I2S(h.killCount)
-                set statsBoard[2][i].text = "Playing"
-                debug set statsBoard[9][i].text = I2S(i)
+                set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(h.get)
+                set statsBoard[CST_BDCOL_KL][i].text = I2S(h.killCount)
+                set statsBoard[CST_BDCOL_ST][i].text = "Playing"
+                debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
                 set i = i + 1
                 set h= h.next
                 
@@ -242,22 +252,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set statsBoard[0][i].text   = "The Farmer"
             set statsBoard[0][i].width  = 0.04
             set i = i + 1
-            set statsBoard[0][i].text = "Player"
-            set statsBoard[1][i].text = "Deaths"
-            set statsBoard[2][i].text = "Status"
+            set statsBoard[CST_BDCOL_PN][i].text = "Player"
+            set statsBoard[CST_BDCOL_DE][i].text = "Deaths"
+            set statsBoard[CST_BDCOL_ST][i].text = "Status"
             set i = i + 1
             loop
                 exitwhen f.end
                 set f.erowIndex = i
-                set statsBoard[0][i].text = GetPlayerName(f.get)
-                set statsBoard[1][i].text = I2S(f.deathCount)
-                set statsBoard[2][i].text = "Playing"
-                debug set statsBoard[9][i].text = I2S(i)
+                set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(f.get)
+                set statsBoard[CST_BDCOL_DE][i].text = I2S(f.deathCount)
+                set statsBoard[CST_BDCOL_ST][i].text = "Playing"
+                debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
                 set i = i + 1
                 set f= f.next
             endloop
-            set statsBoard.col[0].width = 0.04
-            set statsBoard.col[2].width = 0.03
+            set statsBoard.col[CST_BDCOL_PN].width = 0.04
+            set statsBoard.col[CST_BDCOL_ST].width = 0.03
             return false
         endmethod
         
@@ -295,10 +305,20 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         integer deathCount
         
         // Static Methods
+        static method operator deaths takes nothing returns integer
+            return this.deathCount
+        endmethod
+        
+        static method operator deaths= takes integer val returns nothing
+            set this.deathCount = val
+            // fresh board
+            set thistype.statsBoard[CST_BDCOL_DE][rowIndex] = I2S(this.deathCount)
+        endmethod
+        
         public static method add takes player p returns nothing
             call addToForce(p)
         endmethod
-        
+
         public static method remove takes player p returns nothing
             local thistype f = thistype[GetPlayerId(p)]
 
@@ -338,18 +358,18 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call statsBoard.all.setDisplay(true, false)
             set statsBoard[0][0].text = "The Farmer"
             set statsBoard[0][0].color = 0xFFFF00
-            set statsBoard[0][1].text = "Player"
-            set statsBoard[1][1].text = "Deaths"
-            set statsBoard[2][1].text = "Status"
-            debug set statsBoard[9][1].text = "Row"
+            set statsBoard[CST_BDCOL_PN][1].text = "Player"
+            set statsBoard[CST_BDCOL_DE][1].text = "Deaths"
+            set statsBoard[CST_BDCOL_ST][1].text = "Status"
+            debug set statsBoard[CST_BDCOL_DF][1].text = "Row"
 
             loop
                 exitwhen f.end
                 set f.rowIndex = i
-                set statsBoard[0][i].text = GetPlayerName(f.get)
-                set statsBoard[1][i].text = I2S(f.deathCount)
-                set statsBoard[2][i].text = "Playing"
-                debug set statsBoard[9][i].text = I2S(i)
+                set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(f.get)
+                set statsBoard[CST_BDCOL_DE][i].text = I2S(f.deathCount)
+                set statsBoard[CST_BDCOL_ST][i].text = "Playing"
+                debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
                 set i = i + 1
                 set f= f.next
             endloop
@@ -358,22 +378,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set statsBoard[0][i].text   = "The Hunter"
             set statsBoard[0][i].width  = 0.04
             set i = i + 1
-            set statsBoard[0][i].text = "Player"
-            set statsBoard[1][i].text = "Kills"
-            set statsBoard[2][i].text = "Status"
+            set statsBoard[CST_BDCOL_PN][i].text = "Player"
+            set statsBoard[CST_BDCOL_KL][i].text = "Kills"
+            set statsBoard[CST_BDCOL_ST][i].text = "Status"
             set i = i + 1
             loop
                 exitwhen h.end
                 set h.erowIndex = i
-                set statsBoard[0][i].text = GetPlayerName(h.get)
-                set statsBoard[1][i].text = I2S(h.killCount)
-                set statsBoard[2][i].text = "Playing"
-                debug set statsBoard[9][i].text = I2S(i)
+                set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(h.get)
+                set statsBoard[CST_BDCOL_KL][i].text = I2S(h.killCount)
+                set statsBoard[CST_BDCOL_ST][i].text = "Playing"
+                debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
                 set i = i + 1
                 set h= h.next
             endloop
-            set statsBoard.col[0].width = 0.04
-            set statsBoard.col[2].width = 0.03
+            set statsBoard.col[CST_BDCOL_PN].width = 0.04
+            set statsBoard.col[CST_BDCOL_ST].width = 0.03
             return false
         endmethod
         
@@ -541,6 +561,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     /***************************************************************************
     * Functions that would be called on event fired
     ***************************************************************************/
+    // Bind selected Hunter Hero to Player
     private function OnSelectHero takes nothing returns boolean    
         debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetSoldUnit()))+ ":Selecte a Hero") 
         if Hunter.contain(GetOwningPlayer(GetSoldUnit())) then
@@ -599,7 +620,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         call Players.LEAVE.register(Filter(function OnPlayerLeave))
         // Grouping players to Hunter/Farmer force by default
         call LoadDefaultSetting()
-        // Bind selected Hunter Hero to Player
+        
         call BindSelectedHero()
     endfunction
 endlibrary
