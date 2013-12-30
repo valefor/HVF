@@ -13,7 +13,6 @@ library HVF initializer init/* v0.0.1 Xandria
 CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 *******************************************************************************/
-    private keyword Farmer
     /***************************************************************************
     * Modules
     ***************************************************************************/
@@ -62,6 +61,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     
     private module FarmerUnitVars
         unit hero
+        
+        //private group sheeps
         
         // Randomize location of farmer hero
         public method randomizeHeroLoc takes unit hero   returns nothing
@@ -156,17 +157,18 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // specific attributes
         integer killCount
         
-        // Static Methods
-        static method operator kills takes nothing returns integer
+        
+        public method operator kills takes nothing returns integer
             return this.killCount
         endmethod
         
-        static method operator kills= takes integer val returns nothing
+        public method operator kills= takes integer val returns nothing
             set this.killCount = val
             // fresh board
-            set thistype.statsBoard[CST_BDCOL_KL][rowIndex] = I2S(this.killCount)
+            set thistype.statsBoard[CST_BDCOL_KL][rowIndex].text = I2S(this.killCount)
         endmethod
         
+        // Static Methods
         public static method add takes player p returns nothing
             call thistype.addToForce(p)
             set thistype[GetPlayerId(p)].killCount = 0
@@ -176,8 +178,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local thistype h = thistype[GetPlayerId(p)]
 
             if statsBoard != -1 then
-                set thistype.statsBoard[CST_COL_ST][h.rowIndex].text = "Left"
-                set Farmer.statsBoard[CST_COL_ST][h.erowIndex].text = "Left"
+                set thistype.statsBoard[CST_BDCOL_ST][h.rowIndex].text = "Left"
+                set Farmer.statsBoard[CST_BDCOL_ST][h.erowIndex].text = "Left"
             else
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
@@ -304,27 +306,27 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         integer deathCount
         
-        // Static Methods
-        static method operator deaths takes nothing returns integer
+        public method operator deaths takes nothing returns integer
             return this.deathCount
         endmethod
         
-        static method operator deaths= takes integer val returns nothing
+        public method operator deaths= takes integer val returns nothing
             set this.deathCount = val
             // fresh board
-            set thistype.statsBoard[CST_BDCOL_DE][rowIndex] = I2S(this.deathCount)
+            set thistype.statsBoard[CST_BDCOL_DE][rowIndex].text = I2S(this.deathCount)
         endmethod
         
         public static method add takes player p returns nothing
             call addToForce(p)
         endmethod
 
+        // Static Methods
         public static method remove takes player p returns nothing
             local thistype f = thistype[GetPlayerId(p)]
 
             if statsBoard != -1 then
-                set thistype.statsBoard[2][f.rowIndex].text = "Left"
-                set Hunter.statsBoard[2][f.erowIndex].text = "Left"
+                set thistype.statsBoard[CST_BDCOL_ST][f.rowIndex].text = "Left"
+                set Hunter.statsBoard[CST_BDCOL_ST][f.erowIndex].text = "Left"
             else
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
@@ -616,11 +618,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     * Library Initiation
     ***************************************************************************/
     private function init takes nothing returns nothing
-        // Register a leave action callback of player leave event
-        call Players.LEAVE.register(Filter(function OnPlayerLeave))
         // Grouping players to Hunter/Farmer force by default
         call LoadDefaultSetting()
-        
-        call BindSelectedHero()
+        //call BindSelectedHero()
     endfunction
 endlibrary
