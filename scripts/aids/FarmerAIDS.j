@@ -19,7 +19,7 @@ struct FarmerHero extends array
         local Hunter h = Hunter[GetPlayerId(GetOwningPlayer(GetKillingUnit()))]
         
         if Hunter.contain(GetOwningPlayer(GetKillingUnit())) then
-            // set f.deaths=f.deaths + 1
+            set f.deaths=f.deaths + 1
             set h.kills=h.kills + 1
             // Give Hunter reward for killing
             // Revive Farmer Hero at random location
@@ -31,25 +31,25 @@ struct FarmerHero extends array
     private method AIDS_onCreate takes nothing returns nothing
         set this.trig=CreateTrigger()
         call TriggerAddCondition(this.trig,Condition(function thistype.onDeath))
-        call TriggerRegisterUnitEvent(this.trig, this.unit, EVENT_UNIT_DEATH )
+        //call TriggerRegisterUnitEvent(this.trig, this.unit, EVENT_UNIT_DEATH )
     endmethod
 
     // Hero unit won't be removed from map in game    
 endstruct
 
-struct FarmerUnit extends array
+struct FarmerFarmingUnit extends array
     //! runtextmacro AIDS()
     private static method AIDS_filter takes unit u returns boolean
         return GetUnitTypeId(u)==CST_UTI_Sheep or GetUnitTypeId(u)==CST_UTI_Pig or GetUnitTypeId(u)==CST_UTI_Snake or GetUnitTypeId(u)==CST_UTI_Chicken
     endmethod
 endstruct
 
-struct FarmerBuilding extends array
+struct FarmerFarmingBuilding extends array
     //! runtextmacro AIDS()
     private trigger trig
     private static method AIDS_filter takes unit u returns boolean
-        return IsUnitType(u, UNIT_TYPE_STRUCTURE)
-        //return GetUnitTypeId(u)==CST_BTI_SheepFold or GetUnitTypeId(u)==CST_BTI_Pigen or GetUnitTypeId(u)==CST_BTI_SnakeHole or GetUnitTypeId(u)==CST_BTI_Cage
+        //return IsUnitType(u, UNIT_TYPE_STRUCTURE)
+        return GetUnitTypeId(u)==CST_BTI_SheepFold or GetUnitTypeId(u)==CST_BTI_Pigen or GetUnitTypeId(u)==CST_BTI_SnakeHole or GetUnitTypeId(u)==CST_BTI_Cage
     endmethod
     
     private static method onDeath takes nothing returns boolean

@@ -17,7 +17,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     * Modules
     ***************************************************************************/
     // Statistics
-    private module StatsBoardVars
+    private module StatsBoard
         static Board statsBoard = -1
         integer rowIndex
         integer erowIndex
@@ -27,55 +27,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
     endmodule
     
-    // Unit related utils    
-    private module HunterUnitVars
-        unit hero
-        static integer heroSelectedCount = 0
-        
-        public method operator hasHero takes nothing returns boolean
-            return hero != null
-        endmethod
-        
-        public method setHero takes unit hero returns nothing
-            local boolean bInitHero = false
-            if not this.hasHero then
-                // set and initiate hero
-                if hero != null then
-                    set heroSelectedCount = heroSelectedCount + 1
-                    set bInitHero = true
-                endif
-            else
-                // delete hero
-                if hero == null then
-                    set heroSelectedCount = heroSelectedCount - 1 
-                endif
-            endif
-            set this.hero = hero
-            if bInitHero then
-                // Give hunter hero 3 skill points at beginning
-                call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
-            endif
-        endmethod
-        
-    endmodule
-    
-    private module FarmerUnitVars
-        unit hero
-        
-        //private group sheeps
-        
-        // Randomize location of farmer hero
-        public method randomizeHeroLoc takes unit hero   returns nothing
-        endmethod
-    endmodule
-    
     // Force related utils    
-    module ForceVars
+    module Force
         implement DualLinkedList
         static force fc
         
         // Static Methods
-        public static method addToForce takes player p returns nothing
+        public static method add takes player p returns nothing
             local integer playerId = GetPlayerId(p)
             set thistype.count_p = thistype.count_p + 1
             set thistype[16].previous_p.next_p = playerId
@@ -86,7 +44,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call ForceAddPlayer(thistype.fc, p)
         endmethod
         
-        public static method removeFromForce takes player p returns nothing
+        public static method remove takes player p returns nothing
             local integer playerId = GetPlayerId(p)
             set thistype.count_p = thistype.count_p - 1
             set thistype[playerId].previous_p.next_p = thistype[playerId].next_p
@@ -144,20 +102,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
     endmodule
     
-    /***************************************************************************
-    * Structs
-    ***************************************************************************/
-    // Associate players with their force , units, data.
-    struct Hunter extends array
-        
-        implement ForceVars
-        implement HunterUnitVars
-        implement StatsBoardVars
-        
+    // Unit related utils    
+    private module HunterVars
+        unit hero
+        static integer heroSelectedCount = 0
         // specific attributes
         integer killCount
         
-        
+        // Instance method
         public method operator kills takes nothing returns integer
             return this.killCount
         endmethod
@@ -168,13 +120,154 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set thistype.statsBoard[CST_BDCOL_KL][rowIndex].text = I2S(this.killCount)
         endmethod
         
-        // Static Methods
-        public static method add takes player p returns nothing
-            call thistype.addToForce(p)
-            set thistype[GetPlayerId(p)].killCount = 0
+        public method operator hasHero takes nothing returns boolean
+            return hero != null
         endmethod
         
-        public static method remove takes player p returns nothing
+        public method setHero takes unit hero returns nothing
+            local boolean bInitHero = false
+            if not this.hasHero then
+                // set and initiate hero
+                if hero != null then
+                    set heroSelectedCount = heroSelectedCount + 1
+                    set bInitHero = true
+                endif
+            else
+                // delete hero
+                if hero == null then
+                    set heroSelectedCount = heroSelectedCount - 1 
+                endif
+            endif
+            set this.hero = hero
+            if bInitHero then
+                // Give hunter hero 3 skill points at beginning
+                call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
+            endif
+        endmethod
+        
+        private method initHunterVars takes unit hero   returns nothing
+            set this.killCount = 0
+            set this.hero = null
+        endmethod
+        
+        private method deleteHunterVars takes unit hero   returns nothing
+            call this.setHero(null)
+        endmethod
+        
+    endmodule
+    
+    private module FarmerVars
+        unit hero
+        
+        // farming building group
+        group sheepFolds
+        group pigens
+        group snakeHoles
+        group cages
+        // farming building counter
+        integer sheepFoldCount
+        integer pigenCount
+        integer snakeHoleCount
+        integer cageCount
+        // farming animal counter
+        integer sheepCount
+        integer pigCount
+        integer snakeCount
+        integer chickenCount
+        
+        integer deathCount
+        // Instance method
+        public method operator deaths takes nothing returns integer
+            return this.deathCount
+        endmethod
+        
+        public method operator deaths= takes integer val returns nothing
+            set this.deathCount = val
+            // fresh board
+            set thistype.statsBoard[CST_BDCOL_DE][rowIndex].text = I2S(this.deathCount)
+        endmethod
+        
+        public method addFarmingBuilding takes unit building returns nothing
+            if GetUnitTypeId(building) == CST_BTI_SheepFold then
+                call GroupAddUnit(sheepFolds,building)
+                set sheepFoldCount = sheepFoldCount + 1
+            else if GetUnitTypeId(building) == CST_BTI_Pigen then
+                call GroupAddUnit(pigens,building)
+                set pigenCount = pigenCount + 1
+            else if GetUnitTypeId(building) == CST_BTI_SnakeHole then
+                call GroupAddUnit(snakeHoles,building)
+                set snakeHoleCount = snakeHoleCount + 1
+            else if GetUnitTypeId(building) == CST_BTI_Cage then
+                call GroupAddUnit(cages,building)
+                set cageCount = cageCount + 1
+            endif
+        endmethod
+        
+        public method removeFarmingBuilding takes unit building returns nothing
+            if GetUnitTypeId(building) == CST_BTI_SheepFold then
+                call GroupRemoveUnit(sheepFolds,building)
+                set sheepFoldCount = sheepFoldCount - 1
+            else if GetUnitTypeId(building) == CST_BTI_Pigen then
+                call GroupRemoveUnit(pigens,building)
+                set pigenCount = pigenCount - 1
+            else if GetUnitTypeId(building) == CST_BTI_SnakeHole then
+                call GroupRemoveUnit(snakeHoles,building)
+                set snakeHoleCount = snakeHoleCount - 1
+            else if GetUnitTypeId(building) == CST_BTI_Cage then
+                call GroupRemoveUnit(cages,building)
+                set cageCount = cageCount - 1
+            endif
+        endmethod
+        
+        private method initFarmerVars takes unit hero   returns nothing
+            set sheepFolds  = CreateGroup()
+            set pigens      = CreateGroup()
+            set snakeHoles  = CreateGroup()
+            set cages       = CreateGroup()
+            
+            set sheepFoldCount  = 0
+            set pigenCount      = 0
+            set snakeHoleCount  = 0
+            set cageCount       = 0
+            
+            set sheepCount      = 0
+            set pigCount        = 0
+            set snakeCount      = 0
+            set chickenCount    = 0
+            
+            set deathCount      = 0
+        endmethod
+        
+        private method deleteFarmerVars takes unit hero   returns nothing
+        endmethod
+        
+        // Randomize location of farmer hero
+        public method randomizeHeroLoc takes unit hero   returns nothing
+        endmethod
+    endmodule
+    
+    /***************************************************************************
+    * Structs
+    ***************************************************************************/
+    // Associate players with their force , units, data.
+    struct Hunter extends array
+        // Staitic [Module]
+        implement Force
+        implement StatsBoard
+        // Instance [Vars]
+        implement HunterVars
+        
+        // Instance methods
+        private method instanceInit takes nothing returns nothing
+            call this.initFarmerVars()
+        endmethod
+        
+        private method instanceDelete takes nothing returns nothing
+            call this.deleteFarmerVars()
+        endmethod
+        
+        // Static methods
+        public static method removeLeaving takes player p returns nothing
             local thistype h = thistype[GetPlayerId(p)]
 
             if statsBoard != -1 then
@@ -184,8 +277,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
             
-            call thistype.removeFromForce(p)
-            call h.setHero(null)
+            call thistype.remove(p)
+            call h.instanceDelete()
         endmethod
         
         // Give bonus gold for killing farmers in every 60s
@@ -273,14 +366,20 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             return false
         endmethod
         
-        // display stats board
-        static method displayStatsBoard takes nothing returns boolean
+        // On game start
+        private static method onGameStart takes nothing returns boolean
             local thistype h = thistype[thistype.first]
+            // Init statistics board
             call thistype.initStatsBoard()
             loop
                 exitwhen h.end
+                // Init instance vars
+                call h.instanceInit()
+                
+                // Display stats board
                 debug call BJDebugMsg("Display board to hunter:" + GetPlayerName(h.get))
                 set statsBoard.visible[h.get] = true
+                
                 set h= h.next
             endloop
             
@@ -289,8 +388,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 
         private static method onInit takes nothing returns nothing
             call TimerManager.pt60s.register(Filter(function thistype.goldBonusForKilling))
-            // Init and display multiboard at game start
-            call TimerManager.otGameStart.register(Filter(function thistype.displayStatsBoard))
+            call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
             call TimerManager.otSelectHero.register(Filter(function thistype.onSelectHeroExpire))
             // Play time is over, hunters win
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.win))
@@ -300,28 +398,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     
     // *** Farmer
     struct Farmer extends array
-        implement ForceVars
-        implement FarmerUnitVars
-        implement StatsBoardVars
+        // Staitic [Module]
+        implement Force
+        implement StatsBoard
+        // Instance [Vars]
+        implement FarmerVars
         
-        integer deathCount
-        
-        public method operator deaths takes nothing returns integer
-            return this.deathCount
+        private method instanceInit takes nothing returns nothing
+            call this.initFarmerVars()
         endmethod
         
-        public method operator deaths= takes integer val returns nothing
-            set this.deathCount = val
-            // fresh board
-            set thistype.statsBoard[CST_BDCOL_DE][rowIndex].text = I2S(this.deathCount)
-        endmethod
-        
-        public static method add takes player p returns nothing
-            call addToForce(p)
+        private method instanceDelete takes nothing returns nothing
+            call this.deleteFarmerVars()
         endmethod
 
-        // Static Methods
-        public static method remove takes player p returns nothing
+        // Static methods
+        public static method removeLeaving takes player p returns nothing
             local thistype f = thistype[GetPlayerId(p)]
 
             if statsBoard != -1 then
@@ -330,7 +422,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             else
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
-            call thistype.removeFromForce(p)
+            call thistype.remove(p)
         endmethod
         
         public static method goldCompensateForDeath takes nothing returns nothing
@@ -399,24 +491,29 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             return false
         endmethod
         
-        // display stats board
-        static method displayStatsBoard takes nothing returns boolean
+        // On game start
+        private static method onGameStart takes nothing returns boolean
             local thistype f = thistype[thistype.first]
+            // Init statistics board
             call thistype.initStatsBoard()
             loop
                 exitwhen f.end
+                // Init instance vars
+                call f.instanceInit()
+                
+                // Display stats board
                 debug call BJDebugMsg("Display board to farmer:" + GetPlayerName(f.get))
                 set statsBoard.visible[f.get] = true
+
                 set f = f.next
             endloop
-            
             return false
         endmethod
         
         private static method onInit takes nothing returns nothing
             call TimerManager.pt60s.register(Filter(function thistype.goldCompensateForDeath))
             // Init and display multiboard at game start
-            call TimerManager.otGameStart.register(Filter(function thistype.displayStatsBoard))
+            call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
             // Play time is over, farmers lose
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.lose))
         endmethod
