@@ -55,7 +55,7 @@ struct EventManager
         endif
         
         // If farmer farming animal die
-        call f.
+        // call f.
         
         // If farmer farming building is destroyed
         call f.removeFarmingBuilding(dyingUnit)
@@ -68,26 +68,16 @@ struct EventManager
     endmethod
     
     /***************************************************************************
-    * When player building is destroyed, update counters
+    * When player building is finished, update counters
     ***************************************************************************/
     // Event Filter
     private static method filterFarmerFarmingBuildingFinish takes nothing returns boolean
-        return IsUnitFarmerFarmingBuilding(GetFilterUnit())
+        //return IsUnitFarmerFarmingBuilding(GetFilterUnit())
+        return true
     endmethod
     // Event Listener
     private static method onFarmerFarmingBuildingFinish takes nothing returns boolean    
-        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetSoldUnit()))+ ":Selecte a Hero") 
-        if Hunter.contain(GetOwningPlayer(GetSoldUnit())) then
-            call Hunter[GetPlayerId(GetOwningPlayer(GetSoldUnit()))].setHero(GetSoldUnit())
-        endif
-        
-        // Every Hunter players has selected a hero
-        if Hunter.heroSelectedCount == Hunter.count then
-            debug call BJDebugMsg("Every Hunter players has selected a hero")
-            // destroy this trigger which has no actions, no memory leak
-            call DestroyTrigger(GetTriggeringTrigger())
-            set trigSelectHero = null
-        endif
+        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetTriggerUnit()))+ " build a " + GetUnitName(GetTriggerUnit())) 
         
         return false
     endmethod
@@ -128,6 +118,7 @@ struct EventManager
         local Farmer f = Farmer[Farmer.first]
         local Hunter h = Hunter[Hunter.first]
         
+        debug call BJDebugMsg("Event manager: start to listen")
         // Register a leave action callback of player leave event
         call Players.LEAVE.register(Filter(function thistype.onPlayerLeave))
         
@@ -137,7 +128,7 @@ struct EventManager
         loop 
             exitwhen f.end
             call TriggerRegisterPlayerUnitEvent(trigFarmerUnitDeath, f.get, EVENT_PLAYER_UNIT_DEATH, null)
-            call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingFinish, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH, filterFarmerFarmingBuildingFinish)
+            call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingFinish, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH, Filter(function thistype.filterFarmerFarmingBuildingFinish))
             set f= f.next
         endloop
     endmethod

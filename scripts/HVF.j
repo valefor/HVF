@@ -145,12 +145,12 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
         endmethod
         
-        private method initHunterVars takes unit hero   returns nothing
+        method initHunterVars takes nothing returns nothing
             set this.killCount = 0
             set this.hero = null
         endmethod
         
-        private method deleteHunterVars takes unit hero   returns nothing
+        method deleteHunterVars takes nothing returns nothing
             call this.setHero(null)
         endmethod
         
@@ -191,13 +191,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             if GetUnitTypeId(building) == CST_BTI_SheepFold then
                 call GroupAddUnit(sheepFolds,building)
                 set sheepFoldCount = sheepFoldCount + 1
-            else if GetUnitTypeId(building) == CST_BTI_Pigen then
+            elseif GetUnitTypeId(building) == CST_BTI_Pigen then
                 call GroupAddUnit(pigens,building)
                 set pigenCount = pigenCount + 1
-            else if GetUnitTypeId(building) == CST_BTI_SnakeHole then
+            elseif GetUnitTypeId(building) == CST_BTI_SnakeHole then
                 call GroupAddUnit(snakeHoles,building)
                 set snakeHoleCount = snakeHoleCount + 1
-            else if GetUnitTypeId(building) == CST_BTI_Cage then
+            elseif GetUnitTypeId(building) == CST_BTI_Cage then
                 call GroupAddUnit(cages,building)
                 set cageCount = cageCount + 1
             endif
@@ -207,19 +207,19 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             if GetUnitTypeId(building) == CST_BTI_SheepFold then
                 call GroupRemoveUnit(sheepFolds,building)
                 set sheepFoldCount = sheepFoldCount - 1
-            else if GetUnitTypeId(building) == CST_BTI_Pigen then
+            elseif GetUnitTypeId(building) == CST_BTI_Pigen then
                 call GroupRemoveUnit(pigens,building)
                 set pigenCount = pigenCount - 1
-            else if GetUnitTypeId(building) == CST_BTI_SnakeHole then
+            elseif GetUnitTypeId(building) == CST_BTI_SnakeHole then
                 call GroupRemoveUnit(snakeHoles,building)
                 set snakeHoleCount = snakeHoleCount - 1
-            else if GetUnitTypeId(building) == CST_BTI_Cage then
+            elseif GetUnitTypeId(building) == CST_BTI_Cage then
                 call GroupRemoveUnit(cages,building)
                 set cageCount = cageCount - 1
             endif
         endmethod
         
-        private method initFarmerVars takes unit hero   returns nothing
+        method initFarmerVars takes nothing returns nothing
             set sheepFolds  = CreateGroup()
             set pigens      = CreateGroup()
             set snakeHoles  = CreateGroup()
@@ -238,7 +238,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set deathCount      = 0
         endmethod
         
-        private method deleteFarmerVars takes unit hero   returns nothing
+        method deleteFarmerVars takes nothing returns nothing
         endmethod
         
         // Randomize location of farmer hero
@@ -259,11 +259,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         // Instance methods
         private method instanceInit takes nothing returns nothing
-            call this.initFarmerVars()
+            call this.initHunterVars()
         endmethod
         
         private method instanceDelete takes nothing returns nothing
-            call this.deleteFarmerVars()
+            call this.deleteHunterVars()
         endmethod
         
         // Static methods
