@@ -62,11 +62,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         public static method clear takes nothing returns nothing
-            local thistype role = thistype.first
+            local thistype r = thistype.first
             loop
-                exitwhen role.end
-                call thistype.remove(role.get)
-                set role = role.next
+                exitwhen r.end
+                call thistype.remove(r.get)
+                set r = r.next
             endloop
             call ForceClear(thistype.fc)
         endmethod
@@ -159,32 +159,51 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     private module FarmerVars
         unit hero
         
-        // farming building group
+        // Farming building group
         group sheepFolds
         group pigens
         group snakeHoles
         group cages
-        // farming building counter
+        // Farming building counter
         integer sheepFoldCount
         integer pigenCount
         integer snakeHoleCount
         integer cageCount
-        // farming animal counter
+        // Farming animal counter
         integer sheepCount
         integer pigCount
         integer snakeCount
         integer chickenCount
         
         integer deathCount
+        integer role
         // Instance method
         public method operator deaths takes nothing returns integer
-            return this.deathCount
+            return .deathCount
         endmethod
         
         public method operator deaths= takes integer val returns nothing
-            set this.deathCount = val
+            set .deathCount = val
             // fresh board
-            set thistype.statsBoard[CST_BDCOL_DE][rowIndex].text = I2S(this.deathCount)
+            set thistype.statsBoard[CST_BDCOL_DE][rowIndex].text = I2S(.deathCount)
+        endmethod
+        
+        public method operator animalCount takes nothing returns integer
+            return (.sheepCount + .pigCount + .snakeCount + .chickenCount)
+        endmethod
+        
+        // Salary for every x minutes/seconds depends on animalType*animalCount
+        public method operator salary takes nothing returns integer
+            return (CST_INT_SalaryBaseSheep*sheepCount) + (CST_INT_SalaryBasePig*pigCount) + (CST_INT_SalaryBaseSnake*snakeCount) + (CST_INT_SalaryBaseChicken*chickenCount)
+        endmethod
+        
+        // Income for killing overflow animals
+        public method operator overflowIncome takes nothing returns integer
+            return (CST_INT_PriceOfSheep*sheepFoldCount) + (CST_INT_PriceOfPig*pigenCount) + (CST_INT_PriceOfSnake*snakeHoleCount) + (CST_INT_PriceOfChicken*cageCount)
+        endmethod
+        
+        // Killing all animals immediately, return gold for killed animals
+        public method killAllAnimalsToGetGold takes nothing returns integer
         endmethod
         
         public method addFarmingBuilding takes unit building returns nothing
@@ -219,6 +238,56 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
         endmethod
         
+        public method addFarmingAminal takes unit animal returns nothing
+            if GetUnitTypeId(animal) == CST_UTI_Sheep then
+                set sheepCount = sheepCount + 1
+            elseif GetUnitTypeId(animal) == CST_UTI_Pig then
+                set pigCount = pigCount + 1
+            elseif GetUnitTypeId(animal) == CST_UTI_Snake then
+                set snakeCount = snakeCount + 1
+            elseif GetUnitTypeId(animal) == CST_UTI_Chicken then
+                set chickenCount = chickenCount + 1
+            endif
+        endmethod
+        
+        public method removeFarmingAminal takes unit animal returns nothing
+            if GetUnitTypeId(animal) == CST_UTI_Sheep then
+                set sheepCount = sheepCount - 1
+            elseif GetUnitTypeId(animal) == CST_UTI_Pig then
+                set pigCount = pigCount - 1
+            elseif GetUnitTypeId(animal) == CST_UTI_Snake then
+                set snakeCount = snakeCount - 1
+            elseif GetUnitTypeId(animal) == CST_UTI_Chicken then
+                set chickenCount = chickenCount - 1
+            endif
+        endmethod
+        
+        method enumSpawnSheep takes nothing returns nothing
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Sheep, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set sheepCount = sheepCount + 1
+        endmethod
+        method enumSpawnPig takes nothing returns nothing
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Pig, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set pigCount = pigCount + 1
+        endmethod
+        method enumSpawnSnake takes nothing returns nothing
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Snake, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set snakeCount = snakeCount + 1
+        endmethod
+        method enumSpawnChicken takes nothing returns nothing
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Chicken, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set chickenCount = chickenCount + 1
+        endmethod
+        
+        method spawnAnimal takes nothing returns nothing
+            call ForGroup(sheepFolds, function this.enumSpawnSheep)
+            call ForGroup(pigens, function this.enumSpawnPig)
+            call ForGroup(snakeHoles, function this.enumSpawnSnake)
+            call ForGroup(cages, function this.enumSpawnChicken)
+        endmethod
+        
+        
+        
         method initFarmerVars takes nothing returns nothing
             set sheepFolds  = CreateGroup()
             set pigens      = CreateGroup()
@@ -236,6 +305,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set chickenCount    = 0
             
             set deathCount      = 0
+            set role            = CST_INT_FarmerRoleInvalid
         endmethod
         
         method deleteFarmerVars takes nothing returns nothing
@@ -369,8 +439,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // On game start
         private static method onGameStart takes nothing returns boolean
             local thistype h = thistype[thistype.first]
-            // Init statistics board
-            call thistype.initStatsBoard()
+            
             loop
                 exitwhen h.end
                 // Init instance vars
@@ -382,6 +451,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 
                 set h= h.next
             endloop
+            
+            // Init statistics board
+            call thistype.initStatsBoard()
             
             return false
         endmethod
@@ -424,8 +496,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
             call thistype.remove(p)
         endmethod
+
+        // Get total animals' count
+        public static method getTotalAnimalCount takes nothing returns integer
+            local thistype h = thistype[thistype.first]
+            local integer totalAnimalCount = 0
+
+            loop
+                exitwhen h.end
+                set totalAnimalCount = totalAnimalCount + f.animalCount
+                set h= h.next
+            endloop
+            
+            return totalAnimalCount
+        endmethod
         
-        public static method goldCompensateForDeath takes nothing returns nothing
+        private static method goldCompensateForDeath takes nothing returns nothing
             local thistype f = thistype[thistype.first]
             local integer iGold = 0
             
@@ -439,6 +525,44 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 //call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, 10)
                 set f= f.next
             endloop
+        endmethod
+        
+        private static method giveFarmingGold takes nothing returns nothing
+            local thistype f = thistype[thistype.first]
+            
+            debug call BJDebugMsg("Salary!")
+            loop
+                exitwhen f.end
+                debug call BJDebugMsg("Spawn Animal for:" + GetPlayerName(f.get))
+                call f.spawnAnimal()
+                //call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, 10)
+                set f= f.next
+            endloop
+        endmethod
+        
+        private static method spawnAnimal takes nothing returns nothing
+            local thistype f = thistype[thistype.first]
+            
+            debug call BJDebugMsg("Spawn Animal")
+            // If total aminal count doesn't exceed CST_INT_MaxAnimals, spawn
+            if thistype.getTotalAnimalCount < CST_INT_MaxAnimals then
+                loop
+                    exitwhen f.end
+                    debug call BJDebugMsg("Spawn Animal for:" + GetPlayerName(f.get))
+                    call f.spawnAnimal()
+                    set f= f.next
+                endloop
+                f = thistype[thistype.first]
+            // Else don't spawn, give overflow gold to players
+            else
+                loop
+                    exitwhen f.end
+                    debug call BJDebugMsg("Spawn Animal for:" + GetPlayerName(f.get))
+                    call AdjustPlayerStateBJ(iGold, f.get, PLAYER_STATE_RESOURCE_GOLD)
+                    set f= f.next
+                endloop
+            endif
+            
         endmethod
         
         static method initStatsBoard takes nothing returns boolean
@@ -717,6 +841,5 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     private function init takes nothing returns nothing
         // Grouping players to Hunter/Farmer force by default
         call LoadDefaultSetting()
-        //call BindSelectedHero()
     endfunction
 endlibrary

@@ -71,6 +71,10 @@ library Glue /* v0.0.1 Xandria
         
     endglobals
 
+    function IsHunterHero takes unit u returns boolean
+        return GetUnitTypeId(u) < CST_UTI_HunterHeroLastcode and GetUnitTypeId(u) > CST_UTI_HunterHeroFirstcode
+    endfunction
+    
     function IsUnitFarmerAnimal takes unit u returns boolean
         return GetUnitTypeId(u)==CST_UTI_Sheep or GetUnitTypeId(u)==CST_UTI_Pig or GetUnitTypeId(u)==CST_UTI_Snake or GetUnitTypeId(u)==CST_UTI_Chicken
     endfunction

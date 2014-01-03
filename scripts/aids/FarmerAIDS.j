@@ -5,7 +5,7 @@ library FarmerAIDS/* v0.0.1 Xandria
 * AIDS struct for farmer units
 *******************************************************************************/
 
-// Hero
+// When units Entering the map
 struct FarmerHero extends array
     //! runtextmacro AIDS()
     private trigger trig

@@ -31,6 +31,19 @@ struct EventManager
     endmethod
     
     /***************************************************************************
+    * When unit enter map, update counters
+    ***************************************************************************/
+    private static method filterUnitEnterMap takes nothing returns boolean
+        local unit enteringUnit = GetFilterUnit()
+        
+        call addFarmingBuilding(enteringUnit)
+        call addFarmingAminal(enteringUnit)
+        
+        set enteringUnit = null
+        return false
+    endmethod
+    
+    /***************************************************************************
     * When player unit die, update counters
     ***************************************************************************/
     // Event Filter
@@ -55,7 +68,7 @@ struct EventManager
         endif
         
         // If farmer farming animal die
-        // call f.
+        call f.removeFarmingAminal(dyingUnit)
         
         // If farmer farming building is destroyed
         call f.removeFarmingBuilding(dyingUnit)
@@ -117,10 +130,13 @@ struct EventManager
     static method listen takes nothing returns nothing
         local Farmer f = Farmer[Farmer.first]
         local Hunter h = Hunter[Hunter.first]
+        local region r=CreateRegion()
         
         debug call BJDebugMsg("Event manager: start to listen")
         // Register a leave action callback of player leave event
         call Players.LEAVE.register(Filter(function thistype.onPlayerLeave))
+        
+        call TriggerRegisterEnterRegion(CreateTrigger(),r,Filter(function filterUnitEnterMap))
         
         // Hero Tavern belongs to 'Neutral Passive Player'
         call TriggerRegisterPlayerUnitEvent(trigSelectHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
@@ -134,10 +150,12 @@ struct EventManager
     endmethod
     
     private static method onInit takes nothing returns nothing
+        // Init triggers
         set thistype.trigSelectHero = CreateTrigger()
         set thistype.trigFarmerUnitDeath = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingFinish = CreateTrigger()
         
+        // Set up triggers handle function
         call TriggerAddCondition( trigSelectHero,Condition(function thistype.onSelectHero) )
         call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
         call TriggerAddCondition( trigFarmerFarmingBuildingFinish,Condition(function thistype.onFarmerFarmingBuildingFinish) )
@@ -149,7 +167,6 @@ endstruct
 * Library Initiation
 *******************************************************************************/
 private function init takes nothing returns nothing
-    // Register a leave action callback of player leave event
     call EventManager.listen()
 endfunction
 

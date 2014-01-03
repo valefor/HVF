@@ -15,6 +15,11 @@ globals
     constant string CST_STR_Hunter= "猎人"
     constant string CST_STR_Farmer= "农民"
 
+    constant string CST_INT_FarmerRoleInvalid=0
+    constant string CST_INT_FarmerRoleGreedy=111
+    constant string CST_INT_FarmerRoleKiller=222
+    constant string CST_INT_FarmerRoleNomader=333
+    constant string CST_INT_FarmerRoleCoward=444
     /***************************************************************************
     * Game Parameters
     ***************************************************************************/
@@ -23,6 +28,7 @@ globals
     constant integer CST_INT_MaxHeros=1
     constant integer CST_INT_MaxHunters=4
     constant integer CST_INT_MaxFarmers=8
+    constant integer CST_INT_MaxAnimals=550
     
     // *** Timers - Onetime Timer(postfix must be '.01')
     // Game host has 10 seconds to choose game mode
@@ -60,6 +66,18 @@ globals
     // *** Skill points of initial hero
     constant integer CST_INT_InitHunterSkillPoints=3
     constant integer CST_INT_InitFarmerSkillPoints=2
+    
+    // *** Salary based on aminal type
+    constant integer CST_INT_SalaryBaseSheep=1
+    constant integer CST_INT_SalaryBasePig=2
+    constant integer CST_INT_SalaryBaseSnake=3
+    constant integer CST_INT_SalaryBaseChicken=4
+    
+    // *** Price of animal, when animal is killed, player gets such gold
+    constant integer CST_INT_PriceOfSheep=10
+    constant integer CST_INT_PriceOfPig=20
+    constant integer CST_INT_PriceOfSnake=30
+    constant integer CST_INT_PriceOfChicken=40
     
     // *** Board layout
     // Board Column
