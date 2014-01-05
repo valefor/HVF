@@ -5,6 +5,8 @@ library HVF initializer init/* v0.0.1 Xandria
 */          TimeManager     /*
 */          UnitManager     /*
 */          Board           /*
+*/          ErrorMessage    /*
+*/          ORDERID         /*
 ********************************************************************************
 *     HVF Force management : For use of managing HuntersVsFarmers forces
 *
@@ -105,11 +107,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     // Unit related utils    
     private module HunterVars
         unit hero
-        static integer heroSelectedCount = 0
         // specific attributes
         integer killCount
         
         // Instance method
+        /***********************************************************************
+        * Operators
+        ***********************************************************************/
         public method operator kills takes nothing returns integer
             return this.killCount
         endmethod
@@ -120,28 +124,44 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set thistype.statsBoard[CST_BDCOL_KL][rowIndex].text = I2S(this.killCount)
         endmethod
         
-        public method operator hasHero takes nothing returns boolean
-            return hero != null
+        /***********************************************************************
+        * Util functions
+        ***********************************************************************/
+        private method initHero takes nothing returns nothing
+            // Give hunter hero 3 skill points at beginning
+            call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
+            // Give items
         endmethod
         
-        public method setHero takes unit hero returns nothing
-            local boolean bInitHero = false
-            if not this.hasHero then
-                // set and initiate hero
-                if hero != null then
-                    set heroSelectedCount = heroSelectedCount + 1
-                    set bInitHero = true
-                endif
-            else
-                // delete hero
-                if hero == null then
-                    set heroSelectedCount = heroSelectedCount - 1 
-                endif
+        public method generateRandomHero takes location l returns nothing
+            local integer randomInt = GetRandomInt(1, CST_INT_MaxHunterHeroType)
+            local location loc = Location(GetRectCenterX(CST_RCT_DefaultBirthPlace), GetRectCenterY(CST_RCT_DefaultBirthPlace))
+
+            if l !=null then
+                call RemoveLocation(loc)
+                set loc = l
             endif
-            set this.hero = hero
-            if bInitHero then
-                // Give hunter hero 3 skill points at beginning
-                call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
+            set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroFirstcode+randomInt, loc, 0)
+            // Give random hunter hero extra bonus such as life(+2000) agi(+3) int(+2)... 
+            set Bonus_Life[hero]=CST_INT_RandomBonusLife
+            set Bonus_Armor[hero]=CST_INT_RandomBonusArmor
+            set Bonus_Agi[hero]=CST_INT_RandomBonusAgi
+            set Bonus_Int[hero]=CST_INT_RandomBonusInt
+            call this.initHero()
+            
+            call RemoveLocation(loc)
+            set loc = null
+        endmethod
+        
+        public method setHero takes unit u returns nothing
+            if u != null then
+                if GetUnitTypeId(u) == CST_UTI_HunterHeroRandom then
+                    call this.generateRandomHero(GetUnitLoc(u))
+                    call RemoveUnit(u)
+                else
+                    set this.hero = u
+                    call this.initHero()
+                endif
             endif
         endmethod
         
@@ -151,7 +171,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         method deleteHunterVars takes nothing returns nothing
-            call this.setHero(null)
+            // Remove all units
+            // call this.setHero(null)
         endmethod
         
     endmodule
@@ -169,6 +190,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         integer pigenCount
         integer snakeHoleCount
         integer cageCount
+        // Farming building(No Spawn) counter
+        integer sheepFoldNsCount
+        integer pigenNsCount
+        integer snakeHoleNsCount
+        integer cageNsCount
         // Farming animal counter
         integer sheepCount
         integer pigCount
@@ -177,7 +203,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         integer deathCount
         integer role
+        
         // Instance method
+        /***********************************************************************
+        * Operators
+        ***********************************************************************/
         public method operator deaths takes nothing returns integer
             return .deathCount
         endmethod
@@ -194,47 +224,323 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         // Salary for every x minutes/seconds depends on animalType*animalCount
         public method operator salary takes nothing returns integer
-            return (CST_INT_SalaryBaseSheep*sheepCount) + (CST_INT_SalaryBasePig*pigCount) + (CST_INT_SalaryBaseSnake*snakeCount) + (CST_INT_SalaryBaseChicken*chickenCount)
+            local integer money = (CST_INT_SalaryBaseSheep*sheepCount) + (CST_INT_SalaryBasePig*pigCount) + (CST_INT_SalaryBaseSnake*snakeCount) + (CST_INT_SalaryBaseChicken*chickenCount)
+            
+            // Nomader has more salary
+            if this.role == CST_INT_FarmerRoleNomader then
+                set money = R2I(money * 1.5)
+            endif
+            return money
+        endmethod
+        
+        // Income for killing all animals
+        public method operator allAnimalIncome takes nothing returns integer
+            local integer money = (CST_INT_PriceOfSheep*sheepCount) + (CST_INT_PriceOfPig*pigCount) + (CST_INT_PriceOfSnake*snakeCount) + (CST_INT_PriceOfChicken*chickenCount)
+            // Greedy has more money for butcher animal
+            if this.role == CST_INT_FarmerRoleGreedy then
+                set money = R2I(money * 1.3)
+            endif
+            return money
         endmethod
         
         // Income for killing overflow animals
         public method operator overflowIncome takes nothing returns integer
-            return (CST_INT_PriceOfSheep*sheepFoldCount) + (CST_INT_PriceOfPig*pigenCount) + (CST_INT_PriceOfSnake*snakeHoleCount) + (CST_INT_PriceOfChicken*cageCount)
+            local integer money = (CST_INT_PriceOfSheep*sheepFoldCount) + (CST_INT_PriceOfPig*pigenCount) + (CST_INT_PriceOfSnake*snakeHoleCount) + (CST_INT_PriceOfChicken*cageCount)
+            // Greedy has more money for butcher animal
+            if this.role == CST_INT_FarmerRoleGreedy then
+                set money = R2I(money * 1.3)
+            endif
+            return money
+        endmethod
+        // Income from no spawn buildings
+        public method operator noSpawnIncome takes nothing returns integer
+            local integer money = (CST_INT_PriceOfSheep*sheepFoldNsCount) + (CST_INT_PriceOfPig*pigenNsCount) + (CST_INT_PriceOfSnake*snakeHoleNsCount) + (CST_INT_PriceOfChicken*cageNsCount)
+            // Greedy has more money for butcher animal
+            if this.role == CST_INT_FarmerRoleGreedy then
+                set money = R2I(money * 1.3)
+            endif
+            return money
+        endmethod
+        // Income from death..., hmm, weird
+        public method operator deathIncome takes nothing returns integer
+            return CST_INT_GoldMagForDeath*deathCount
         endmethod
         
-        // Killing all animals immediately, return gold for killed animals
-        public method killAllAnimalsToGetGold takes nothing returns integer
+        /***********************************************************************
+        * Filters
+        ***********************************************************************/
+        private static method filterButcherAllAnimal takes nothing returns boolean
+            local unit toBeKilled = GetFilterUnit()
+            local integer unitTypeId = GetUnitTypeId(toBeKilled)
+            
+            if unitTypeId == CST_UTI_Sheep or unitTypeId == CST_UTI_Pig or unitTypeId == CST_UTI_Snake or unitTypeId == CST_UTI_Chicken then
+                call KillUnit(toBeKilled)
+            endif
+            debug call BJDebugMsg("Kill " + GetUnitName(toBeKilled)) 
+            debug call KillUnit(toBeKilled)
+            set toBeKilled = null
+            return false
+        endmethod
+        private static method filterAllAnimalSpawnOn takes nothing returns boolean
+            local unit filterUnit = GetFilterUnit()
+            local integer unitTypeId = GetUnitTypeId(filterUnit)
+            
+            if unitTypeId == CST_BTI_SheepFoldNs or unitTypeId == CST_BTI_PigenNs or unitTypeId == CST_BTI_SnakeHoleNs or unitTypeId == CST_BTI_CageNs then
+                call IssueImmediateOrderById( filterUnit, ORDERID_unbearform )
+            endif
+            set filterUnit = null
+            return false
+        endmethod
+        private static method filterAllAnimalSpawnOff takes nothing returns boolean
+            local unit filterUnit = GetFilterUnit()
+            local integer unitTypeId = GetUnitTypeId(filterUnit)
+            
+            if unitTypeId == CST_BTI_SheepFold or unitTypeId == CST_BTI_Pigen or unitTypeId == CST_BTI_SnakeHole or unitTypeId == CST_BTI_Cage then
+                call IssueImmediateOrderById( filterUnit, ORDERID_bearform )
+            endif
+            set filterUnit = null
+            return false
+        endmethod
+        private static method filterAnimalAutoLoad takes nothing returns boolean
+            local unit filterUnit = GetFilterUnit()
+            local integer unitTypeId = GetUnitTypeId(filterUnit)
+            
+            if unitTypeId == CST_BTI_SheepFold or unitTypeId == CST_BTI_Pigen or unitTypeId == CST_BTI_SnakeHole or unitTypeId == CST_BTI_Cage or unitTypeId == CST_BTI_SheepFoldNs or unitTypeId == CST_BTI_PigenNs or unitTypeId == CST_BTI_SnakeHoleNs or unitTypeId == CST_BTI_CageNs then
+                call IssueTargetOrderById( filterUnit, ORDERID_smart , filterUnit )
+            endif
+            set filterUnit = null
+            return false
+        endmethod
+        private static method filterAnimalLoadAll takes nothing returns boolean
+            local unit filterUnit = GetFilterUnit()
+            local integer unitTypeId = GetUnitTypeId(filterUnit)
+            
+            if unitTypeId == CST_BTI_SheepFold or unitTypeId == CST_BTI_Pigen or unitTypeId == CST_BTI_SnakeHole or unitTypeId == CST_BTI_Cage or unitTypeId == CST_BTI_SheepFoldNs or unitTypeId == CST_BTI_PigenNs or unitTypeId == CST_BTI_SnakeHoleNs or unitTypeId == CST_BTI_CageNs then
+                call IssueImmediateOrderById( filterUnit, ORDERID_battlestations )
+            endif
+            set filterUnit = null
+            return false
+        endmethod
+        private static method filterAnimalUnloadAll takes nothing returns boolean
+            local unit filterUnit = GetFilterUnit()
+            local integer unitTypeId = GetUnitTypeId(filterUnit)
+            
+            if unitTypeId == CST_BTI_SheepFold or unitTypeId == CST_BTI_Pigen or unitTypeId == CST_BTI_SnakeHole or unitTypeId == CST_BTI_Cage or unitTypeId == CST_BTI_SheepFoldNs or unitTypeId == CST_BTI_PigenNs or unitTypeId == CST_BTI_SnakeHoleNs or unitTypeId == CST_BTI_CageNs then
+                call IssueImmediateOrderById( filterUnit, ORDERID_standdown )
+            endif
+            set filterUnit = null
+            return false
         endmethod
         
-        public method addFarmingBuilding takes unit building returns nothing
-            if GetUnitTypeId(building) == CST_BTI_SheepFold then
-                call GroupAddUnit(sheepFolds,building)
-                set sheepFoldCount = sheepFoldCount + 1
-            elseif GetUnitTypeId(building) == CST_BTI_Pigen then
+        /***********************************************************************
+        * Enumerators
+        ***********************************************************************/
+        static method enumSpawnSheep takes nothing returns nothing
+            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Sheep, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set f.sheepCount = f.sheepCount + 1
+        endmethod
+        static method enumSpawnPig takes nothing returns nothing
+            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Pig, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set f.pigCount = f.pigCount + 1
+        endmethod
+        static method enumSpawnSnake takes nothing returns nothing
+            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Snake, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set f.snakeCount = f.snakeCount + 1
+        endmethod
+        static method enumSpawnChicken takes nothing returns nothing
+            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Chicken, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set f.chickenCount = f.chickenCount + 1
+        endmethod
+        
+        /***********************************************************************
+        * Iteration all units of this player
+        ***********************************************************************/
+        private method iterateUnits takes filterfunc filter returns nothing
+            local group dummyGroup = CreateGroup()
+            
+            call GroupEnumUnitsOfPlayer(dummyGroup, this.get, filter)
+            
+            call DestroyGroup(dummyGroup)
+            set dummyGroup = null
+        endmethod
+        
+        /***********************************************************************
+        * Util functions
+        ***********************************************************************/
+        // Butcher a animal, get money
+        public method butcherAnimal takes unit animal returns nothing
+            local integer money = 0
+            if GetUnitTypeId(animal) == CST_UTI_Sheep then
+                set money = CST_INT_PriceOfSheep
+            elseif GetUnitTypeId(animal) == CST_UTI_Pig then
+                set money = CST_INT_PriceOfPig
+            elseif GetUnitTypeId(animal) == CST_UTI_Snake then
+                set money = CST_INT_PriceOfSnake
+            elseif GetUnitTypeId(animal) == CST_UTI_Chicken then
+                set money = CST_INT_PriceOfChicken
+            endif
+            // Greedy has more money for butcher animal
+            if this.role == CST_INT_FarmerRoleGreedy then
+                set money = R2I(money * 1.3)
+            endif                   
+            call KillUnit(animal)
+            call AdjustPlayerStateBJ(money, this.get, PLAYER_STATE_RESOURCE_GOLD)
+        endmethod
+        
+        // Butcher all animals immediately, return gold for killed animals
+        public method butcherAllAnimal takes nothing returns nothing
+            local integer gold = this.allAnimalIncome
+            
+            call iterateUnits(Filter(function thistype.filterButcherAllAnimal))
+            
+            call AdjustPlayerStateBJ(gold, this.get, PLAYER_STATE_RESOURCE_GOLD)
+            
+            // Animal count should be set to 0
+            debug call ThrowWarning(this.allAnimalIncome != 0, "HVF", "butcherAllAnimal", "Farmer", this, " animal count is not cleared.")
+        endmethod
+        
+        public method allAnimalSpawnOn takes nothing returns nothing
+            call iterateUnits(Filter(function thistype.filterAllAnimalSpawnOn))
+        endmethod
+        public method allAnimalSpawnOff takes nothing returns nothing
+            call iterateUnits(Filter(function thistype.filterAllAnimalSpawnOff))
+        endmethod
+        public method animalAutoLoad takes nothing returns nothing
+            call iterateUnits(Filter(function thistype.filterAnimalAutoLoad))
+        endmethod
+        public method animalLoadAll takes nothing returns nothing
+            call iterateUnits(Filter(function thistype.filterAnimalLoadAll))
+        endmethod
+        public method animalUnloadAll takes nothing returns nothing
+            call iterateUnits(Filter(function thistype.filterAnimalUnloadAll))
+        endmethod
+        
+        // Transform build to No Spawn building
+        public method transform2Ns takes unit building returns nothing
+            call removeFarmingBuilding(building, true)
+        endmethod
+        // Transform build to Auto Spawn building
+        public method transform2As takes unit building returns nothing
+            call addFarmingBuilding(building, true)
+        endmethod
+        
+        // Add a farming building to group
+        // Note, 'fromNs' means transfer No Spawn building to Auto Spawn building
+        public method addFarmingBuilding takes unit building, boolean fromNs returns nothing
+            local integer bti = GetUnitTypeId(building)
+            // Add Auto Spawn building
+            if not fromNs then
+                if bti == CST_BTI_SheepFold then
+                    call GroupAddUnit(sheepFolds,building)
+                    set sheepFoldCount = sheepFoldCount + 1
+                elseif bti == CST_BTI_Pigen then
+                    call GroupAddUnit(pigens,building)
+                    set pigenCount = pigenCount + 1
+                elseif bti == CST_BTI_SnakeHole then
+                    call GroupAddUnit(snakeHoles,building)
+                    set snakeHoleCount = snakeHoleCount + 1
+                elseif bti == CST_BTI_Cage then
+                    call GroupAddUnit(cages,building)
+                    set cageCount = cageCount + 1
+                endif
+            endif
+            
+            // Transfer No Spawn building to Auto Spawn building
+            if fromNs then
+                if bti == CST_BTI_SheepFoldNs then
+                    call GroupAddUnit(sheepFolds,building)
+                    set sheepFoldCount = sheepFoldCount + 1
+                    set sheepFoldNsCount = sheepFoldNsCount - 1
+                elseif bti == CST_BTI_PigenNs then
+                    call GroupAddUnit(pigens,building)
+                    set pigenCount = pigenCount + 1
+                    set pigenNsCount = pigenNsCount - 1
+                elseif bti == CST_BTI_SnakeHoleNs then
+                    call GroupAddUnit(snakeHoles,building)
+                    set snakeHoleCount = snakeHoleCount + 1
+                    set snakeHoleNsCount = snakeHoleNsCount - 1
+                elseif bti == CST_BTI_CageNs then
+                    call GroupAddUnit(cages,building)
+                    set cageCount = cageCount + 1
+                    set cageNsCount = cageNsCount - 1
+                endif
+            endif
+            
+        endmethod
+        
+        // Upgrade a farming building
+        public method upgradeFarmingBuilding takes unit building returns nothing
+            if GetUnitTypeId(building) == CST_BTI_Pigen then
+                call GroupRemoveUnit(sheepFolds,building)
+                set sheepFoldCount = sheepFoldCount - 1
                 call GroupAddUnit(pigens,building)
                 set pigenCount = pigenCount + 1
             elseif GetUnitTypeId(building) == CST_BTI_SnakeHole then
+                call GroupRemoveUnit(pigens,building)
+                set pigenCount = pigenCount - 1
                 call GroupAddUnit(snakeHoles,building)
                 set snakeHoleCount = snakeHoleCount + 1
             elseif GetUnitTypeId(building) == CST_BTI_Cage then
+                call GroupRemoveUnit(snakeHoles,building)
+                set snakeHoleCount = snakeHoleCount - 1
                 call GroupAddUnit(cages,building)
                 set cageCount = cageCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_PigenNs then
+                set sheepFoldNsCount = sheepFoldNsCount - 1
+                set pigenNsCount = pigenNsCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_SnakeHoleNs then
+                set pigenNsCount = pigenNsCount - 1
+                set snakeHoleNsCount = snakeHoleNsCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_CageNs then
+                set snakeHoleNsCount = snakeHoleNsCount - 1
+                set cageNsCount = cageNsCount + 1
             endif
         endmethod
         
-        public method removeFarmingBuilding takes unit building returns nothing
-            if GetUnitTypeId(building) == CST_BTI_SheepFold then
+        // Note, 'toNs' means transfer building to No Spawn building
+        public method removeFarmingBuilding takes unit building, boolean toNs returns nothing
+            local integer bti = GetUnitTypeId(building)
+            if bti == CST_BTI_SheepFold then
                 call GroupRemoveUnit(sheepFolds,building)
                 set sheepFoldCount = sheepFoldCount - 1
-            elseif GetUnitTypeId(building) == CST_BTI_Pigen then
+                if toNs then
+                    set sheepFoldNsCount = sheepFoldNsCount + 1 
+                endif
+            elseif bti == CST_BTI_Pigen then
                 call GroupRemoveUnit(pigens,building)
                 set pigenCount = pigenCount - 1
-            elseif GetUnitTypeId(building) == CST_BTI_SnakeHole then
+                if toNs then
+                    set pigenNsCount = pigenNsCount + 1 
+                endif
+            elseif bti == CST_BTI_SnakeHole then
                 call GroupRemoveUnit(snakeHoles,building)
                 set snakeHoleCount = snakeHoleCount - 1
-            elseif GetUnitTypeId(building) == CST_BTI_Cage then
+                if toNs then
+                    set snakeHoleNsCount = snakeHoleNsCount + 1 
+                endif
+            elseif bti == CST_BTI_Cage then
                 call GroupRemoveUnit(cages,building)
                 set cageCount = cageCount - 1
+                if toNs then
+                    set cageNsCount = cageNsCount + 1 
+                endif
+            endif
+            
+            // Remove No Spawn building
+            if not toNs then
+                if bti == CST_BTI_SheepFoldNs then
+                    set sheepFoldNsCount = sheepFoldNsCount - 1
+                elseif bti == CST_BTI_PigenNs then
+                    set pigenNsCount = pigenNsCount - 1
+                elseif bti == CST_BTI_SnakeHoleNs then
+                    set snakeHoleNsCount = snakeHoleNsCount - 1
+                elseif bti == CST_BTI_CageNs then
+                    set cageNsCount = cageNsCount - 1
+                endif
             endif
         endmethod
         
@@ -262,31 +568,27 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
         endmethod
         
-        method enumSpawnSheep takes nothing returns nothing
+        // For group enumeration use
+        /*
+        static method enumKillAnimal takes nothing returns nothing
+            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
             call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Sheep, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set sheepCount = sheepCount + 1
+            set f.sheepCount = f.sheepCount + 1
         endmethod
-        method enumSpawnPig takes nothing returns nothing
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Pig, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set pigCount = pigCount + 1
+        static method enumSpawnAnimal takes nothing returns nothing
+            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
+            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Sheep, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            set f.sheepCount = f.sheepCount + 1
         endmethod
-        method enumSpawnSnake takes nothing returns nothing
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Snake, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set snakeCount = snakeCount + 1
-        endmethod
-        method enumSpawnChicken takes nothing returns nothing
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Chicken, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set chickenCount = chickenCount + 1
-        endmethod
+        */
         
+
         method spawnAnimal takes nothing returns nothing
-            call ForGroup(sheepFolds, function this.enumSpawnSheep)
-            call ForGroup(pigens, function this.enumSpawnPig)
-            call ForGroup(snakeHoles, function this.enumSpawnSnake)
-            call ForGroup(cages, function this.enumSpawnChicken)
+            call ForGroup(sheepFolds, function thistype.enumSpawnSheep)
+            call ForGroup(pigens, function thistype.enumSpawnPig)
+            call ForGroup(snakeHoles, function thistype.enumSpawnSnake)
+            call ForGroup(cages, function thistype.enumSpawnChicken)
         endmethod
-        
-        
         
         method initFarmerVars takes nothing returns nothing
             set sheepFolds  = CreateGroup()
@@ -298,6 +600,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set pigenCount      = 0
             set snakeHoleCount  = 0
             set cageCount       = 0
+            
+            set sheepFoldNsCount= 0
+            set pigenNsCount    = 0
+            set snakeHoleNsCount= 0
+            set cageNsCount     = 0
             
             set sheepCount      = 0
             set pigCount        = 0
@@ -379,7 +686,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 exitwhen h.end
                 if h.hero == null then
                     debug call BJDebugMsg(GetPlayerName(h.get)+" hasn't selected hero")
-                    //set h.hero = GenRandomHunterHeroForPlayer(h.get, null)
+                    call h.generateRandomHero(null)
                 endif
                 set h= h.next
             endloop
@@ -499,16 +806,58 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 
         // Get total animals' count
         public static method getTotalAnimalCount takes nothing returns integer
-            local thistype h = thistype[thistype.first]
+            local thistype f = thistype[thistype.first]
             local integer totalAnimalCount = 0
 
             loop
-                exitwhen h.end
+                exitwhen f.end
                 set totalAnimalCount = totalAnimalCount + f.animalCount
-                set h= h.next
+                set f= f.next
             endloop
             
             return totalAnimalCount
+        endmethod
+        
+        // Farmer's income settlement
+        private static method incomeSettlement takes nothing returns nothing
+            local thistype f = thistype[thistype.first]
+            local integer gold = 0
+            
+            loop
+                exitwhen f.end
+                debug call BJDebugMsg("IncomeSettlement for farmer:" + GetPlayerName(f.get))
+                // Spawn animals
+                // If total aminal count doesn't exceed CST_INT_MaxAnimals, spawn
+                if thistype.getTotalAnimalCount() < CST_INT_MaxAnimals then
+                    call f.spawnAnimal()
+                    set gold = 0
+                // Else don't spawn, give overflow gold to players
+                else
+                    set gold = f.overflowIncome
+                endif
+                // settlement
+                set gold = f.noSpawnIncome + f.deathIncome
+                call AdjustPlayerStateBJ(gold, f.get, PLAYER_STATE_RESOURCE_GOLD)
+                // If farmer is 'woody' give extra lumber income
+                if f.role == CST_INT_FarmerRoleWoody then
+                    call AdjustPlayerStateBJ(R2I(gold*0.15), f.get, PLAYER_STATE_RESOURCE_LUMBER)
+                endif
+                set f= f.next
+            endloop
+            
+        endmethod
+        
+        // Farmer's salary settlement
+        private static method salarySettlement takes nothing returns nothing
+            local thistype f = thistype[thistype.first]
+            //local integer gold = 0
+            
+            debug call BJDebugMsg("Salary!")
+            loop
+                exitwhen f.end
+                call AdjustPlayerStateBJ(f.salary, f.get, PLAYER_STATE_RESOURCE_GOLD)
+                set f= f.next
+            endloop
         endmethod
         
         private static method goldCompensateForDeath takes nothing returns nothing
@@ -525,44 +874,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 //call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, 10)
                 set f= f.next
             endloop
-        endmethod
-        
-        private static method giveFarmingGold takes nothing returns nothing
-            local thistype f = thistype[thistype.first]
-            
-            debug call BJDebugMsg("Salary!")
-            loop
-                exitwhen f.end
-                debug call BJDebugMsg("Spawn Animal for:" + GetPlayerName(f.get))
-                call f.spawnAnimal()
-                //call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, 10)
-                set f= f.next
-            endloop
-        endmethod
-        
-        private static method spawnAnimal takes nothing returns nothing
-            local thistype f = thistype[thistype.first]
-            
-            debug call BJDebugMsg("Spawn Animal")
-            // If total aminal count doesn't exceed CST_INT_MaxAnimals, spawn
-            if thistype.getTotalAnimalCount < CST_INT_MaxAnimals then
-                loop
-                    exitwhen f.end
-                    debug call BJDebugMsg("Spawn Animal for:" + GetPlayerName(f.get))
-                    call f.spawnAnimal()
-                    set f= f.next
-                endloop
-                f = thistype[thistype.first]
-            // Else don't spawn, give overflow gold to players
-            else
-                loop
-                    exitwhen f.end
-                    debug call BJDebugMsg("Spawn Animal for:" + GetPlayerName(f.get))
-                    call AdjustPlayerStateBJ(iGold, f.get, PLAYER_STATE_RESOURCE_GOLD)
-                    set f= f.next
-                endloop
-            endif
-            
         endmethod
         
         static method initStatsBoard takes nothing returns boolean
@@ -635,7 +946,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         private static method onInit takes nothing returns nothing
-            call TimerManager.pt60s.register(Filter(function thistype.goldCompensateForDeath))
+            call TimerManager.pt15s.register(Filter(function thistype.salarySettlement))
+            call TimerManager.pt60s.register(Filter(function thistype.incomeSettlement))
             // Init and display multiboard at game start
             call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
             // Play time is over, farmers lose
@@ -779,60 +1091,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set ap = ap.next
             exitwhen ap.end
         endloop
-    endfunction
-    
-    /***************************************************************************
-    * Functions that would be called on event fired
-    ***************************************************************************/
-    // Bind selected Hunter Hero to Player
-    private function OnSelectHero takes nothing returns boolean    
-        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetSoldUnit()))+ ":Selecte a Hero") 
-        if Hunter.contain(GetOwningPlayer(GetSoldUnit())) then
-            call Hunter[GetPlayerId(GetOwningPlayer(GetSoldUnit()))].setHero(GetSoldUnit())
-        endif
-        
-        // Every Hunter players has selected a hero
-        if Hunter.heroSelectedCount == Hunter.count then
-            debug call BJDebugMsg("Every Hunter players has selected a hero")
-            // destroy this trigger which has no actions, no memory leak
-            call DestroyTrigger(GetTriggeringTrigger())
-        endif
-        return false
-    endfunction
-    
-    private function BindSelectedHero takes nothing returns nothing
-        local trigger tgSelectedHero = CreateTrigger()
-        call TriggerAddCondition( tgSelectedHero,Condition(function OnSelectHero) )
-        // Hero Tavern belongs to 'Neutral Passive Player'
-        call TriggerRegisterPlayerUnitEvent(tgSelectedHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
-        set tgSelectedHero = null
-    endfunction  
-    
-    // Do clean-up work for leaving player
-    private function OnPlayerLeave takes nothing returns boolean
-        local player pLeave = GetTriggerPlayer()
-        local boolean bIsHunter = Hunter.contain(pLeave)
-        
-        // remove player from group
-        if bIsHunter then
-            debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Hunter")
-            call Hunter.remove(pLeave)
-        else
-            debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmer")
-            call Farmer.remove(pLeave)
-        endif
-        
-        // remove unit of this player
-        // or share control/vision of leaving player with other playing players?
-        
-        set pLeave = null
-        return false
-    endfunction
-    
-    /***************************************************************************
-    * Functions that would be called on timer expired
-    ***************************************************************************/
-    function OnHeroSelectTimerExpired takes nothing returns nothing
     endfunction
     
     /***************************************************************************

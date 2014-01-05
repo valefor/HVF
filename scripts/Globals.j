@@ -15,11 +15,12 @@ globals
     constant string CST_STR_Hunter= "猎人"
     constant string CST_STR_Farmer= "农民"
 
-    constant string CST_INT_FarmerRoleInvalid=0
-    constant string CST_INT_FarmerRoleGreedy=111
-    constant string CST_INT_FarmerRoleKiller=222
-    constant string CST_INT_FarmerRoleNomader=333
-    constant string CST_INT_FarmerRoleCoward=444
+    constant integer CST_INT_FarmerRoleInvalid=0
+    constant integer CST_INT_FarmerRoleGreedy=111
+    constant integer CST_INT_FarmerRoleKiller=222
+    constant integer CST_INT_FarmerRoleNomader=333
+    constant integer CST_INT_FarmerRoleCoward=444
+    constant integer CST_INT_FarmerRoleWoody=555
     /***************************************************************************
     * Game Parameters
     ***************************************************************************/

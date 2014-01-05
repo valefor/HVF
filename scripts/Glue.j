@@ -35,6 +35,11 @@ library Glue /* v0.0.1 Xandria
     *        'h001'    :    Pigen
     *        'h00U'    :    SnakeHole
     *        'h00V'    :    Cage
+    *    Buildings    -    Animal (No Spawn)
+    *        'h010'    :    SheepFoldNS
+    *        'h00Z'    :    PigenNS
+    *        'h011'    :    SnakeHoleNS
+    *        'h012'    :    CageNS
     ***************************************************************************/
 
     /***************************************************************************
@@ -53,6 +58,7 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_INT_MaxHunterHeroType  = 9
         constant integer CST_UTI_HunterHeroFirstcode='U002'// First Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroLastcode ='U00D'// Last Raw Code of Hunter Hero
+        constant integer CST_UTI_HunterHeroRandom   ='U00C'
         
         // *** Farmer
         constant integer CST_UTI_FarmerHero ='H00P'
@@ -68,6 +74,22 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_BTI_Pigen      ='h001'
         constant integer CST_BTI_SnakeHole  ='h00U'
         constant integer CST_BTI_Cage       ='h00V'
+        
+        constant integer CST_BTI_SheepFoldNs='h010'
+        constant integer CST_BTI_PigenNs    ='h00Z'
+        constant integer CST_BTI_SnakeHoleNs='h011'
+        constant integer CST_BTI_CageNs     ='h012'
+        
+        /***********************************************************************
+        * AbilityId (ABI)
+        ***********************************************************************/
+        constant integer CST_ABI_ButcherAll ='A011'
+        constant integer CST_ABI_ButcherOne ='A00N'
+        constant integer CST_ABI_AllAnimalSpawnOff ='A024'
+        constant integer CST_ABI_AllAnimalSpawnOn  ='A025'
+        constant integer CST_ABI_AnimalAutoLoad ='A03O'
+        constant integer CST_ABI_AnimalLoadAll  ='A03M'
+        constant integer CST_ABI_AnimalUnloadAll='A03N'
         
     endglobals
 
