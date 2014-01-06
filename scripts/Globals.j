@@ -80,6 +80,9 @@ globals
     constant integer CST_INT_PriceOfSnake=30
     constant integer CST_INT_PriceOfChicken=40
     
+    // *** Items
+    constant integer CST_INT_MaxItemCount=77
+    
     // *** Board layout
     // Board Column
     constant integer CST_BDCOL_PN=0   // Player name

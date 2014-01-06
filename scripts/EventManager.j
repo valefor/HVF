@@ -10,6 +10,7 @@ library EventManager initializer init/* v0.0.1 Xandria
 
 struct EventManager
     static trigger trigSelectHero
+    static trigger trigHunterUnitDeath
     static trigger trigFarmerUnitDeath
     static trigger trigFarmerFarmingBuildingFinish
     static trigger trigFarmerFarmingBuildingUpgrade
@@ -57,13 +58,32 @@ struct EventManager
     endmethod
     
     /***************************************************************************
-    * When player unit die, update counters
+    * When hunter player unit die
+    ***************************************************************************/
+    // Event Filter
+    private static method filterHunterUnitDeath takes nothing returns boolean
+        // return IsUnitHunterHero(GetFilterUnit())
+        return true
+    endmethod
+    // Event Listener
+    private static method onHunterUnitDeath takes nothing returns boolean
+        local unit dyingUnit = GetDyingUnit()
+        local unit killingUnit = GetKillingUnit()
+        
+        if Farmer.contain(GetOwningPlayer(killingUnit)) then
+            // Hunter hero was killed, give a giant skeleton as hunter hero
+            
+        endif
+    endmethod
+    
+    /***************************************************************************
+    * When farmer player unit die, update counters
     ***************************************************************************/
     // Event Filter
     // Event Listener
     private static method onFarmerUnitDeath takes nothing returns boolean    
         local unit dyingUnit = GetDyingUnit()
-        local unit killingUnit = GetDyingUnit()
+        local unit killingUnit = GetKillingUnit()
         local integer dyingUnitTypeId = GetUnitTypeId(dyingUnit)
         local integer killingUnitTypeId = GetUnitTypeId(killingUnit)
         local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(dyingUnit))]
@@ -209,8 +229,7 @@ struct EventManager
             call Farmer.removeLeaving(pLeave)
         endif
         
-        // remove unit of this player
-        // or share control/vision of leaving player with other playing players?
+        
         
         if Hunter.count == 0 then
             call Farmer.win()
@@ -242,6 +261,13 @@ struct EventManager
         // Hero Tavern belongs to 'Neutral Passive Player'
         call TriggerRegisterPlayerUnitEvent(trigSelectHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
         
+        // We only care about hunter's hero death
+        loop
+            exitwhen h.end
+            call TriggerRegisterPlayerUnitEvent(trigHunterUnitDeath, h.get, EVENT_PLAYER_UNIT_DEATH, Filter(function thistype.filterHunterUnitDeath))
+            set h= h.next
+        endloop
+        
         loop
             exitwhen f.end
             call TriggerRegisterPlayerUnitEvent(trigFarmerUnitDeath, f.get, EVENT_PLAYER_UNIT_DEATH, null)
@@ -256,6 +282,7 @@ struct EventManager
     private static method onInit takes nothing returns nothing
         // Init triggers
         set thistype.trigSelectHero = CreateTrigger()
+        set thistype.trigHunterUnitDeath = CreateTrigger()
         set thistype.trigFarmerUnitDeath = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingFinish = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingUpgrade = CreateTrigger()
@@ -265,6 +292,7 @@ struct EventManager
         
         // Set up triggers handle function
         call TriggerAddCondition( trigSelectHero,Condition(function thistype.onSelectHero) )
+        call TriggerAddCondition( trigHunterUnitDeath,Condition(function thistype.onHunterUnitDeath) )
         call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
         call TriggerAddCondition( trigFarmerFarmingBuildingFinish,Condition(function thistype.onFarmerFarmingBuildingFinish) )
         call TriggerAddCondition( trigFarmerFarmingBuildingUpgrade,Condition(function thistype.onFarmerFarmingBuildingUpgrade) )

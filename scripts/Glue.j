@@ -29,7 +29,6 @@ library Glue /* v0.0.1 Xandria
     *        'n000'    :    Snake
     *        'nech'    :    Chicken
     *
-    *
     *    Buildings    -    Animal    [IsUnitType(unit, UNIT_TYPE_STRUCTURE)]
     *        'h002'    :    SheepFold
     *        'h001'    :    Pigen
@@ -40,6 +39,11 @@ library Glue /* v0.0.1 Xandria
     *        'h00Z'    :    PigenNS
     *        'h011'    :    SnakeHoleNS
     *        'h012'    :    CageNS
+    *
+    *    Items
+    *        'I00J'    :    Seed
+    *        'I00G'    :    PigenNS
+    *        'I003'    :    SnakeHoleNS
     ***************************************************************************/
 
     /***************************************************************************
@@ -59,6 +63,7 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_UTI_HunterHeroFirstcode='U002'// First Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroLastcode ='U00D'// Last Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroRandom   ='U00C'
+        constant integer CST_UTI_HunterHeroSkeleton ='U00C'
         
         // *** Farmer
         constant integer CST_UTI_FarmerHero ='H00P'
@@ -69,7 +74,9 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_UTI_Snake      ='n000'
         constant integer CST_UTI_Chicken    ='nech'
         
-        // *** BuildingTypeId (BTI)
+        /***********************************************************************
+        * BuildingTypeId (BTI)
+        ***********************************************************************/
         constant integer CST_BTI_SheepFold  ='h002'
         constant integer CST_BTI_Pigen      ='h001'
         constant integer CST_BTI_SnakeHole  ='h00U'
@@ -91,9 +98,13 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_ABI_AnimalLoadAll  ='A03M'
         constant integer CST_ABI_AnimalUnloadAll='A03N'
         
+        /***********************************************************************
+        * ItemTypeId (ITI)
+        ***********************************************************************/
+        constant integer CST_ITI_MagicSeed ='I00J'
     endglobals
 
-    function IsHunterHero takes unit u returns boolean
+    function IsUnitHunterHero takes unit u returns boolean
         return GetUnitTypeId(u) < CST_UTI_HunterHeroLastcode and GetUnitTypeId(u) > CST_UTI_HunterHeroFirstcode
     endfunction
     

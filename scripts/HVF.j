@@ -125,6 +125,26 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         /***********************************************************************
+        * Filters
+        ***********************************************************************/
+        private static method filterKillAllUnits takes nothing returns boolean
+            call KillUnit(GetFilterUnit())
+            return false
+        endmethod
+        
+        /***********************************************************************
+        * Iteration all units of this player
+        ***********************************************************************/
+        private method iterateUnits takes filterfunc filter returns nothing
+            local group dummyGroup = CreateGroup()
+            
+            call GroupEnumUnitsOfPlayer(dummyGroup, this.get, filter)
+            
+            call DestroyGroup(dummyGroup)
+            set dummyGroup = null
+        endmethod
+        
+        /***********************************************************************
         * Util functions
         ***********************************************************************/
         private method initHero takes nothing returns nothing
@@ -171,8 +191,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         method deleteHunterVars takes nothing returns nothing
-            // Remove all units
-            // call this.setHero(null)
+            // Kill/Remove all units
+            call iterateUnits(Filter(function thistype.filterKillAllUnits))
         endmethod
         
     endmodule
@@ -635,11 +655,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         implement HunterVars
         
         // Instance methods
-        private method instanceInit takes nothing returns nothing
+        private method initInstance takes nothing returns nothing
             call this.initHunterVars()
         endmethod
         
-        private method instanceDelete takes nothing returns nothing
+        private method deleteInstance takes nothing returns nothing
             call this.deleteHunterVars()
         endmethod
         
@@ -653,9 +673,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             else
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
-            
+            // remove unit of this player
+            // or share control/vision of leaving player with other playing players?
+            call h.deleteInstance()
             call thistype.remove(p)
-            call h.instanceDelete()
         endmethod
         
         // Give bonus gold for killing farmers in every 60s
@@ -750,7 +771,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             loop
                 exitwhen h.end
                 // Init instance vars
-                call h.instanceInit()
+                call h.initInstance()
                 
                 // Display stats board
                 debug call BJDebugMsg("Display board to hunter:" + GetPlayerName(h.get))
@@ -783,11 +804,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Instance [Vars]
         implement FarmerVars
         
-        private method instanceInit takes nothing returns nothing
+        private method initInstance takes nothing returns nothing
             call this.initFarmerVars()
         endmethod
         
-        private method instanceDelete takes nothing returns nothing
+        private method deleteInstance takes nothing returns nothing
             call this.deleteFarmerVars()
         endmethod
 
@@ -801,6 +822,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             else
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
+            // remove unit of this player
+            // or share control/vision of leaving player with other playing players?
+             call f.deleteInstance()
             call thistype.remove(p)
         endmethod
 
@@ -934,7 +958,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             loop
                 exitwhen f.end
                 // Init instance vars
-                call f.instanceInit()
+                call f.initInstance()
                 
                 // Display stats board
                 debug call BJDebugMsg("Display board to farmer:" + GetPlayerName(f.get))
