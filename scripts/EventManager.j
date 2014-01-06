@@ -69,11 +69,17 @@ struct EventManager
     private static method onHunterUnitDeath takes nothing returns boolean
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
-        
+        local Hunter h = Hunter[GetPlayerId(GetOwningPlayer(dyingUnit))]
+        if IsUnitHunterHero(dyingUnit) then
+            call h.reviveSkeleton(true)
+        elseif GetUnitTypeId(dyingUnit) == CST_UTI_HunterHeroSkeleton then
+            call h.reviveSkeleton(false)
+        endif
         if Farmer.contain(GetOwningPlayer(killingUnit)) then
             // Hunter hero was killed, give a giant skeleton as hunter hero
             
         endif
+        return false
     endmethod
     
     /***************************************************************************

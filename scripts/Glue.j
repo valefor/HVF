@@ -63,16 +63,22 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_UTI_HunterHeroFirstcode='U002'// First Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroLastcode ='U00D'// Last Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroRandom   ='U00C'
-        constant integer CST_UTI_HunterHeroSkeleton ='U00C'
+        constant integer CST_UTI_HunterHeroSkeleton ='nskg'
         
         // *** Farmer
         constant integer CST_UTI_FarmerHero ='H00P'
         
-        // *** Animal
+        // *** Farming Animal
         constant integer CST_UTI_Sheep      ='nshe'
         constant integer CST_UTI_Pig        ='npig'
         constant integer CST_UTI_Snake      ='n000'
         constant integer CST_UTI_Chicken    ='nech'
+        
+        // *** Neutral Animal
+        constant integer CST_UTI_Rabbit     ='n00K'
+        constant integer CST_UTI_Deer       ='n00I'
+        constant integer CST_UTI_Dog        ='n00J'
+        constant integer CST_UTI_Vulture    ='nvul'
         
         /***********************************************************************
         * BuildingTypeId (BTI)
@@ -86,6 +92,9 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_BTI_PigenNs    ='h00Z'
         constant integer CST_BTI_SnakeHoleNs='h011'
         constant integer CST_BTI_CageNs     ='h012'
+        
+        constant integer CST_BTI_SmallTree  ='h00O'
+        constant integer CST_BTI_MagicTree  ='h00T'
         
         /***********************************************************************
         * AbilityId (ABI)
@@ -101,7 +110,33 @@ library Glue /* v0.0.1 Xandria
         /***********************************************************************
         * ItemTypeId (ITI)
         ***********************************************************************/
-        constant integer CST_ITI_MagicSeed ='I00J'
+        constant integer CST_ITI_MagicSeed      ='I00J'
+        constant integer CST_ITI_MythticGrass   ='I003'
+        constant integer CST_ITI_MythticFlower  ='I00G'
+        
+        constant integer CST_ITI_TowerBase  ='I00Y'
+        
+        constant integer CST_ITI_RabbitMeat ='I00H'
+        constant integer CST_ITI_Venision   ='I00X'
+        constant integer CST_ITI_DogMeat    ='I00W'
+        constant integer CST_ITI_VultureMeat='I018'
+        
+        /***********************************************************************
+        * DestructableTypeId (DTI)
+        ***********************************************************************/
+        constant integer CST_DTI_MagicTree      ='ZTtc'
+        
+        /***********************************************************************
+        * Region & location, some memory leaks, not big deal, let it be
+        ***********************************************************************/
+        constant rect CST_RGN_SkeletonRevive=Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
+        constant rect CST_RGN_SecretGarden=Rect(5888.0, - 3840.0, 6400.0, - 3328.0)
+        constant rect CST_RGN_WaterLand1=Rect(3840.0, 4640.0, 6848.0, 6944.0)
+        constant rect CST_RGN_WaterLand2=Rect(5376.0, 1408.0, 6560.0, 3584.0)
+        constant rect CST_RGN_WaterLand3=Rect(- 7712.0, - 1600.0, - 7232.0, - 1248.0)
+        
+        constant location CST_LCT_SkeletonRevive=GetRectCenter(CST_RGN_SkeletonRevive)
+
     endglobals
 
     function IsUnitHunterHero takes unit u returns boolean

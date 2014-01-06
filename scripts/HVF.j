@@ -147,6 +147,37 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         /***********************************************************************
         * Util functions
         ***********************************************************************/
+        private static method isAllHerosDie takes nothing returns boolean
+            local thistype h = thistype[thistype.first]
+            
+            loop
+                exitwhen h.end
+                if h.hero != null and IsUnitHunterHero(h.hero) then
+                    return false
+                endif
+                set h=h.next
+            endloop
+            return true
+        endmethod
+
+        public method reviveSkeleton takes boolean isFb returns nothing
+            //local location loc = 
+            // If it's first blood, that means hunter hero die
+            // Notice, now skeleton is a unit not a hero, we can not use ReviveHero
+            set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, CST_LCT_SkeletonRevive, bj_UNIT_FACING)
+            call PanCameraToTimedLocForPlayer(this.get, CST_LCT_SkeletonRevive, 0.50)
+            
+            if isFb then
+                if thistype.isAllHerosDie() then
+                    call Farmer.win()
+                    call Hunter.lose()
+                endif
+            endif
+            
+            //call RemoveLocation()
+            
+        endmethod
+        
         private method initHero takes nothing returns nothing
             // Give hunter hero 3 skill points at beginning
             call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
@@ -663,7 +694,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call this.deleteHunterVars()
         endmethod
         
-        // Static methods
         public static method removeLeaving takes player p returns nothing
             local thistype h = thistype[GetPlayerId(p)]
 
