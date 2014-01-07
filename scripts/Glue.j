@@ -106,6 +106,7 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_ABI_AnimalAutoLoad ='A03O'
         constant integer CST_ABI_AnimalLoadAll  ='A03M'
         constant integer CST_ABI_AnimalUnloadAll='A03N'
+        constant integer CST_ABI_NightVision='A04B'
         
         /***********************************************************************
         * ItemTypeId (ITI)
@@ -126,6 +127,17 @@ library Glue /* v0.0.1 Xandria
         * DestructableTypeId (DTI)
         ***********************************************************************/
         constant integer CST_DTI_MagicTree      ='ZTtc'
+        constant integer CST_DTI_SummerTree     ='LTlt'
+        
+        /***********************************************************************
+        * TechID (TCI)
+        ***********************************************************************/
+        constant integer CST_TCI_Plague         ='Rupc'
+        constant integer CST_TCI_Level1Upgrade  ='R00N'
+        constant integer CST_TCI_HeroLifeUp     ='R005'
+        constant integer CST_TCI_TowerLifeUp    ='R00G'
+        constant integer CST_TCI_TowerHealing   ='R00L'
+        constant integer CST_TCI_TowerVisionUp  ='R00R'
         
         /***********************************************************************
         * Region & location, some memory leaks, not big deal, let it be

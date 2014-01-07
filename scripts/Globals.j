@@ -14,6 +14,16 @@ globals
     
     constant string CST_STR_Hunter= "猎人"
     constant string CST_STR_Farmer= "农民"
+    
+    // The following nick name must be identical with that in propername list
+    constant string CST_STR_FarmerProperNameGreedy= "敛财者"
+    constant string CST_STR_FarmerProperNameKiller= "杀狼者"
+    constant string CST_STR_FarmerProperNameNomader= "游牧者"
+    constant string CST_STR_FarmerProperNameCoward= "胆小鬼"
+    constant string CST_STR_FarmerProperNameWoody= "伐木工"
+    constant string CST_STR_FarmerProperNameMaster= "老农民"
+    constant string CST_STR_FarmerProperNameDefender= "炮塔狂"
+    constant string CST_STR_FarmerProperNamePlague= "瘟疫农"
 
     constant integer CST_INT_FarmerRoleInvalid=0
     constant integer CST_INT_FarmerRoleGreedy=111
@@ -21,6 +31,9 @@ globals
     constant integer CST_INT_FarmerRoleNomader=333
     constant integer CST_INT_FarmerRoleCoward=444
     constant integer CST_INT_FarmerRoleWoody=555
+    constant integer CST_INT_FarmerRoleMaster=666
+    constant integer CST_INT_FarmerRoleDefender=777
+    constant integer CST_INT_FarmerRolePlague=888
     /***************************************************************************
     * Game Parameters
     ***************************************************************************/
@@ -83,13 +96,16 @@ globals
     // *** Items
     constant integer CST_INT_MaxItemCount=77
     
+    // *** Exp increace 100 for 3 tick(minutes)
+    constant integer CST_INT_ExpAddForTick=100
+    constant integer CST_INT_ExpTickStep=3
+    
     // *** Board layout
     // Board Column
     constant integer CST_BDCOL_PN=0   // Player name
     constant integer CST_BDCOL_KL=1   // Kills
     constant integer CST_BDCOL_DE=1   // Deaths
     constant integer CST_BDCOL_ST=2   // Status
-    
     constant integer CST_BDCOL_DF=9   // DEBUG FLAG
     
     /* ==============================Variables=============================== */

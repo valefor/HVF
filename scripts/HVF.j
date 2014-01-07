@@ -3,7 +3,6 @@ library HVF initializer init/* v0.0.1 Xandria
 */          PlayerManager   /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-error-message-239210/[/url]
 */          PlayerAlliance  /*  List
 */          TimeManager     /*
-*/          UnitManager     /*
 */          Board           /*
 */          ErrorMessage    /*
 */          ORDERID         /*
@@ -327,6 +326,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             if GetUnitTypeId(GetFilterUnit()) == CST_UTI_FarmerHero then
                 call f.setHero(GetFilterUnit())
             endif
+            return false
+        endmethod
+        private static method filterKillAllUnits takes nothing returns boolean
+            if GetUnitTypeId(GetFilterUnit()) != CST_UTI_FarmerHero then
+                call KillUnit(GetFilterUnit())
+            endif
+            return false
         endmethod
         private static method filterButcherAllAnimal takes nothing returns boolean
             local unit toBeKilled = GetFilterUnit()
@@ -394,25 +400,31 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         /***********************************************************************
         * Enumerators
         ***********************************************************************/
-        static method enumSpawnSheep takes nothing returns nothing
+        static method enumSpawnFarmingAnimal takes nothing returns nothing
             local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Sheep, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
+            local location rallyPoint = GetUnitRallyPoint(GetEnumUnit())
+            local integer utiB = GetUnitTypeId(GetEnumUnit()) // Building UTI
+            local unit u
+            local integer utiA // Animal UTI
+            
+            if utiB == CST_BTI_SheepFold then
+                set utiA = CST_UTI_Sheep
+            elseif utiB == CST_BTI_Pigen then
+                set utiA = CST_UTI_Pig
+            elseif utiB == CST_BTI_SnakeHole then
+                set utiA = CST_UTI_Snake
+            elseif utiB == CST_BTI_Cage then
+                set utiA = CST_UTI_Chicken
+            endif
+            
+            set u = CreateUnit(GetOwningPlayer(GetEnumUnit()), utiA, GetUnitX(GetEnumUnit()), GetUnitY(GetEnumUnit()), bj_UNIT_FACING)
+            call IssuePointOrderByIdLoc(u, ORDERID_smart, rallyPoint)
+            call IssueTargetOrderById(u, ORDERID_smart, GetUnitRallyUnit(GetEnumUnit()))
             set f.sheepCount = f.sheepCount + 1
-        endmethod
-        static method enumSpawnPig takes nothing returns nothing
-            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Pig, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set f.pigCount = f.pigCount + 1
-        endmethod
-        static method enumSpawnSnake takes nothing returns nothing
-            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Snake, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set f.snakeCount = f.snakeCount + 1
-        endmethod
-        static method enumSpawnChicken takes nothing returns nothing
-            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Chicken, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set f.chickenCount = f.chickenCount + 1
+            
+            call RemoveLocation(rallyPoint)
+            set rallyPoint = null
+            set u = null
         endmethod
         
         /***********************************************************************
@@ -461,7 +473,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // Animal count should be set to 0
             debug call ThrowWarning(this.allAnimalIncome != 0, "HVF", "butcherAllAnimal", "Farmer", this, " animal count is not cleared.")
         endmethod
-        
+        // Kill all units except farmer hero
+        public method killAllUnits takes nothing returns nothing
+            call iterateUnits(Filter(function thistype.filterKillAllUnits))
+        endmethod
         public method allAnimalSpawnOn takes nothing returns nothing
             call iterateUnits(Filter(function thistype.filterAllAnimalSpawnOn))
         endmethod
@@ -488,26 +503,53 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         private method initHero takes nothing returns nothing
-            local item retrainBook = CreateItem(CST_ITI_RetrainBook)
+            local item retrainBook
             
             if this.hero != null then
+                set retrainBook = CreateItem(CST_ITI_RetrainBook, GetUnitX(this.hero), GetUnitY(this.hero)) //GetUnitX
                 call SetUnitState(this.hero, UNIT_STATE_MANA, GetUnitState(this.hero, UNIT_STATE_MAX_MANA) * 1)
                 call UnitResetCooldown(this.hero)
                 // call UnitAddItem(this.hero, retrainBook)
                 call UnitUseItem(this.hero, retrainBook)
                 call SetHeroLevelBJ(this.hero, 1, false)
                 call UnitModifySkillPoints(this.hero, CST_INT_InitFarmerSkillPoints - GetHeroSkillPoints(this.hero))
+                call RemoveItem(retrainBook)
             endif
             
-            call RemoveItem(retrainBook)
             set retrainBook = null
         endmethod
         
         public method setHero takes unit u returns nothing
+            local string properName
             set this.hero = u
+            
+            set properName = GetHeroProperName(this.hero)
             // Set role at first attach
-            if GetHeroProperName(this.hero) == CST_STR_Farmer then
+            if properName == CST_STR_FarmerProperNamePlague then
+                set this.role = CST_INT_FarmerRolePlague
+                call SetPlayerTechResearched(this.get, CST_TCI_Plague, 5)
+            elseif properName == CST_STR_FarmerProperNameGreedy then
+                set this.role = CST_INT_FarmerRoleGreedy
+            elseif properName == CST_STR_FarmerProperNameKiller then
+                set this.role = CST_INT_FarmerRoleKiller
+                call SetPlayerTechResearched(this.get, CST_TCI_Level1Upgrade, 1)
+            elseif properName == CST_STR_FarmerProperNameNomader then
+                set this.role = CST_INT_FarmerRoleNomader
+            elseif properName == CST_STR_FarmerProperNameCoward then
+                set this.role = CST_INT_FarmerRoleCoward
+                call UnitAddAbility(this.hero, CST_ABI_NightVision)
+                call SetPlayerTechResearched(this.get, CST_TCI_HeroLifeUp, 2)
+            elseif properName == CST_STR_FarmerProperNameWoody then
+                set this.role = CST_INT_FarmerRoleWoody
+            elseif properName == CST_STR_FarmerProperNameMaster then
+                set this.role = CST_INT_FarmerRoleMaster
+            elseif properName == CST_STR_FarmerProperNameDefender then
+                set this.role = CST_INT_FarmerRoleDefender
+                call SetPlayerTechResearched(this.get, CST_TCI_TowerLifeUp, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_TowerHealing, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_TowerVisionUp, 1)
             endif
+            
             call initHero()
         endmethod
         
@@ -516,16 +558,18 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local rect playableRect = GetPlayableMapRect()
             local location rndLoc = GetRandomLocInRect(playableRect)
             
-            // If hero hasn't be created
+            // If hero hasn't been created
             if this.hero == null then
-                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_FarmerHero, rndLoc, 0)
-            elseif IsUnitType(this.hero) == UNIT_TYPE_DEAD then
+                call this.setHero( CreateUnitAtLoc(this.get, CST_UTI_FarmerHero, rndLoc, 0) )
+            elseif IsUnitType(this.hero, UNIT_TYPE_DEAD) then
                 // Hero die, revive it
                 call ReviveHeroLoc(this.hero, rndLoc, false)
+            else
+                return
             endif
             
             call initHero()
-            call PanCameraToTimedLocForPlayer(this.hero, rndLoc, 0.50)
+            call PanCameraToTimedLocForPlayer(this.get, rndLoc, 0.50)
             call RemoveLocation(rndLoc)
             call RemoveRect(playableRect)
             set rndLoc = null
@@ -671,27 +715,12 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 set chickenCount = chickenCount - 1
             endif
         endmethod
-        
-        // For group enumeration use
-        /*
-        static method enumKillAnimal takes nothing returns nothing
-            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Sheep, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set f.sheepCount = f.sheepCount + 1
-        endmethod
-        static method enumSpawnAnimal takes nothing returns nothing
-            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
-            call CreateUnitAtLoc(GetOwningPlayer(GetEnumUnit()), CST_UTI_Sheep, GetUnitLoc(GetEnumUnit()), bj_UNIT_FACING)
-            set f.sheepCount = f.sheepCount + 1
-        endmethod
-        */
-        
 
         method spawnAnimal takes nothing returns nothing
-            call ForGroup(sheepFolds, function thistype.enumSpawnSheep)
-            call ForGroup(pigens, function thistype.enumSpawnPig)
-            call ForGroup(snakeHoles, function thistype.enumSpawnSnake)
-            call ForGroup(cages, function thistype.enumSpawnChicken)
+            call ForGroup(sheepFolds, function thistype.enumSpawnFarmingAnimal)
+            call ForGroup(pigens, function thistype.enumSpawnFarmingAnimal)
+            call ForGroup(snakeHoles, function thistype.enumSpawnFarmingAnimal)
+            call ForGroup(cages, function thistype.enumSpawnFarmingAnimal)
         endmethod
         
         method initFarmerVars takes nothing returns nothing
@@ -887,6 +916,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Instance [Vars]
         implement FarmerVars
         
+        private static integer exp = 0
+        private static integer expTick
+        
         private method initInstance takes nothing returns nothing
             call this.initFarmerVars()
         endmethod
@@ -967,18 +999,23 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endloop
         endmethod
         
-        private static method goldCompensateForDeath takes nothing returns nothing
+        private static method aquireFreeExp takes nothing returns nothing
             local thistype f = thistype[thistype.first]
             local integer iGold = 0
             
-            debug call BJDebugMsg("Give bonus gold for farmers")
+            debug call BJDebugMsg("Give free exp to farmers")
+            
+            set thistype.expTick = thistype.expTick + 1
+            
+            if (thistype.expTick - R2I(thistype.expTick/CST_INT_ExpTickStep)*CST_INT_ExpTickStep) != 0 then
+                return
+            endif
+            set thistype.exp = thistype.exp + CST_INT_ExpAddForTick
             
             loop
                 exitwhen f.end
-                debug call BJDebugMsg("Give bonus to farmer:" + GetPlayerName(f.get))
-                set iGold = CST_INT_GoldMagForDeath * f.deathCount
-                call AdjustPlayerStateBJ(iGold, f.get, PLAYER_STATE_RESOURCE_GOLD)
-                //call AdjustPlayerStateSimpleBJ(f.get, PLAYER_STATE_GOLD_GATHERED, 10)
+                debug call BJDebugMsg("Give " +I2S(thistype.exp)+ "exp to farmer:" + GetPlayerName(f.get))
+                call AddHeroXP(f.hero, thistype.exp, true)
                 set f= f.next
             endloop
         endmethod
@@ -1036,6 +1073,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // On game start
         private static method onGameStart takes nothing returns boolean
             local thistype f = thistype[thistype.first]
+            local integer i = 0
             // Init statistics board
             call thistype.initStatsBoard()
             loop
@@ -1043,11 +1081,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 // Init instance vars
                 call f.initInstance()
                 
+                // Create hero at random location
+                
+                
                 // Display stats board
                 debug call BJDebugMsg("Display board to farmer:" + GetPlayerName(f.get))
                 set statsBoard.visible[f.get] = true
-
+                
+                // Test
+                /*
+                loop
+                    exitwhen i >= 8
+                    set i = i + 1
+                    call CreateUnitAtLoc(f.get, 'Nbrn', GetPlayerStartLocationLoc(f.get), bj_UNIT_FACING)
+                endloop
                 set f = f.next
+                */
             endloop
             return false
         endmethod
@@ -1055,6 +1104,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         private static method onInit takes nothing returns nothing
             call TimerManager.pt15s.register(Filter(function thistype.salarySettlement))
             call TimerManager.pt60s.register(Filter(function thistype.incomeSettlement))
+            call TimerManager.pt60s.register(Filter(function thistype.aquireFreeExp))
             // Init and display multiboard at game start
             call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
             // Play time is over, farmers lose
@@ -1186,7 +1236,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         local ActivePlayer ap = ActivePlayer[ActivePlayer.first]
         loop
             // Set max allowed hero to 1
-            call SetPlayerTechMaxAllowed(ap.get, CST_INT_TechidHero, CST_INT_MaxHeros)
+            // call SetPlayerTechMaxAllowed(ap.get, CST_INT_TechidHero, CST_INT_MaxHeros)
             if GetPlayerId(ap.get) > 5 and GetPlayerId(ap.get) < 10 then
                 debug call BJDebugMsg("Grouping player:" + GetPlayerName(ap.get) + " to Hunter")
                 call Hunter.add(ap.get)

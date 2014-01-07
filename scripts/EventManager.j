@@ -10,6 +10,7 @@ library EventManager initializer init/* v0.0.1 Xandria
 
 struct EventManager
     static trigger trigSelectHero
+    static trigger trigPlantTree
     static trigger trigHunterUnitDeath
     static trigger trigHunterPickupItem
     static trigger trigFarmerUnitDeath
@@ -25,6 +26,8 @@ struct EventManager
         debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetSoldUnit()))+ ":Selecte a Hero") 
         if Hunter.contain(GetOwningPlayer(GetSoldUnit())) then
             call Hunter[GetPlayerId(GetOwningPlayer(GetSoldUnit()))].setHero(GetSoldUnit())
+        else
+            call Farmer[GetPlayerId(GetOwningPlayer(GetSoldUnit()))].setHero(GetSoldUnit())
         endif
         
         // Every Hunter players has selected a hero
@@ -55,6 +58,33 @@ struct EventManager
         
         
         set enteringUnit = null
+        return false
+    endmethod
+    
+    /***************************************************************************
+    * When hunter/farmer plant a tree
+    ***************************************************************************/
+    // Event Filter
+    private static method filterPlantTree takes nothing returns boolean
+        return true
+        //return GetUnitTypeId(GetFilterUnit()) == CST_BTI_SmallTree or GetUnitTypeId(GetFilterUnit()) == CST_BTI_MagicTree
+    endmethod
+    // Event Listener
+    private static method onPlantTree takes nothing returns boolean
+        debug call BJDebugMsg("Start to build " + GetUnitName(GetTriggerUnit()))
+        if GetUnitTypeId(GetTriggerUnit()) == CST_BTI_SmallTree then
+            call RemoveUnit(GetTriggerUnit())
+            call CreateDestructable(CST_DTI_SummerTree, GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), GetRandomDirectionDeg(), 1, 0)
+        elseif GetUnitTypeId(GetTriggerUnit()) == CST_BTI_MagicTree then
+            call RemoveUnit(GetTriggerUnit())
+            call CreateDestructable(CST_DTI_MagicTree, GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), GetRandomDirectionDeg(), 1, 0)
+        /* For debug use
+        elseif GetUnitTypeId(GetTriggerUnit()) == 'hwtw' then
+            debug call BJDebugMsg("Start to build " + GetUnitName(GetTriggerUnit()))
+            call RemoveUnit(GetTriggerUnit())
+            call CreateDestructable(CST_DTI_SummerTree, GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), GetRandomDirectionDeg(), 1, 0)
+        */
+        endif
         return false
     endmethod
     
@@ -122,6 +152,7 @@ struct EventManager
         debug call BJDebugMsg(GetUnitName(GetTriggerUnit()) + " die") 
         // If farmer Hero die
         if dyingUnitTypeId == CST_UTI_FarmerHero then
+            call f.killAllUnits()
             if Hunter.contain(GetOwningPlayer(killingUnit)) then
                 set f.deaths=f.deaths + 1
                 set h.kills=h.kills + 1
@@ -295,12 +326,14 @@ struct EventManager
         loop
             exitwhen h.end
             call TriggerRegisterPlayerUnitEvent(trigHunterUnitDeath, h.get, EVENT_PLAYER_UNIT_DEATH, Filter(function thistype.filterHunterUnitDeath))
+            call TriggerRegisterPlayerUnitEvent(trigPlantTree, h.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
             set h= h.next
         endloop
         
         loop
             exitwhen f.end
             call TriggerRegisterPlayerUnitEvent(trigFarmerUnitDeath, f.get, EVENT_PLAYER_UNIT_DEATH, null)
+            call TriggerRegisterPlayerUnitEvent(trigPlantTree, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
             call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingFinish, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH, Filter(function thistype.filterFarmerFarmingBuildingFinish))
             call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingUpgrade, f.get, EVENT_PLAYER_UNIT_UPGRADE_FINISH, Filter(function thistype.filterFarmerFarmingBuildingUpgrade))
             call TriggerRegisterPlayerUnitEvent(trigFarmerSpellCast, f.get, EVENT_PLAYER_UNIT_SPELL_CAST, Filter(function thistype.filterFarmerSpellCast))
@@ -312,6 +345,7 @@ struct EventManager
     private static method onInit takes nothing returns nothing
         // Init triggers
         set thistype.trigSelectHero = CreateTrigger()
+        set thistype.trigPlantTree = CreateTrigger()
         set thistype.trigHunterUnitDeath = CreateTrigger()
         set thistype.trigHunterPickupItem = CreateTrigger()
         set thistype.trigFarmerUnitDeath = CreateTrigger()
@@ -323,6 +357,7 @@ struct EventManager
         
         // Set up triggers handle function
         call TriggerAddCondition( trigSelectHero,Condition(function thistype.onSelectHero) )
+        call TriggerAddCondition( trigPlantTree,Condition(function thistype.onPlantTree) )
         call TriggerAddCondition( trigHunterUnitDeath,Condition(function thistype.onHunterUnitDeath) )
         call TriggerAddCondition( trigHunterPickupItem,Condition(function thistype.onHunterPickupItem) )
         call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
