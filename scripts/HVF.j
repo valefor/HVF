@@ -320,6 +320,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         /***********************************************************************
         * Filters
         ***********************************************************************/
+        private static method filterBindHero takes nothing returns boolean
+            //local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(enteringUnit))]
+            local Farmer f = Farmer[GetPlayerId(GetFilterPlayer())]
+            
+            if GetUnitTypeId(GetFilterUnit()) == CST_UTI_FarmerHero then
+                call f.setHero(GetFilterUnit())
+            endif
+        endmethod
         private static method filterButcherAllAnimal takes nothing returns boolean
             local unit toBeKilled = GetFilterUnit()
             local integer unitTypeId = GetUnitTypeId(toBeKilled)
@@ -477,6 +485,51 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Transform build to Auto Spawn building
         public method transform2As takes unit building returns nothing
             call addFarmingBuilding(building, true)
+        endmethod
+        
+        private method initHero takes nothing returns nothing
+            local item retrainBook = CreateItem(CST_ITI_RetrainBook)
+            
+            if this.hero != null then
+                call SetUnitState(this.hero, UNIT_STATE_MANA, GetUnitState(this.hero, UNIT_STATE_MAX_MANA) * 1)
+                call UnitResetCooldown(this.hero)
+                // call UnitAddItem(this.hero, retrainBook)
+                call UnitUseItem(this.hero, retrainBook)
+                call SetHeroLevelBJ(this.hero, 1, false)
+                call UnitModifySkillPoints(this.hero, CST_INT_InitFarmerSkillPoints - GetHeroSkillPoints(this.hero))
+            endif
+            
+            call RemoveItem(retrainBook)
+            set retrainBook = null
+        endmethod
+        
+        public method setHero takes unit u returns nothing
+            set this.hero = u
+            // Set role at first attach
+            if GetHeroProperName(this.hero) == CST_STR_Farmer then
+            endif
+            call initHero()
+        endmethod
+        
+        // Revive hero at random location
+        public method reviveHero takes nothing returns nothing
+            local rect playableRect = GetPlayableMapRect()
+            local location rndLoc = GetRandomLocInRect(playableRect)
+            
+            // If hero hasn't be created
+            if this.hero == null then
+                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_FarmerHero, rndLoc, 0)
+            elseif IsUnitType(this.hero) == UNIT_TYPE_DEAD then
+                // Hero die, revive it
+                call ReviveHeroLoc(this.hero, rndLoc, false)
+            endif
+            
+            call initHero()
+            call PanCameraToTimedLocForPlayer(this.hero, rndLoc, 0.50)
+            call RemoveLocation(rndLoc)
+            call RemoveRect(playableRect)
+            set rndLoc = null
+            set playableRect = null
         endmethod
         
         // Add a farming building to group
@@ -664,14 +717,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             set deathCount      = 0
             set role            = CST_INT_FarmerRoleInvalid
+            
+            // Bind predefined hero to farmer
+            call iterateUnits(Filter(function thistype.filterBindHero))
         endmethod
         
         method deleteFarmerVars takes nothing returns nothing
         endmethod
         
-        // Randomize location of farmer hero
-        public method randomizeHeroLoc takes unit hero   returns nothing
-        endmethod
     endmodule
     
     /***************************************************************************

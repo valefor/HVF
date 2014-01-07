@@ -115,6 +115,7 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_ITI_MythticFlower  ='I00G'
         
         constant integer CST_ITI_TowerBase  ='I00Y'
+        constant integer CST_ITI_RetrainBook='tret'
         
         constant integer CST_ITI_RabbitMeat ='I00H'
         constant integer CST_ITI_Venision   ='I00X'

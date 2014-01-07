@@ -11,6 +11,7 @@ library EventManager initializer init/* v0.0.1 Xandria
 struct EventManager
     static trigger trigSelectHero
     static trigger trigHunterUnitDeath
+    static trigger trigHunterPickupItem
     static trigger trigFarmerUnitDeath
     static trigger trigFarmerFarmingBuildingFinish
     static trigger trigFarmerFarmingBuildingUpgrade
@@ -58,6 +59,28 @@ struct EventManager
     endmethod
     
     /***************************************************************************
+    * When hunter hero pickup item, need to check if the item is tower base
+    ***************************************************************************/
+    // Event Filter
+    private static method filterHunterPickupItem takes nothing returns boolean
+        // return IsUnitHunterHero(GetFilterUnit())
+        return true
+    endmethod
+    // Event Listener
+    private static method onHunterPickupItem takes nothing returns boolean
+        local item manItem = GetManipulatedItem()
+        local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
+        // Hunter hero can not take tower base
+        if GetItemTypeId(manItem) == CST_ITI_TowerBase then
+            call RemoveItem(manItem)
+            call DisplayTimedTextToPlayer(h.get, 0, 0, 5, "Hunters can't take tower base")
+            call AdjustPlayerStateBJ(10, h.get, PLAYER_STATE_RESOURCE_LUMBER)
+        endif
+        set manItem = null
+        return false
+    endmethod
+    
+    /***************************************************************************
     * When hunter player unit die
     ***************************************************************************/
     // Event Filter
@@ -69,16 +92,17 @@ struct EventManager
     private static method onHunterUnitDeath takes nothing returns boolean
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
-        local Hunter h = Hunter[GetPlayerId(GetOwningPlayer(dyingUnit))]
+        local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
         if IsUnitHunterHero(dyingUnit) then
+            // Hunter hero was killed, give a giant skeleton as hunter hero
             call h.reviveSkeleton(true)
         elseif GetUnitTypeId(dyingUnit) == CST_UTI_HunterHeroSkeleton then
             call h.reviveSkeleton(false)
         endif
         if Farmer.contain(GetOwningPlayer(killingUnit)) then
-            // Hunter hero was killed, give a giant skeleton as hunter hero
-            
         endif
+        set dyingUnit = null
+        set killingUnit = null
         return false
     endmethod
     
@@ -105,6 +129,7 @@ struct EventManager
                 // Revive Farmer Hero at random location
             else // Farmer hero was killed by ally or neutral 
             endif
+            call f.reviveHero()
         endif
         
         // If farmer farming animal die
@@ -116,7 +141,6 @@ struct EventManager
         
         set dyingUnit = null
         set killingUnit = null
-        
         return false
     endmethod
     
@@ -289,6 +313,7 @@ struct EventManager
         // Init triggers
         set thistype.trigSelectHero = CreateTrigger()
         set thistype.trigHunterUnitDeath = CreateTrigger()
+        set thistype.trigHunterPickupItem = CreateTrigger()
         set thistype.trigFarmerUnitDeath = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingFinish = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingUpgrade = CreateTrigger()
@@ -299,6 +324,7 @@ struct EventManager
         // Set up triggers handle function
         call TriggerAddCondition( trigSelectHero,Condition(function thistype.onSelectHero) )
         call TriggerAddCondition( trigHunterUnitDeath,Condition(function thistype.onHunterUnitDeath) )
+        call TriggerAddCondition( trigHunterPickupItem,Condition(function thistype.onHunterPickupItem) )
         call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
         call TriggerAddCondition( trigFarmerFarmingBuildingFinish,Condition(function thistype.onFarmerFarmingBuildingFinish) )
         call TriggerAddCondition( trigFarmerFarmingBuildingUpgrade,Condition(function thistype.onFarmerFarmingBuildingUpgrade) )
