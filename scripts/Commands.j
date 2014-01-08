@@ -43,15 +43,50 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     /***************************************************************************
 	* Structs
 	***************************************************************************/
-    private struct HelloCmd extends array
-        readonly static constant string CHAT_COMMAND = "hello"
+    private struct KickPlayerCmd extends array
+        readonly static constant string CHAT_COMMAND = "kick"
         
         static method onCommand takes nothing returns nothing
-            call BJDebugMsg("OnCommand callbackld")
-            if ChatCommand.eventData == "" then
-                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hello Player "+ I2S(ChatCommand.eventPlayerId+1))
+            local string prompt = "声明：\n你正在使用|cffff0000踢人（-kick）|r命令，作者赋予你这项权利是为了提供给大家一个良好的游戏环境，素质游戏从我做起。\n"
+            local integer playerNo = S2I(StringStrip(ChatCommand.eventData," "))
+            local Hunter h = Hunter[Hunter.first]
+            local Farmer f = Farmer[Farmer.first]
+            debug call BJDebugMsg("OnCommand('-kick') callback")
+            if GetTriggerPlayer() != GetHostPlayer() then
+                return
+            endif
+            
+            if StringStrip(ChatCommand.eventData," ") == "" or playerNo == 0 then
+                set prompt = prompt + "选择你想踢出的玩家的|cff008000编号|r：\n"
+                if Hunter.count > 0 then
+                    set prompt = prompt + " " + CST_STR_Hunter + "\n"
+                    loop
+                        exitwhen h.end
+                        if h.get != GetHostPlayer() then
+                            set prompt = prompt + "  " + I2S(GetPlayerId(h.get)+1) + " - " + GetPlayerName(h.get) + "\n"
+                        endif
+                        set h = h.next
+                    endloop
+                endif
+                
+                if Farmer.count > 0 then
+                    set prompt = prompt + " " + CST_STR_Farmer + "\n"
+                    loop
+                        exitwhen f.end
+                        if f.get != GetHostPlayer() then
+                            set prompt = prompt + "  " + I2S(GetPlayerId(f.get)+1) + " - " + GetPlayerName(f.get) + "\n"
+                        endif
+                        set f = f.next
+                    endloop
+                endif
+                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,prompt)
             else
-                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hello "+ ChatCommand.eventData)
+                // Host can't kick himself
+                if Player(playerNo-1) != GetHostPlayer() then
+                    call BJDebugMsg("Player:" + GetPlayerName(Player(playerNo-1)) + " has been kicked out by host!")
+                    //call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hello "+ ChatCommand.eventData)
+                    call CustomDefeatBJ(Player(playerNo-1), "You have been kicked out by host")
+                endif
             endif
             // disable this command
             // call ChatCommand.eventCommand.enable(false)
@@ -62,7 +97,9 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 
     private function CommandResponse takes nothing returns nothing
         //with function 
-        if ChatCommand.eventData == "" then
+        local string prompt = "声明：|n你正在使用|cffff0000踢人（-kick）|r命令，作者赋予你这项权利是为了提供给大家一个良好的游戏环境，素质游戏从我做起。|n"
+        if StringStrip(ChatCommand.eventData," ") == "" then
+            set prompt = prompt + "选择你想踢出的玩家的|cff008000编号|r：|n"
             call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hi Player "+ I2S(ChatCommand.eventPlayerId+1))
         else
             call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hi "+ ChatCommand.eventData)
@@ -161,8 +198,8 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         // !!!! Here GetLocalPlayer would cause desync !!!!
         //if GetLocalPlayer() == GetHostPlayer() then
         //endif
-        
-        // command "-hi" created
+        // command "-kick" created
+        call ChatCommand.create(KickPlayerCmd.CHAT_COMMAND,function KickPlayerCmd.onCommand)
     endfunction
     
 endlibrary

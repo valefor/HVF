@@ -15,7 +15,9 @@ struct EventManager
     static trigger trigHunterPickupItem
     static trigger trigFarmerUnitDeath
     static trigger trigFarmerFarmingBuildingFinish
+    static trigger trigFarmerFarmingBuildingUpgrade
     static trigger trigFarmerSpellCast
+    static trigger trigFarmerUnitIssuedOrder
     
     /***************************************************************************
     * Bind selected Hunter Hero to Player
@@ -50,7 +52,7 @@ struct EventManager
         
         debug call BJDebugMsg(GetUnitName(enteringUnit) + " enter map") 
         if Farmer.contain(GetOwningPlayer(enteringUnit)) then
-            // call f.addFarmingBuilding(enteringUnit,false)
+            call f.addFarmingBuilding(enteringUnit,false)
             call f.addFarmingAminal(enteringUnit)
         endif
         
@@ -188,6 +190,25 @@ struct EventManager
     endmethod
     
     /***************************************************************************
+    * <D> When farmer building is upgraded, update counters
+    ***************************************************************************/
+    // Event Filter
+    private static method filterFarmerFarmingBuildingUpgrade takes nothing returns boolean
+        //return IsUnitFarmerFarmingBuilding(GetFilterUnit())
+        return true
+    endmethod
+    // Event Listener
+    private static method onFarmerFarmingBuildingUpgrade takes nothing returns boolean    
+        local unit updatedUnit = GetTriggerUnit()
+        local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(updatedUnit))]
+        
+        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetTriggerUnit()))+ " upgrade to " + GetUnitName(GetTriggerUnit())) 
+        // call f.upgradeFarmingBuilding(updatedUnit)
+        
+        return false
+    endmethod
+    
+    /***************************************************************************
     * When farmer spell is casted, update counters
     ***************************************************************************/
     // Event Filter
@@ -224,6 +245,31 @@ struct EventManager
             call f.butcherAllAnimal()
         endif
         //call f.upgradeFarmingBuilding(spellCastUnit)
+        
+        return false
+    endmethod
+    
+    /***************************************************************************
+    * <D> When farmer unit issues orders, update counters
+    ***************************************************************************/
+    // Event Filter
+    private static method filterFarmerUnitIssuedOrder takes nothing returns boolean
+        //return IsUnitFarmerFarmingBuilding(GetFilterUnit())
+        return true
+    endmethod
+    // Event Listener
+    private static method onFarmerUnitIssuedOrder takes nothing returns boolean    
+        local unit orderedUnit = GetOrderedUnit() // GetSpellAbilityUnit
+        local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(orderedUnit))]
+        local integer orderId = GetIssuedOrderId()
+        
+        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(orderedUnit))+ " issued order: " + OrderId2String(orderId)) 
+        
+        if orderId == ORDERID_bearform then
+            // call f.transform2Ns(orderedUnit)
+        elseif orderId == ORDERID_unbearform then
+            // call f.transform2As(orderedUnit)
+        endif
         
         return false
     endmethod
@@ -289,7 +335,9 @@ struct EventManager
             call TriggerRegisterPlayerUnitEvent(trigFarmerUnitDeath, f.get, EVENT_PLAYER_UNIT_DEATH, null)
             call TriggerRegisterPlayerUnitEvent(trigPlantTree, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
             call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingFinish, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH, Filter(function thistype.filterFarmerFarmingBuildingFinish))
+            call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingUpgrade, f.get, EVENT_PLAYER_UNIT_UPGRADE_FINISH, Filter(function thistype.filterFarmerFarmingBuildingUpgrade))
             call TriggerRegisterPlayerUnitEvent(trigFarmerSpellCast, f.get, EVENT_PLAYER_UNIT_SPELL_CAST, Filter(function thistype.filterFarmerSpellCast))
+            call TriggerRegisterPlayerUnitEvent(trigFarmerUnitIssuedOrder, f.get, EVENT_PLAYER_UNIT_ISSUED_ORDER, Filter(function thistype.filterFarmerUnitIssuedOrder))
             set f= f.next
         endloop
     endmethod
@@ -302,7 +350,9 @@ struct EventManager
         set thistype.trigHunterPickupItem = CreateTrigger()
         set thistype.trigFarmerUnitDeath = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingFinish = CreateTrigger()
+        set thistype.trigFarmerFarmingBuildingUpgrade = CreateTrigger()
         set thistype.trigFarmerSpellCast = CreateTrigger()
+        set thistype.trigFarmerUnitIssuedOrder = CreateTrigger()
         
         
         // Set up triggers handle function
@@ -312,7 +362,9 @@ struct EventManager
         call TriggerAddCondition( trigHunterPickupItem,Condition(function thistype.onHunterPickupItem) )
         call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
         call TriggerAddCondition( trigFarmerFarmingBuildingFinish,Condition(function thistype.onFarmerFarmingBuildingFinish) )
+        call TriggerAddCondition( trigFarmerFarmingBuildingUpgrade,Condition(function thistype.onFarmerFarmingBuildingUpgrade) )
         call TriggerAddCondition( trigFarmerSpellCast,Condition(function thistype.onFarmerSpellCast) )
+        call TriggerAddCondition( trigFarmerUnitIssuedOrder,Condition(function thistype.onFarmerUnitIssuedOrder) )
     endmethod
     
 endstruct

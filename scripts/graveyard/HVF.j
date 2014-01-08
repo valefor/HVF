@@ -230,6 +230,21 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     private module FarmerVars
         unit hero
         
+        // Farming building group
+        group sheepFolds
+        group pigens
+        group snakeHoles
+        group cages
+        // Farming building counter
+        integer sheepFoldCount
+        integer pigenCount
+        integer snakeHoleCount
+        integer cageCount
+        // Farming building(No Spawn) counter
+        integer sheepFoldNsCount
+        integer pigenNsCount
+        integer snakeHoleNsCount
+        integer cageNsCount
         // Farming animal counter
         integer sheepCount
         integer pigCount
@@ -381,7 +396,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set filterUnit = null
             return false
         endmethod
-        private static method filterSpawnFarmingAnimal takes nothing returns boolean
+        
+        /***********************************************************************
+        * Enumerators
+        ***********************************************************************/
+        static method enumSpawnFarmingAnimal takes nothing returns nothing
             local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
             local location rallyPoint = GetUnitRallyPoint(GetEnumUnit())
             local integer utiB = GetUnitTypeId(GetEnumUnit()) // Building UTI
@@ -390,7 +409,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             if utiB == CST_BTI_SheepFold then
                 set utiA = CST_UTI_Sheep
-                //set f.sheepCount = f.sheepCount + 1
             elseif utiB == CST_BTI_Pigen then
                 set utiA = CST_UTI_Pig
             elseif utiB == CST_BTI_SnakeHole then
@@ -402,12 +420,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set u = CreateUnit(GetOwningPlayer(GetEnumUnit()), utiA, GetUnitX(GetEnumUnit()), GetUnitY(GetEnumUnit()), bj_UNIT_FACING)
             call IssuePointOrderByIdLoc(u, ORDERID_smart, rallyPoint)
             call IssueTargetOrderById(u, ORDERID_smart, GetUnitRallyUnit(GetEnumUnit()))
-            
+            set f.sheepCount = f.sheepCount + 1
             
             call RemoveLocation(rallyPoint)
             set rallyPoint = null
             set u = null
-            return false
         endmethod
         
         /***********************************************************************
@@ -475,9 +492,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public method animalUnloadAll takes nothing returns nothing
             call iterateUnits(Filter(function thistype.filterAnimalUnloadAll))
         endmethod
-        // Create animal beside farming building for every 60 secs
-        public method spawnAnimal takes nothing returns nothing
-            call iterateUnits(Filter(function thistype.filterSpawnFarmingAnimal))
+        
+        // Transform build to No Spawn building
+        public method transform2Ns takes unit building returns nothing
+            call removeFarmingBuilding(building, true)
+        endmethod
+        // Transform build to Auto Spawn building
+        public method transform2As takes unit building returns nothing
+            call addFarmingBuilding(building, true)
         endmethod
         
         private method initHero takes nothing returns nothing
@@ -554,6 +576,122 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set playableRect = null
         endmethod
         
+        // Add a farming building to group
+        // Note, 'fromNs' means transfer No Spawn building to Auto Spawn building
+        public method addFarmingBuilding takes unit building, boolean fromNs returns nothing
+            local integer bti = GetUnitTypeId(building)
+            // Add Auto Spawn building
+            if not fromNs then
+                if bti == CST_BTI_SheepFold then
+                    call GroupAddUnit(sheepFolds,building)
+                    set sheepFoldCount = sheepFoldCount + 1
+                elseif bti == CST_BTI_Pigen then
+                    call GroupAddUnit(pigens,building)
+                    set pigenCount = pigenCount + 1
+                elseif bti == CST_BTI_SnakeHole then
+                    call GroupAddUnit(snakeHoles,building)
+                    set snakeHoleCount = snakeHoleCount + 1
+                elseif bti == CST_BTI_Cage then
+                    call GroupAddUnit(cages,building)
+                    set cageCount = cageCount + 1
+                endif
+            endif
+            
+            // Transfer No Spawn building to Auto Spawn building
+            if fromNs then
+                if bti == CST_BTI_SheepFoldNs then
+                    call GroupAddUnit(sheepFolds,building)
+                    set sheepFoldCount = sheepFoldCount + 1
+                    set sheepFoldNsCount = sheepFoldNsCount - 1
+                elseif bti == CST_BTI_PigenNs then
+                    call GroupAddUnit(pigens,building)
+                    set pigenCount = pigenCount + 1
+                    set pigenNsCount = pigenNsCount - 1
+                elseif bti == CST_BTI_SnakeHoleNs then
+                    call GroupAddUnit(snakeHoles,building)
+                    set snakeHoleCount = snakeHoleCount + 1
+                    set snakeHoleNsCount = snakeHoleNsCount - 1
+                elseif bti == CST_BTI_CageNs then
+                    call GroupAddUnit(cages,building)
+                    set cageCount = cageCount + 1
+                    set cageNsCount = cageNsCount - 1
+                endif
+            endif
+            
+        endmethod
+        
+        // Upgrade a farming building
+        public method upgradeFarmingBuilding takes unit building returns nothing
+            if GetUnitTypeId(building) == CST_BTI_Pigen then
+                call GroupRemoveUnit(sheepFolds,building)
+                set sheepFoldCount = sheepFoldCount - 1
+                call GroupAddUnit(pigens,building)
+                set pigenCount = pigenCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_SnakeHole then
+                call GroupRemoveUnit(pigens,building)
+                set pigenCount = pigenCount - 1
+                call GroupAddUnit(snakeHoles,building)
+                set snakeHoleCount = snakeHoleCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_Cage then
+                call GroupRemoveUnit(snakeHoles,building)
+                set snakeHoleCount = snakeHoleCount - 1
+                call GroupAddUnit(cages,building)
+                set cageCount = cageCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_PigenNs then
+                set sheepFoldNsCount = sheepFoldNsCount - 1
+                set pigenNsCount = pigenNsCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_SnakeHoleNs then
+                set pigenNsCount = pigenNsCount - 1
+                set snakeHoleNsCount = snakeHoleNsCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_CageNs then
+                set snakeHoleNsCount = snakeHoleNsCount - 1
+                set cageNsCount = cageNsCount + 1
+            endif
+        endmethod
+        
+        // Note, 'toNs' means transfer building to No Spawn building
+        public method removeFarmingBuilding takes unit building, boolean toNs returns nothing
+            local integer bti = GetUnitTypeId(building)
+            if bti == CST_BTI_SheepFold then
+                call GroupRemoveUnit(sheepFolds,building)
+                set sheepFoldCount = sheepFoldCount - 1
+                if toNs then
+                    set sheepFoldNsCount = sheepFoldNsCount + 1 
+                endif
+            elseif bti == CST_BTI_Pigen then
+                call GroupRemoveUnit(pigens,building)
+                set pigenCount = pigenCount - 1
+                if toNs then
+                    set pigenNsCount = pigenNsCount + 1 
+                endif
+            elseif bti == CST_BTI_SnakeHole then
+                call GroupRemoveUnit(snakeHoles,building)
+                set snakeHoleCount = snakeHoleCount - 1
+                if toNs then
+                    set snakeHoleNsCount = snakeHoleNsCount + 1 
+                endif
+            elseif bti == CST_BTI_Cage then
+                call GroupRemoveUnit(cages,building)
+                set cageCount = cageCount - 1
+                if toNs then
+                    set cageNsCount = cageNsCount + 1 
+                endif
+            endif
+            
+            // Remove No Spawn building
+            if not toNs then
+                if bti == CST_BTI_SheepFoldNs then
+                    set sheepFoldNsCount = sheepFoldNsCount - 1
+                elseif bti == CST_BTI_PigenNs then
+                    set pigenNsCount = pigenNsCount - 1
+                elseif bti == CST_BTI_SnakeHoleNs then
+                    set snakeHoleNsCount = snakeHoleNsCount - 1
+                elseif bti == CST_BTI_CageNs then
+                    set cageNsCount = cageNsCount - 1
+                endif
+            endif
+        endmethod
+        
         public method addFarmingAminal takes unit animal returns nothing
             if GetUnitTypeId(animal) == CST_UTI_Sheep then
                 set sheepCount = sheepCount + 1
@@ -576,6 +714,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             elseif GetUnitTypeId(animal) == CST_UTI_Chicken then
                 set chickenCount = chickenCount - 1
             endif
+        endmethod
+
+        method spawnAnimal takes nothing returns nothing
+            call ForGroup(sheepFolds, function thistype.enumSpawnFarmingAnimal)
+            call ForGroup(pigens, function thistype.enumSpawnFarmingAnimal)
+            call ForGroup(snakeHoles, function thistype.enumSpawnFarmingAnimal)
+            call ForGroup(cages, function thistype.enumSpawnFarmingAnimal)
         endmethod
         
         method initFarmerVars takes nothing returns nothing
