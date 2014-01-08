@@ -103,7 +103,7 @@ GetOwningPlayer
             local unit u
             
             loop
-                exitwhen i >= 40
+                exitwhen i >= 10
                 set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
                 call UnitAddItem(u, CreateItem(CST_ITI_RabbitMeat, GetUnitX(u), GetUnitY(u)))
                 
