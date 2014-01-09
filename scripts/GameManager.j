@@ -11,6 +11,7 @@ library GameManager initializer init /*
 *   */ uses /*
 *   
 *       */ TimeManager /*
+*       */ UnitManager /*
 *       */ Commands /*
 *
 *******************************************************************************/
@@ -35,6 +36,7 @@ library GameManager initializer init /*
 	        call FogEnableOff()
             call BJDebugMsg(MSG_GameInitializing)
 	        call TriggerSleepAction(2.0)
+	        //call UnitManager.createBeiginNeutralAggrUnits()
 	        call BJDebugMsg(MSG_GameInitializingDone)
 	        //debug call BJDebugMsg("Waiting host for chosing game mode...")
 	        
@@ -54,14 +56,14 @@ library GameManager initializer init /*
 	    endmethod
 	    
 	    static method start takes nothing returns nothing
-	        call FogEnableOn()
+	        // call FogEnableOn()
 	        if not Params.flagGameModeNv then
                 // Vote for play time
                 debug call BJDebugMsg("Please vote for play time...")
                 call PlayTime.vote()
             else
                 // No need to vote for play time, start game
-                set PlayTime.setTime(CST_OT_PlayTime)
+                call PlayTime.setTime(CST_OT_PlayTime)
                 call PlayTime.countdownStart()
             endif
             // Enable game utils commands

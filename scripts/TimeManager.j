@@ -153,7 +153,7 @@ In multiplayer however, this trigger should work.
         
         private static method onInit takes nothing returns nothing
             // set VAR_INT_PlayTimeDelta to 1 seconds in debug mode to fast debugging
-            debug set VAR_INT_PlayTimeDelta = 1
+            // debug set VAR_INT_PlayTimeDelta = 1
             
             // PT
             set pt1s = TimerPointer.create()
@@ -200,7 +200,7 @@ In multiplayer however, this trigger should work.
             call TIMEOVER.register(c)
         endmethod
         */
-        static method setTime takes real t returns boolean
+        static method setTime takes real t returns nothing
             set thistype.playTime = t
         endmethod
         

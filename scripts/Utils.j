@@ -68,4 +68,17 @@ library Utils/*
     function AppendHotkey takes string source, string hotkey returns string
         return "|cffffcc00[" + hotkey + "]|r " + source
     endfunction
+    
+    
+    // Get Random Real
+    function GetRandomRectX takes rect r returns real
+        call SetRandomSeed(GetRandomInt(0, 1000000))
+        return GetRandomReal(GetRectMinX(r), GetRectMaxX(r))
+    endfunction
+    
+    function GetRandomRectY takes rect r returns real
+        call SetRandomSeed(GetRandomInt(0, 1000000))
+        return GetRandomReal(GetRectMinY(r), GetRectMaxY(r))
+    endfunction
+    
 endlibrary

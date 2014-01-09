@@ -50,11 +50,7 @@ library Glue initializer init /* v0.0.1 by Xandria
     * Globals
     ***************************************************************************/
     globals
-        
-        constant rect    CST_RCT_DefaultBirthPlace= Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
-        //private location locHeroShop = Location(- 6240.0, - 2208.0)
-        
-        
+
         /***********************************************************************
         * UnitTypeId (UTI)
         ***********************************************************************/
@@ -99,6 +95,9 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_BTI_SmallTree  ='h00O'
         constant integer CST_BTI_MagicTree  ='h00T'
         
+        constant integer CST_BTI_Slaughterhouse = 'h00K'
+        constant integer CST_BTI_ArmsRecycler   = 'h014'
+        
         /***********************************************************************
         * AbilityId (ABI)
         ***********************************************************************/
@@ -118,15 +117,16 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_ITI_MythticGrass   ='I003'
         constant integer CST_ITI_MythticFlower  ='I00G'
         
-        constant integer CST_ITI_TowerBase  ='I00Y'
-        constant integer CST_ITI_RetrainBook='tret'
+        constant integer CST_ITI_TowerBase      ='I00Y'
+        constant integer CST_ITI_RetrainBook    ='tret'
         
-        constant integer CST_ITI_RabbitMeat ='I00H'
-        constant integer CST_ITI_Venision   ='I00X'
-        constant integer CST_ITI_DogMeat    ='I00W'
-        constant integer CST_ITI_VultureMeat='I018'
+        constant integer CST_ITI_RabbitMeat     ='I00H'
+        constant integer CST_ITI_Venision       ='I00X'
+        constant integer CST_ITI_DogMeat        ='I00W'
+        constant integer CST_ITI_VultureMeat    ='I018'
         
-        constant integer CST_ITI_HunterMiniShop='I000'
+        constant integer CST_ITI_HunterMiniShop ='I000'
+        constant integer CST_ITI_HewAxe         ='I005'
         
         /***********************************************************************
         * DestructableTypeId (DTI)
@@ -147,13 +147,13 @@ library Glue initializer init /* v0.0.1 by Xandria
         /***********************************************************************
         * Region & location, little memory leakage, not big deal, let it be
         ***********************************************************************/
-        constant rect CST_RGN_SkeletonRevive=Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
-        constant rect CST_RGN_SecretGarden=Rect(5888.0, - 3840.0, 6400.0, - 3328.0)
-        constant rect CST_RGN_WaterLand1=Rect(3840.0, 4640.0, 6848.0, 6944.0)
-        constant rect CST_RGN_WaterLand2=Rect(5376.0, 1408.0, 6560.0, 3584.0)
-        constant rect CST_RGN_WaterLand3=Rect(- 7712.0, - 1600.0, - 7232.0, - 1248.0)
+        rect CST_RGN_SkeletonRevive=null
+        rect CST_RGN_SecretGarden=null
+        rect CST_RGN_WaterLand1=null
+        rect CST_RGN_WaterLand2=null
+        rect CST_RGN_WaterLand3=null
         
-        constant location CST_LCT_SkeletonRevive=GetRectCenter(CST_RGN_SkeletonRevive)
+        location CST_LCT_SkeletonRevive=null
 
         // Hunters item box location
         constant real VAR_ItemBoxFacing = 270.0
@@ -175,10 +175,29 @@ library Glue initializer init /* v0.0.1 by Xandria
         return GetUnitTypeId(u)==CST_BTI_SheepFold or GetUnitTypeId(u)==CST_BTI_Pigen or GetUnitTypeId(u)==CST_BTI_SnakeHole or GetUnitTypeId(u)==CST_BTI_Cage
     endfunction
     
+    function CreateHunterBeginUnits takes player p, integer i returns nothing
+        local unit u = CreateUnit(p, CST_UTI_HunterItemBox, VAR_ItemBoxXs[i], VAR_ItemBoxYs[i], VAR_ItemBoxFacing)
+        call UnitAddItemToSlotById(u, 'I005', 0)
+        call UnitAddItemToSlotById(u, 'shrs', 1)
+        call UnitAddItemToSlotById(u, 'pman', 2)
+        call UnitAddItemToSlotById(u, 'moon', 3)
+        call UnitAddItemToSlotById(u, 'dust', 4)
+        call UnitAddItemToSlotById(u, 'I000', 5)
+        call CreateUnit(p, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(CST_RGN_SkeletonRevive), GetRectMaxX(CST_RGN_SkeletonRevive)), GetRandomReal(GetRectMinY(CST_RGN_SkeletonRevive), GetRectMaxY(CST_RGN_SkeletonRevive)), bj_UNIT_FACING)
+        set u = null
+    endfunction
+    
     /***************************************************************************
 	* Library Initiation
 	***************************************************************************/
     private function init takes nothing returns nothing
+        set CST_RGN_SkeletonRevive=Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
+        set CST_RGN_SecretGarden=Rect(5888.0, - 3840.0, 6400.0, - 3328.0)
+        set CST_RGN_WaterLand1=Rect(3840.0, 4640.0, 6848.0, 6944.0)
+        set CST_RGN_WaterLand2=Rect(5376.0, 1408.0, 6560.0, 3584.0)
+        set CST_RGN_WaterLand3=Rect(- 7712.0, - 1600.0, - 7232.0, - 1248.0)
+        set CST_LCT_SkeletonRevive=GetRectCenter(CST_RGN_SkeletonRevive)
+        
         set VAR_ItemBoxXs[0] = - 6976.0
         set VAR_ItemBoxXs[1] = - 6720.0
         set VAR_ItemBoxXs[2] = - 6976.0

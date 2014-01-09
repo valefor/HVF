@@ -121,6 +121,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set this.killCount = val
             // fresh board
             set thistype.statsBoard[CST_BDCOL_KL][rowIndex].text = I2S(this.killCount)
+            set Farmer.statsBoard[CST_BDCOL_KL][erowIndex].text = I2S(this.killCount)
         endmethod
         
         /***********************************************************************
@@ -160,7 +161,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
 
         public method reviveSkeleton takes boolean isFb returns nothing
-            //local location loc = 
             // If it's first blood, that means hunter hero die
             // Notice, now skeleton is a unit not a hero, we can not use ReviveHero
             set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, CST_LCT_SkeletonRevive, bj_UNIT_FACING)
@@ -183,10 +183,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // Give items
         endmethod
         
-        public method generateRandomHero takes location l returns nothing
+        public method createRandomHero takes location l returns nothing
             local integer randomInt = GetRandomInt(1, CST_INT_MaxHunterHeroType)
-            local location loc = Location(GetRectCenterX(CST_RCT_DefaultBirthPlace), GetRectCenterY(CST_RCT_DefaultBirthPlace))
+            local location loc = Location(GetRectCenterX(CST_RGN_SkeletonRevive), GetRectCenterY(CST_RGN_SkeletonRevive))
 
+            
+            debug call BJDebugMsg("Center X of CST_RGN_SkeletonRevive:" + R2S(GetRectCenterX(CST_RGN_SkeletonRevive)))
+            debug call BJDebugMsg("Create random hero at location >> X:" + R2S(GetLocationX(loc))+ ", Y:"+ R2S(GetLocationY(loc)) )
             if l !=null then
                 call RemoveLocation(loc)
                 set loc = l
@@ -206,7 +209,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public method setHero takes unit u returns nothing
             if u != null then
                 if GetUnitTypeId(u) == CST_UTI_HunterHeroRandom then
-                    call this.generateRandomHero(GetUnitLoc(u))
+                    call this.createRandomHero(GetUnitLoc(u))
                     call RemoveUnit(u)
                 else
                     set this.hero = u
@@ -218,24 +221,16 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         method initHunterVars takes nothing returns nothing
             set this.killCount = 0
             set this.hero = null
-        endmethod
-        
-        method createBeginUnits takes integer i returns nothing
-            local unit u = CreateUnit(this.get, CST_UTI_HunterItemBox, VAR_ItemBoxXs[i], - VAR_ItemBoxYs[i], VAR_ItemBoxFacing)
-            call UnitAddItemToSlotById(u, 'I005', 0)
-            call UnitAddItemToSlotById(u, 'shrs', 1)
-            call UnitAddItemToSlotById(u, 'pman', 2)
-            call UnitAddItemToSlotById(u, 'moon', 3)
-            call UnitAddItemToSlotById(u, 'dust', 4)
-            call UnitAddItemToSlotById(u, 'I000', 5)
             
-            CreateUnit(this.get, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(CST_RGN_SkeletonRevive), GetRectMaxX(CST_RGN_SkeletonRevive)), GetRandomReal(GetRectMinY(CST_RGN_SkeletonRevive), GetRectMaxY(CST_RGN_SkeletonRevive)), bj_UNIT_FACING)
-            set u = null
+            call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, this.get)
+            call AdjustPlayerStateBJ(CST_INT_HunterBeginGold, this.get, PLAYER_STATE_RESOURCE_GOLD)
+            call AdjustPlayerStateBJ(CST_INT_HunterBeginLumber, this.get, PLAYER_STATE_RESOURCE_LUMBER)
         endmethod
         
         method deleteHunterVars takes nothing returns nothing
             // Kill/Remove all units
             call iterateUnits(Filter(function thistype.filterKillAllUnits))
+            
         endmethod
         
     endmodule
@@ -273,6 +268,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set .deathCount = val
             // fresh board
             set thistype.statsBoard[CST_BDCOL_DE][rowIndex].text = I2S(.deathCount)
+            set Hunter.statsBoard[CST_BDCOL_KL][erowIndex].text = I2S(.deathCount)
         endmethod
         
         public method operator animalCount takes nothing returns integer
@@ -404,31 +400,43 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             return false
         endmethod
         private static method filterSpawnFarmingAnimal takes nothing returns boolean
-            local thistype f = thistype[GetPlayerId(GetOwningPlayer(GetEnumUnit()))]
-            local location rallyPoint = GetUnitRallyPoint(GetEnumUnit())
-            local integer utiB = GetUnitTypeId(GetEnumUnit()) // Building UTI
+            local unit filterUnit = GetFilterUnit()
+            local thistype f = thistype[GetPlayerId(GetOwningPlayer(filterUnit))]
+            local location rallyPoint = GetUnitRallyPoint(filterUnit)
+            local integer utiB = GetUnitTypeId(filterUnit) // Building UTI
             local unit u
             local integer utiA // Animal UTI
             
+            debug call BJDebugMsg("filterSpawnFarmingAnimal > Player " + GetPlayerName(GetOwningPlayer(filterUnit)))
+            debug call BJDebugMsg("filterSpawnFarmingAnimal > Unitname " + GetUnitName(filterUnit))
+            debug call BJDebugMsg("filterSpawnFarmingAnimal > Uti " + I2S(GetUnitTypeId(filterUnit)))
             if utiB == CST_BTI_SheepFold then
                 set utiA = CST_UTI_Sheep
-                //set f.sheepCount = f.sheepCount + 1
+                debug call BJDebugMsg("filterSpawnFarmingAnimal > create sheep")
+                // No need to increace here... onEnterMap will detect it
+                // set f.sheepCount = f.sheepCount + 1
             elseif utiB == CST_BTI_Pigen then
                 set utiA = CST_UTI_Pig
             elseif utiB == CST_BTI_SnakeHole then
                 set utiA = CST_UTI_Snake
             elseif utiB == CST_BTI_Cage then
                 set utiA = CST_UTI_Chicken
+            else
+                call RemoveLocation(rallyPoint)
+                set u = null
+                set filterUnit = null 
+                return false
             endif
-            
-            set u = CreateUnit(GetOwningPlayer(GetEnumUnit()), utiA, GetUnitX(GetEnumUnit()), GetUnitY(GetEnumUnit()), bj_UNIT_FACING)
+            debug call BJDebugMsg("filterSpawnFarmingAnimal > create unit")
+            set u = CreateUnit(GetOwningPlayer(filterUnit), utiA, GetUnitX(filterUnit), GetUnitY(filterUnit), bj_UNIT_FACING)
             call IssuePointOrderByIdLoc(u, ORDERID_smart, rallyPoint)
-            call IssueTargetOrderById(u, ORDERID_smart, GetUnitRallyUnit(GetEnumUnit()))
+            call IssueTargetOrderById(u, ORDERID_smart, GetUnitRallyUnit(filterUnit))
             
             
             call RemoveLocation(rallyPoint)
             set rallyPoint = null
             set u = null
+            set filterUnit = null 
             return false
         endmethod
         
@@ -563,25 +571,27 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         // Revive hero at random location
         public method reviveHero takes nothing returns nothing
-            local rect playableRect = GetPlayableMapRect()
-            local location rndLoc = GetRandomLocInRect(playableRect)
+            //local rect playableRect = GetPlayableMapRect()
+            //local location rndLoc = GetRandomLocInRect(playableRect)
+            local real x = GetRandomRectX(GetPlayableMapRect())
+            local real y = GetRandomRectY(GetPlayableMapRect())
             
             // If hero hasn't been created
             if this.hero == null then
-                call this.setHero( CreateUnitAtLoc(this.get, CST_UTI_FarmerHero, rndLoc, 0) )
+                call this.setHero( CreateUnit(this.get, CST_UTI_FarmerHero, x, y, 0) )
             elseif IsUnitType(this.hero, UNIT_TYPE_DEAD) then
                 // Hero die, revive it
-                call ReviveHeroLoc(this.hero, rndLoc, false)
+                call ReviveHero(this.hero, x, y, false)
             else
                 return
             endif
             
             call initHero()
-            call PanCameraToTimedLocForPlayer(this.get, rndLoc, 0.50)
-            call RemoveLocation(rndLoc)
-            call RemoveRect(playableRect)
-            set rndLoc = null
-            set playableRect = null
+            call PanCameraToTimedForPlayer(this.get, x, y, 0.50)
+            //call RemoveLocation(rndLoc)
+            //call RemoveRect(playableRect)
+            //set rndLoc = null
+            //set playableRect = null
         endmethod
         
         // Add a farming building to group
@@ -732,7 +742,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set role            = CST_INT_FarmerRoleInvalid
             
             // Bind predefined hero to farmer
-            call iterateUnits(Filter(function thistype.filterBindHero))
+            // call iterateUnits(Filter(function thistype.filterBindHero))
+            // Set begin resource, limitations
+            call BJDebugMsg("Init gold:" + I2S(CST_INT_HunterBeginGold))
+            call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, this.get)
+            call AdjustPlayerStateBJ(CST_INT_FarmerBeginGold, this.get, PLAYER_STATE_RESOURCE_GOLD)
+            call AdjustPlayerStateBJ(CST_INT_FarmerBeginLumber, this.get, PLAYER_STATE_RESOURCE_LUMBER)
+            call SetPlayerTechMaxAllowed(this.get, CST_BTI_Slaughterhouse, 1)
+            call SetPlayerTechMaxAllowed(this.get, CST_BTI_ArmsRecycler, 1)
         endmethod
         
         method deleteFarmerVars takes nothing returns nothing
@@ -803,7 +820,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 exitwhen h.end
                 if h.hero == null then
                     debug call BJDebugMsg(GetPlayerName(h.get)+" hasn't selected hero")
-                    call h.generateRandomHero(null)
+                    call h.createRandomHero(null)
                 endif
                 set h= h.next
             endloop
@@ -871,7 +888,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 exitwhen h.end
                 // Init instance vars
                 call h.initInstance()
-                call f.createBeginUnits(i)
+                call CreateHunterBeginUnits(h.get,i)
                 
                 // Display stats board
                 debug call BJDebugMsg("Display board to hunter:" + GetPlayerName(h.get))
@@ -953,6 +970,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 // Spawn animals
                 // If total aminal count doesn't exceed CST_INT_MaxAnimals, spawn
                 if thistype.getTotalAnimalCount() < CST_INT_MaxAnimals then
+                    debug call BJDebugMsg("TotalAnimalCount:" + I2S(thistype.getTotalAnimalCount()))
+                    debug call BJDebugMsg("Spawn animal for" + GetPlayerName(f.get))
                     call f.spawnAnimal()
                     set gold = 0
                 // Else don't spawn, give overflow gold to players
@@ -960,7 +979,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                     set gold = f.overflowIncome
                 endif
                 // settlement
-                set gold = f.noSpawnIncome + f.deathIncome
+                set gold = gold + f.noSpawnIncome + f.deathIncome
                 call AdjustPlayerStateBJ(gold, f.get, PLAYER_STATE_RESOURCE_GOLD)
                 // If farmer is 'woody' give extra lumber income
                 if f.role == CST_INT_FarmerRoleWoody then
@@ -979,7 +998,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             debug call BJDebugMsg("Salary!")
             loop
                 exitwhen f.end
-                call AdjustPlayerStateBJ(f.salary, f.get, PLAYER_STATE_RESOURCE_GOLD)
+                call AdjustPlayerStateBJ(f.salary + CST_INT_SalaryAlms, f.get, PLAYER_STATE_RESOURCE_GOLD)
                 set f= f.next
             endloop
         endmethod
@@ -1082,8 +1101,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                     set i = i + 1
                     call CreateUnitAtLoc(f.get, 'Nbrn', GetPlayerStartLocationLoc(f.get), bj_UNIT_FACING)
                 endloop
-                set f = f.next
                 */
+                set f = f.next
             endloop
             return false
         endmethod
@@ -1102,7 +1121,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     /***************************************************************************
     * Common Use Functions
     ***************************************************************************/    
-    public function InSameForce takes player p, player p2 returns boolean
+    function InSameForce takes player p, player p2 returns boolean
         if Farmer.contain(p)  then
             if Farmer.contain(p2) then
                 return true

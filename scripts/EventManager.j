@@ -140,6 +140,13 @@ struct EventManager
     * When farmer player unit die, update counters
     ***************************************************************************/
     // Event Filter
+    private static method reviveHero takes nothing returns nothing
+        local TimerPointer tp = TimerPool[GetExpiredTimer()]
+        local Farmer f = tp.count
+        
+        call f.reviveHero()
+        call tp.destroy()
+    endmethod
     // Event Handler
     private static method onFarmerUnitDeath takes nothing returns boolean    
         local unit dyingUnit = GetDyingUnit()
@@ -148,6 +155,8 @@ struct EventManager
         local integer killingUnitTypeId = GetUnitTypeId(killingUnit)
         local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(dyingUnit))]
         local Hunter h = Hunter[GetPlayerId(GetOwningPlayer(killingUnit))]
+        local TimerPointer tp = TimerPointer.create()
+        
         
         debug call BJDebugMsg(GetUnitName(GetTriggerUnit()) + " die") 
         // If farmer Hero die
@@ -160,7 +169,9 @@ struct EventManager
                 // Revive Farmer Hero at random location
             else // Farmer hero was killed by ally or neutral 
             endif
-            call f.reviveHero()
+            set tp.count = f
+            call TimerStart(tp.timer, 1.25, false, function thistype.reviveHero)
+            //call f.reviveHero()
         endif
         
         // If farmer farming animal die
@@ -309,9 +320,14 @@ struct EventManager
     ***************************************************************************/
     // Event Handler
     private static method onUnitIssuedAttackOrder takes nothing returns boolean
-        if GetIssuedOrderId() == ORDERID_attack then
+        local integer orderId = GetIssuedOrderId()
+        local integer targetUti = GetUnitTypeId(GetOrderTargetUnit())
+        
+        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetOrderedUnit()))+ " issued order: " + OrderId2String(orderId)) 
+        if GetIssuedOrderId() == ORDERID_attack and (targetUti == CST_UTI_FarmerHero or IsUnitHunterHero(GetOrderTargetUnit())) then
+            debug call BJDebugMsg(GetUnitName(GetOrderedUnit())+" is trying to attack " + GetUnitName(GetOrderTargetUnit()))
             if InSameForce(GetOwningPlayer(GetOrderTargetUnit()), GetOwningPlayer(GetOrderedUnit())) then
-                call IssueImmediateOrderById(GetOrderedUnit(), ORDERID_cancel)
+                call IssueImmediateOrderById(GetOrderedUnit(), ORDERID_holdposition)
             endif
         endif
         return false

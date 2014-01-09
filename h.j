@@ -33,6 +33,7 @@
 //! import "scripts\Commands.j"
 //! import "scripts\GameManager.j"
 //! import "scripts\TimeManager.j"
+//! import "scripts\Params.j"
 
 // HVF Globals
-//! import "scripts\Globals.j"
+//! import "scripts\i18n\Messages_CN.j"
