@@ -32,32 +32,40 @@ library GameManager initializer init /*
 	struct Game extends array
 	
 	    static method initialize takes nothing returns nothing
-	        // Set max allowed hero to 1
-	        // !!!! Here GetLocalPlayer would cause desync !!!!
-            //call SetPlayerTechMaxAllowed(GetLocalPlayer(), CST_INT_TECHID_HERO, CST_INT_MAX_HEROS)
-	        
-            debug call BJDebugMsg("Initializing game...")
+	        call FogEnableOff()
+            call BJDebugMsg(MSG_GameInitializing)
 	        call TriggerSleepAction(2.0)
-	        debug call BJDebugMsg("Initializing finished...")
+	        call BJDebugMsg(MSG_GameInitializingDone)
 	        //debug call BJDebugMsg("Waiting host for chosing game mode...")
 	        
 	        if GetHostPlayer() == GetLocalPlayer() then
-	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, "Please select game mode in 10 seconds")
+	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_YouAreHost)
+	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_PlsSelectGameMode)
 	        else
-	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 10, "Waiting host:" +GetPlayerName(GetHostPlayer())+ " for chosing game mode...")
+	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_HostIs + COLOR_YELLOW + GetPlayerName(GetHostPlayer())+ "|r")
+	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_WaitHostSelectGameMode)
 	        endif
 
 	        call TriggerSleepAction(5.0)
 	        debug call BJDebugMsg("Debug1")
 	        
-	        // Disable host commands
-	        call ShufflePlayerCmd.cmd.enable(false)
-	        
-	        // Enable game utils commands
-	        call BJDebugMsg("Please vote for play time...")
-	        // Vote for play time
-	        call PlayTime.vote()
-	    endmethod  
+	        // Disable game mode commands
+	        call InvalidGameModeCommands() 
+	    endmethod
+	    
+	    static method start takes nothing returns nothing
+	        call FogEnableOn()
+	        if not Params.flagGameModeNv then
+                // Vote for play time
+                debug call BJDebugMsg("Please vote for play time...")
+                call PlayTime.vote()
+            else
+                // No need to vote for play time, start game
+                set PlayTime.setTime(CST_OT_PlayTime)
+                call PlayTime.countdownStart()
+            endif
+            // Enable game utils commands
+	    endmethod
 	endstruct
 	/***************************************************************************
 	* Common Use Functions

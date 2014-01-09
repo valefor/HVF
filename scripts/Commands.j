@@ -1,4 +1,4 @@
-library Commands initializer init /* v0.0.1 by Adrian
+library Commands initializer init /* v0.0.1 by Xandria
 ***********************************************************************************************
 *
 *   HVF Command System.
@@ -8,8 +8,7 @@ library Commands initializer init /* v0.0.1 by Adrian
 *   */ uses /*
 *   
 *       */ ChatCommand  /*  hiveworkshop.com/forums/submissions-414/system-chatcommand-219132/#post2181374
-*       */ Core         /*  core functions must be loaded first
-*       */ HVF          /*  HVF main functionality
+*       */ EventManager /* 
 *
 ************************************************************************************************
 *
@@ -47,7 +46,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         readonly static constant string CHAT_COMMAND = "kick"
         
         static method onCommand takes nothing returns nothing
-            local string prompt = "声明：\n你正在使用|cffff0000踢人（-kick）|r命令，作者赋予你这项权利是为了提供给大家一个良好的游戏环境，素质游戏从我做起。\n"
+            local string prompt = MSG_KickPlayerClaim
             local integer playerNo = S2I(StringStrip(ChatCommand.eventData," "))
             local Hunter h = Hunter[Hunter.first]
             local Farmer f = Farmer[Farmer.first]
@@ -57,7 +56,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
             endif
             
             if StringStrip(ChatCommand.eventData," ") == "" or playerNo == 0 then
-                set prompt = prompt + "选择你想踢出的玩家的|cff008000编号|r：\n"
+                set prompt = prompt + MSG_SelectNumberToKick
                 if Hunter.count > 0 then
                     set prompt = prompt + " " + CST_STR_Hunter + "\n"
                     loop
@@ -79,13 +78,15 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                         set f = f.next
                     endloop
                 endif
-                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,prompt)
+                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal,prompt)
             else
                 // Host can't kick himself
                 if Player(playerNo-1) != GetHostPlayer() then
-                    call BJDebugMsg("Player:" + GetPlayerName(Player(playerNo-1)) + " has been kicked out by host!")
+                    call BJDebugMsg(COLOR_RED + GetPlayerName(Player(playerNo-1)) + "|r " + MSG_HasBeenKicked)
                     //call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hello "+ ChatCommand.eventData)
-                    call CustomDefeatBJ(Player(playerNo-1), "You have been kicked out by host")
+                    call CustomDefeatBJ(Player(playerNo-1), MSG_YouHaveBeenKicked)
+                else 
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantKickYourself)
                 endif
             endif
             // disable this command
@@ -126,48 +127,73 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     struct ShufflePlayerCmd extends array
         readonly static constant string CHAT_COMMAND = "sp"
         static ChatCommand cmd
+        static boolean valid = true
         
         static method onCommand takes nothing returns nothing
-            call BJDebugMsg("OnCommand callback")
-            
+            debug call BJDebugMsg("OnCommand('-sp') callback")
+
             // Only do shuffling when host player order this command
             if GetTriggerPlayer() == GetHostPlayer() then
-                call BJDebugMsg("ShufflePlayer")
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+                
                 call ShufflePlayer()
+                set Params.flagGameModeSp = true
                 // this is a one shoot command, disable this command from now
-                //call ChatCommand.eventCommand.enable(false)
+                call ChatCommand.eventCommand.enable(false)
             endif
-            
-            
-        endmethod
-        
-        static method disable takes nothing returns nothing
-            // disable this command
-            call cmd.enable(false)
         endmethod
     
         // implement ChatCommandModule
     endstruct
-    
-    private struct RandomHeroCmd extends array
-        readonly static constant string CHAT_COMMAND = "random"
+
+    struct NoVotingCmd extends array
+        readonly static constant string CHAT_COMMAND = "nv"
         static ChatCommand cmd
+        static boolean valid = true
         
         static method onCommand takes nothing returns nothing
-            debug call BJDebugMsg("OnCommand('random') callback")
-            
-            // do something here
-            
-            // this is a one shoot command, disable this command from now
-            call ChatCommand.eventCommand.enable(false)
+            debug call BJDebugMsg("OnCommand('-nv') callback")
+
+            // Only do shuffling when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+                set Params.flagGameModeNv = true
+                // this is a one shoot command, disable this command from now
+                call ChatCommand.eventCommand.enable(false)
+            endif
         endmethod
-        
-        static method disable takes nothing returns nothing
-            // disable this command
-            call ChatCommand.eventCommand.enable(false)
-        endmethod
+    endstruct
     
-        // implement ChatCommandModule
+    struct NoInfightCmd extends array
+        readonly static constant string CHAT_COMMAND = "ni"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-ni') callback")
+
+            // Only do shuffling when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+                
+                call EventManager.forbidInfighting()
+                set Params.flagGameModeNi = true
+                // this is a one shoot command, disable this command from now
+                call ChatCommand.eventCommand.enable(false)
+            endif
+        endmethod
     endstruct
     
     // Call this function to enable game command
@@ -181,8 +207,10 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     /***************************************************************************
 	* Common Use Functions
 	***************************************************************************/
-	public function DisableHostCommands takes nothing returns nothing
-	    call ShufflePlayerCmd.disable()
+	function InvalidGameModeCommands takes nothing returns nothing
+	    set ShufflePlayerCmd.valid == false
+	    set NoVotingCmd.valid == false
+	    set NoInfightCmd.valid == false
 	endfunction
 	
 	public function EnableGameUtilCommands takes nothing returns nothing
@@ -193,11 +221,11 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 	***************************************************************************/
     private function init takes nothing returns nothing
         // The following command need to be set up before game starts
-        set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
         // Add 'sp' command to host player at beginning
-        // !!!! Here GetLocalPlayer would cause desync !!!!
-        //if GetLocalPlayer() == GetHostPlayer() then
-        //endif
+        set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
+        set NoVotingCmd.cmd = ChatCommand.create(NoVotingCmd.CHAT_COMMAND,function NoVotingCmd.onCommand)
+        set NoInfightCmd.cmd = ChatCommand.create(NoInfightCmd.CHAT_COMMAND,function NoInfightCmd.onCommand)
+        
         // command "-kick" created
         call ChatCommand.create(KickPlayerCmd.CHAT_COMMAND,function KickPlayerCmd.onCommand)
     endfunction

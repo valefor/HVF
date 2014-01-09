@@ -220,6 +220,19 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set this.hero = null
         endmethod
         
+        method createBeginUnits takes integer i returns nothing
+            local unit u = CreateUnit(this.get, CST_UTI_HunterItemBox, VAR_ItemBoxXs[i], - VAR_ItemBoxYs[i], VAR_ItemBoxFacing)
+            call UnitAddItemToSlotById(u, 'I005', 0)
+            call UnitAddItemToSlotById(u, 'shrs', 1)
+            call UnitAddItemToSlotById(u, 'pman', 2)
+            call UnitAddItemToSlotById(u, 'moon', 3)
+            call UnitAddItemToSlotById(u, 'dust', 4)
+            call UnitAddItemToSlotById(u, 'I000', 5)
+            
+            CreateUnit(this.get, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(CST_RGN_SkeletonRevive), GetRectMaxX(CST_RGN_SkeletonRevive)), GetRandomReal(GetRectMinY(CST_RGN_SkeletonRevive), GetRectMaxY(CST_RGN_SkeletonRevive)), bj_UNIT_FACING)
+            set u = null
+        endmethod
+        
         method deleteHunterVars takes nothing returns nothing
             // Kill/Remove all units
             call iterateUnits(Filter(function thistype.filterKillAllUnits))
@@ -229,7 +242,16 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     
     private module FarmerVars
         unit hero
-        
+        // Farming building counter
+        integer sheepFoldCount
+        integer pigenCount
+        integer snakeHoleCount
+        integer cageCount
+        // Farming building(No Spawn) counter
+        integer sheepFoldNsCount
+        integer pigenNsCount
+        integer snakeHoleNsCount
+        integer cageNsCount
         // Farming animal counter
         integer sheepCount
         integer pigCount
@@ -479,6 +501,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public method spawnAnimal takes nothing returns nothing
             call iterateUnits(Filter(function thistype.filterSpawnFarmingAnimal))
         endmethod
+        // Transform build to No Spawn building
+        public method transform2Ns takes unit building returns nothing
+            call removeFarmingBuilding(building, true)
+        endmethod
+        // Transform build to Auto Spawn building
+        public method transform2As takes unit building returns nothing
+            call addFarmingBuilding(building, true)
+        endmethod
         
         private method initHero takes nothing returns nothing
             local item retrainBook
@@ -552,6 +582,104 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call RemoveRect(playableRect)
             set rndLoc = null
             set playableRect = null
+        endmethod
+        
+        // Add a farming building to group
+        // Note, 'fromNs' means transfer No Spawn building to Auto Spawn building
+        public method addFarmingBuilding takes unit building, boolean fromNs returns nothing
+            local integer bti = GetUnitTypeId(building)
+            // Add Auto Spawn building
+            if not fromNs then
+                if bti == CST_BTI_SheepFold then
+                    set sheepFoldCount = sheepFoldCount + 1
+                elseif bti == CST_BTI_Pigen then
+                    set pigenCount = pigenCount + 1
+                elseif bti == CST_BTI_SnakeHole then
+                    set snakeHoleCount = snakeHoleCount + 1
+                elseif bti == CST_BTI_Cage then
+                    set cageCount = cageCount + 1
+                endif
+            endif
+            
+            // Transfer No Spawn building to Auto Spawn building
+            if fromNs then
+                if bti == CST_BTI_SheepFoldNs then
+                    set sheepFoldCount = sheepFoldCount + 1
+                    set sheepFoldNsCount = sheepFoldNsCount - 1
+                elseif bti == CST_BTI_PigenNs then
+                    set pigenCount = pigenCount + 1
+                    set pigenNsCount = pigenNsCount - 1
+                elseif bti == CST_BTI_SnakeHoleNs then
+                    set snakeHoleCount = snakeHoleCount + 1
+                    set snakeHoleNsCount = snakeHoleNsCount - 1
+                elseif bti == CST_BTI_CageNs then
+                    set cageCount = cageCount + 1
+                    set cageNsCount = cageNsCount - 1
+                endif
+            endif
+            
+        endmethod
+        
+        // Upgrade a farming building
+        public method upgradeFarmingBuilding takes unit building returns nothing
+            if GetUnitTypeId(building) == CST_BTI_Pigen then
+                set sheepFoldCount = sheepFoldCount - 1
+                set pigenCount = pigenCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_SnakeHole then
+                set pigenCount = pigenCount - 1
+                set snakeHoleCount = snakeHoleCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_Cage then
+                set snakeHoleCount = snakeHoleCount - 1
+                set cageCount = cageCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_PigenNs then
+                set sheepFoldNsCount = sheepFoldNsCount - 1
+                set pigenNsCount = pigenNsCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_SnakeHoleNs then
+                set pigenNsCount = pigenNsCount - 1
+                set snakeHoleNsCount = snakeHoleNsCount + 1
+            elseif GetUnitTypeId(building) == CST_BTI_CageNs then
+                set snakeHoleNsCount = snakeHoleNsCount - 1
+                set cageNsCount = cageNsCount + 1
+            endif
+        endmethod
+        
+        // Note, 'toNs' means transfer building to No Spawn building
+        public method removeFarmingBuilding takes unit building, boolean toNs returns nothing
+            local integer bti = GetUnitTypeId(building)
+            if bti == CST_BTI_SheepFold then
+                set sheepFoldCount = sheepFoldCount - 1
+                if toNs then
+                    set sheepFoldNsCount = sheepFoldNsCount + 1 
+                endif
+            elseif bti == CST_BTI_Pigen then
+                set pigenCount = pigenCount - 1
+                if toNs then
+                    set pigenNsCount = pigenNsCount + 1 
+                endif
+            elseif bti == CST_BTI_SnakeHole then
+                set snakeHoleCount = snakeHoleCount - 1
+                if toNs then
+                    set snakeHoleNsCount = snakeHoleNsCount + 1 
+                endif
+            elseif bti == CST_BTI_Cage then
+                set cageCount = cageCount - 1
+                if toNs then
+                    set cageNsCount = cageNsCount + 1 
+                endif
+            endif
+            
+            // Remove No Spawn building
+            if not toNs then
+                if bti == CST_BTI_SheepFoldNs then
+                    set sheepFoldNsCount = sheepFoldNsCount - 1
+                elseif bti == CST_BTI_PigenNs then
+                    set pigenNsCount = pigenNsCount - 1
+                elseif bti == CST_BTI_SnakeHoleNs then
+                    set snakeHoleNsCount = snakeHoleNsCount - 1
+                elseif bti == CST_BTI_CageNs then
+                    set cageNsCount = cageNsCount - 1
+                endif
+            endif
         endmethod
         
         public method addFarmingAminal takes unit animal returns nothing
@@ -735,6 +863,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // On game start
         private static method onGameStart takes nothing returns boolean
             local thistype h = thistype[thistype.first]
+            local integer i = 0
             // Init statistics board
             call thistype.initStatsBoard()
             
@@ -742,15 +871,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 exitwhen h.end
                 // Init instance vars
                 call h.initInstance()
+                call f.createBeginUnits(i)
                 
                 // Display stats board
                 debug call BJDebugMsg("Display board to hunter:" + GetPlayerName(h.get))
                 set statsBoard.visible[h.get] = true
-                
-                set h= h.next
+                set i = i + 1
+                set h = h.next
             endloop
-            
-            
             
             return false
         endmethod
@@ -941,7 +1069,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call f.initInstance()
                 
                 // Create hero at random location
-                
+                call f.reviveHero()
                 
                 // Display stats board
                 debug call BJDebugMsg("Display board to farmer:" + GetPlayerName(f.get))

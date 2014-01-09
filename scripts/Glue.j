@@ -1,4 +1,4 @@
-library Glue /* v0.0.1 Xandria
+library Glue initializer init /* v0.0.1 by Xandria
 ********************************************************************************
 *     Glue : As its name says, this library is the under layout of system since 
 *   it depends on predefined units buildings of map, that means if you update 
@@ -64,6 +64,9 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_UTI_HunterHeroLastcode ='U00D'// Last Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroRandom   ='U00C'
         constant integer CST_UTI_HunterHeroSkeleton ='nskg'
+        // Itembox
+        constant integer CST_UTI_HunterItemBox  ='h00I'
+        constant integer CST_UTI_HunterWorker   ='h00B'
         
         // *** Farmer
         constant integer CST_UTI_FarmerHero ='H00P'
@@ -123,6 +126,8 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_ITI_DogMeat    ='I00W'
         constant integer CST_ITI_VultureMeat='I018'
         
+        constant integer CST_ITI_HunterMiniShop='I000'
+        
         /***********************************************************************
         * DestructableTypeId (DTI)
         ***********************************************************************/
@@ -140,7 +145,7 @@ library Glue /* v0.0.1 Xandria
         constant integer CST_TCI_TowerVisionUp  ='R00R'
         
         /***********************************************************************
-        * Region & location, some memory leaks, not big deal, let it be
+        * Region & location, little memory leakage, not big deal, let it be
         ***********************************************************************/
         constant rect CST_RGN_SkeletonRevive=Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
         constant rect CST_RGN_SecretGarden=Rect(5888.0, - 3840.0, 6400.0, - 3328.0)
@@ -150,6 +155,12 @@ library Glue /* v0.0.1 Xandria
         
         constant location CST_LCT_SkeletonRevive=GetRectCenter(CST_RGN_SkeletonRevive)
 
+        // Hunters item box location
+        constant real VAR_ItemBoxFacing = 270.0
+        
+        real array VAR_ItemBoxXs
+        real array VAR_ItemBoxYs
+        
     endglobals
 
     function IsUnitHunterHero takes unit u returns boolean
@@ -162,5 +173,20 @@ library Glue /* v0.0.1 Xandria
     
     function IsUnitFarmerFarmingBuilding takes unit u returns boolean
         return GetUnitTypeId(u)==CST_BTI_SheepFold or GetUnitTypeId(u)==CST_BTI_Pigen or GetUnitTypeId(u)==CST_BTI_SnakeHole or GetUnitTypeId(u)==CST_BTI_Cage
+    endfunction
+    
+    /***************************************************************************
+	* Library Initiation
+	***************************************************************************/
+    private function init takes nothing returns nothing
+        set VAR_ItemBoxXs[0] = - 6976.0
+        set VAR_ItemBoxXs[1] = - 6720.0
+        set VAR_ItemBoxXs[2] = - 6976.0
+        set VAR_ItemBoxXs[3] = - 6720.0
+        
+        set VAR_ItemBoxYs[0] = - 1472.0
+        set VAR_ItemBoxYs[1] = - 1472.0
+        set VAR_ItemBoxYs[2] = - 1728.0
+        set VAR_ItemBoxYs[3] = - 1728.0
     endfunction
 endlibrary

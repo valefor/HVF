@@ -15,7 +15,9 @@ struct EventManager
     static trigger trigHunterPickupItem
     static trigger trigFarmerUnitDeath
     static trigger trigFarmerFarmingBuildingFinish
+    static trigger trigFarmerFarmingBuildingUpgrade
     static trigger trigFarmerSpellCast
+    static trigger trigFarmerUnitIssuedOrder
     
     /***************************************************************************
     * Bind selected Hunter Hero to Player
@@ -50,7 +52,7 @@ struct EventManager
         
         debug call BJDebugMsg(GetUnitName(enteringUnit) + " enter map") 
         if Farmer.contain(GetOwningPlayer(enteringUnit)) then
-            // call f.addFarmingBuilding(enteringUnit,false)
+            call f.addFarmingBuilding(enteringUnit,false)
             call f.addFarmingAminal(enteringUnit)
         endif
         
@@ -67,7 +69,7 @@ struct EventManager
         return true
         //return GetUnitTypeId(GetFilterUnit()) == CST_BTI_SmallTree or GetUnitTypeId(GetFilterUnit()) == CST_BTI_MagicTree
     endmethod
-    // Event Listener
+    // Event Handler
     private static method onPlantTree takes nothing returns boolean
         debug call BJDebugMsg("Start to build " + GetUnitName(GetTriggerUnit()))
         if GetUnitTypeId(GetTriggerUnit()) == CST_BTI_SmallTree then
@@ -94,7 +96,7 @@ struct EventManager
         // return IsUnitHunterHero(GetFilterUnit())
         return true
     endmethod
-    // Event Listener
+    // Event Handler
     private static method onHunterPickupItem takes nothing returns boolean
         local item manItem = GetManipulatedItem()
         local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
@@ -116,7 +118,7 @@ struct EventManager
         // return IsUnitHunterHero(GetFilterUnit())
         return true
     endmethod
-    // Event Listener
+    // Event Handler
     private static method onHunterUnitDeath takes nothing returns boolean
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
@@ -138,7 +140,7 @@ struct EventManager
     * When farmer player unit die, update counters
     ***************************************************************************/
     // Event Filter
-    // Event Listener
+    // Event Handler
     private static method onFarmerUnitDeath takes nothing returns boolean    
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
@@ -165,7 +167,7 @@ struct EventManager
         call f.removeFarmingAminal(dyingUnit)
         
         // If farmer farming building is destroyed/canceled
-        // call f.removeFarmingBuilding(dyingUnit, false)
+        call f.removeFarmingBuilding(dyingUnit, false)
         
         
         set dyingUnit = null
@@ -181,9 +183,28 @@ struct EventManager
         //return IsUnitFarmerFarmingBuilding(GetFilterUnit())
         return true
     endmethod
-    // Event Listener
+    // Event Handler
     private static method onFarmerFarmingBuildingFinish takes nothing returns boolean    
         debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetTriggerUnit()))+ " build a " + GetUnitName(GetTriggerUnit()))
+        return false
+    endmethod
+    
+    /***************************************************************************
+    * When farmer building is upgraded, update counters
+    ***************************************************************************/
+    // Event Filter
+    private static method filterFarmerFarmingBuildingUpgrade takes nothing returns boolean
+        //return IsUnitFarmerFarmingBuilding(GetFilterUnit())
+        return true
+    endmethod
+    // Event Handler
+    private static method onFarmerFarmingBuildingUpgrade takes nothing returns boolean    
+        local unit updatedUnit = GetTriggerUnit()
+        local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(updatedUnit))]
+        
+        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetTriggerUnit()))+ " upgrade to " + GetUnitName(GetTriggerUnit())) 
+        call f.upgradeFarmingBuilding(updatedUnit)
+        
         return false
     endmethod
     
@@ -195,7 +216,7 @@ struct EventManager
         //return IsUnitFarmerFarmingBuilding(GetFilterUnit())
         return true
     endmethod
-    // Event Listener
+    // Event Handler
     private static method onFarmerSpellCast takes nothing returns boolean    
         local unit spellCastUnit = GetTriggerUnit() // GetSpellAbilityUnit
         local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(spellCastUnit))]
@@ -229,6 +250,31 @@ struct EventManager
     endmethod
     
     /***************************************************************************
+    * When farmer unit issues orders, update counters
+    ***************************************************************************/
+    // Event Filter
+    private static method filterFarmerUnitIssuedOrder takes nothing returns boolean
+        //return IsUnitFarmerFarmingBuilding(GetFilterUnit())
+        return true
+    endmethod
+    // Event Handler
+    private static method onFarmerUnitIssuedOrder takes nothing returns boolean    
+        local unit orderedUnit = GetOrderedUnit() // GetSpellAbilityUnit
+        local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(orderedUnit))]
+        local integer orderId = GetIssuedOrderId()
+        
+        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(orderedUnit))+ " issued order: " + OrderId2String(orderId)) 
+        
+        if orderId == ORDERID_bearform then
+            call f.transform2Ns(orderedUnit)
+        elseif orderId == ORDERID_unbearform then
+            call f.transform2As(orderedUnit)
+        endif
+        
+        return false
+    endmethod
+    
+    /***************************************************************************
     * Do clean-up work for leaving player
     ***************************************************************************/
     private static method onPlayerLeave takes nothing returns boolean
@@ -257,7 +303,44 @@ struct EventManager
         set pLeave = null
         return false
     endmethod
+    
+    /***************************************************************************
+    * No-Infighting mode is on, When unit issues attack order, forbid it
+    ***************************************************************************/
+    // Event Handler
+    private static method onUnitIssuedAttackOrder takes nothing returns boolean
+        if GetIssuedOrderId() == ORDERID_attack then
+            if InSameForce(GetOwningPlayer(GetOrderTargetUnit()), GetOwningPlayer(GetOrderedUnit())) then
+                call IssueImmediateOrderById(GetOrderedUnit(), ORDERID_cancel)
+            endif
+        endif
+        return false
+    endmethod
+    
+    // Forbid infighting
+    static method forbidInfighting takes nothing returns nothing
+        local Farmer f = Farmer[Farmer.first]
+        local Hunter h = Hunter[Hunter.first]
+        local trigger trigUnitIssuedAttackOrder = CreateTrigger()
         
+        call TriggerAddCondition( trigUnitIssuedAttackOrder,Condition(function thistype.onUnitIssuedAttackOrder) )
+        
+        loop
+            exitwhen h.end
+            call TriggerRegisterPlayerUnitEvent(trigUnitIssuedAttackOrder, f.get, EVENT_PLAYER_UNIT_ISSUED_TARGET_ORDER, null)
+            set h= h.next
+        endloop
+        
+        loop
+            exitwhen f.end
+            call TriggerRegisterPlayerUnitEvent(trigUnitIssuedAttackOrder, f.get, EVENT_PLAYER_UNIT_ISSUED_TARGET_ORDER, null)
+            set f= f.next
+        endloop
+        
+        set trigUnitIssuedAttackOrder = null
+    endmethod
+    
+    
     // Start listen on events
     static method listen takes nothing returns nothing
         local Farmer f = Farmer[Farmer.first]
@@ -276,7 +359,6 @@ struct EventManager
         // Hero Tavern belongs to 'Neutral Passive Player'
         call TriggerRegisterPlayerUnitEvent(trigSelectHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
         
-        // We only care about hunter's hero death
         loop
             exitwhen h.end
             call TriggerRegisterPlayerUnitEvent(trigHunterUnitDeath, h.get, EVENT_PLAYER_UNIT_DEATH, Filter(function thistype.filterHunterUnitDeath))
@@ -289,7 +371,9 @@ struct EventManager
             call TriggerRegisterPlayerUnitEvent(trigFarmerUnitDeath, f.get, EVENT_PLAYER_UNIT_DEATH, null)
             call TriggerRegisterPlayerUnitEvent(trigPlantTree, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
             call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingFinish, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH, Filter(function thistype.filterFarmerFarmingBuildingFinish))
+            call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingUpgrade, f.get, EVENT_PLAYER_UNIT_UPGRADE_FINISH, Filter(function thistype.filterFarmerFarmingBuildingUpgrade))
             call TriggerRegisterPlayerUnitEvent(trigFarmerSpellCast, f.get, EVENT_PLAYER_UNIT_SPELL_CAST, Filter(function thistype.filterFarmerSpellCast))
+            call TriggerRegisterPlayerUnitEvent(trigFarmerUnitIssuedOrder, f.get, EVENT_PLAYER_UNIT_ISSUED_ORDER, Filter(function thistype.filterFarmerUnitIssuedOrder))
             set f= f.next
         endloop
     endmethod
@@ -302,7 +386,9 @@ struct EventManager
         set thistype.trigHunterPickupItem = CreateTrigger()
         set thistype.trigFarmerUnitDeath = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingFinish = CreateTrigger()
+        set thistype.trigFarmerFarmingBuildingUpgrade = CreateTrigger()
         set thistype.trigFarmerSpellCast = CreateTrigger()
+        set thistype.trigFarmerUnitIssuedOrder = CreateTrigger()
         
         
         // Set up triggers handle function
@@ -312,7 +398,9 @@ struct EventManager
         call TriggerAddCondition( trigHunterPickupItem,Condition(function thistype.onHunterPickupItem) )
         call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
         call TriggerAddCondition( trigFarmerFarmingBuildingFinish,Condition(function thistype.onFarmerFarmingBuildingFinish) )
+        call TriggerAddCondition( trigFarmerFarmingBuildingUpgrade,Condition(function thistype.onFarmerFarmingBuildingUpgrade) )
         call TriggerAddCondition( trigFarmerSpellCast,Condition(function thistype.onFarmerSpellCast) )
+        call TriggerAddCondition( trigFarmerUnitIssuedOrder,Condition(function thistype.onFarmerUnitIssuedOrder) )
     endmethod
     
 endstruct

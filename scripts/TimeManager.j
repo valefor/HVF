@@ -7,7 +7,6 @@ library TimeManager initializer init/* v0.0.1 Xandria
 *   
 *       */ Dialog   /*
 *       */ Core     /*  core functions must be loaded first
-*       */ Event    /*
 *       */ TimerUtils /*
 *       */ TimerPool/*
 *
@@ -201,6 +200,10 @@ In multiplayer however, this trigger should work.
             call TIMEOVER.register(c)
         endmethod
         */
+        static method setTime takes real t returns boolean
+            set thistype.playTime = t
+        endmethod
+        
         static method yellowAlert takes nothing returns boolean
             return false
         endmethod
@@ -239,7 +242,7 @@ In multiplayer however, this trigger should work.
             */ 
         endmethod
         
-        private static method gameStart takes nothing returns nothing
+        public static method countdownStart takes nothing returns nothing
             // If we need to use such PolledWait/PauseGame game time functions, 
             // trigger action is the only choice
             // local SimpleTrigger tgCdPlayTime = SimpleTrigger.create()
@@ -286,7 +289,7 @@ In multiplayer however, this trigger should work.
                 debug call BJDebugMsg("Game time is set to " + I2S(R2I(thistype.playTime)) + " minutes.")
                 // show play time dialog
                 //call StartCountdownPlayTime()
-                call thistype.gameStart()
+                call thistype.countdownStart()
             endif
             debug call BJDebugMsg("Seletes:" + I2S(thistype.selects))
             debug call BJDebugMsg("Total:" + I2S(Human.count))
@@ -313,7 +316,7 @@ In multiplayer however, this trigger should work.
             endloop
             // calculate play time
             set thistype.playTime = thistype.playTime/thistype.selects 
-            call thistype.gameStart()
+            call thistype.countdownStart()
             return false
         endmethod
         
@@ -357,8 +360,13 @@ In multiplayer however, this trigger should work.
             // dialogs can't be displayed on init and the scope's init-func is run during init
             // so we need to use TimerStart to call functions which need to show dialog
             debug call BJDebugMsg("Play.vote")
-            call TimerStart(CreateTimer(), 0, false, function thistype.startVote)
-            // register a onetime timer to terminate voting after 15 seconds
+            if not Params.flagGameModeNv then
+                call TimerStart(CreateTimer(), 0, false, function thistype.startVote)
+            else
+                // No need to vote for play time, start game
+                set thistype.playTime = CST_OT_PlayTime 
+                call thistype.countdownStart()
+            endif
         endmethod
         
         private static method onInit takes nothing returns nothing

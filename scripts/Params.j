@@ -1,30 +1,11 @@
+library Params initializer init/* v0.0.1 Xandria
+********************************************************************************
+* 	Library for game parameters
+*******************************************************************************/
 globals
     /* ==============================Constants=============================== */
-
-    /***************************************************************************
-    * Literalization
-    ***************************************************************************/
-    // For game time voting
-    constant string CST_STR_PlayTimeTitle= "请选择游戏时间"
-    constant string CST_STR_PlayTime40m="40分钟游戏时间(对猎人有利)"
-    constant string CST_STR_PlayTime50m="50分钟游戏时间"
-    constant string CST_STR_PlayTime60m="60分钟游戏时间(对农民有利)"
+    constant integer CST_INT_TechidHero='HERO'
     
-    constant string CST_STR_RemainedTime="剩余游戏时间"
-    
-    constant string CST_STR_Hunter= "猎人"
-    constant string CST_STR_Farmer= "农民"
-    
-    // The following nick name must be identical with that in propername list
-    constant string CST_STR_FarmerProperNameGreedy= "敛财者"
-    constant string CST_STR_FarmerProperNameKiller= "杀狼者"
-    constant string CST_STR_FarmerProperNameNomader= "游牧者"
-    constant string CST_STR_FarmerProperNameCoward= "胆小鬼"
-    constant string CST_STR_FarmerProperNameWoody= "伐木工"
-    constant string CST_STR_FarmerProperNameMaster= "老农民"
-    constant string CST_STR_FarmerProperNameDefender= "炮塔狂"
-    constant string CST_STR_FarmerProperNamePlague= "瘟疫农"
-
     constant integer CST_INT_FarmerRoleInvalid=0
     constant integer CST_INT_FarmerRoleGreedy=111
     constant integer CST_INT_FarmerRoleKiller=222
@@ -38,7 +19,6 @@ globals
     * Game Parameters
     ***************************************************************************/
     // *** Limitaition
-    constant integer CST_INT_TechidHero='HERO'
     constant integer CST_INT_MaxHeros=1
     constant integer CST_INT_MaxHunters=4
     constant integer CST_INT_MaxFarmers=8
@@ -54,7 +34,7 @@ globals
     // Detect (Minitues)
     constant real CST_OT_Detect=10.0
     // Default play time (Minitues)
-    constant real CST_OT_PlayTime=60.0
+    constant real CST_OT_PlayTime=50.0
     constant integer CST_INT_MAXOT = 3
     
     // *** Timers - Periodic Timer
@@ -108,8 +88,32 @@ globals
     constant integer CST_BDCOL_ST=2   // Status
     constant integer CST_BDCOL_DF=9   // DEBUG FLAG
     
+    // *** Message display duration
+    constant integer CST_MSGDUR_Important=60
+    constant integer CST_MSGDUR_Beaware =30
+    constant integer CST_MSGDUR_Normal  =10
+    constant integer CST_MSGDUR_Tips    =5
+    
     /* ==============================Variables=============================== */
     // *** Deltas, for debug use
     // 60 seconds, 1 means one minute, 1 means one second in debug mode
     integer VAR_INT_PlayTimeDelta=60
 endglobals
+
+struct Params extends array
+    // Game Mode
+    static boolean flagGameModeSp   = false
+    static boolean flagGameModeNv   = false
+    static boolean flagGameModeNi   = false
+    
+    // Medal
+    
+    /***************************************************************************
+    * Library Initiation
+    ***************************************************************************/
+    private function init takes nothing returns nothing
+    endfunction
+
+endstruct
+
+endlibrary

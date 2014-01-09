@@ -1,13 +1,14 @@
 library Core initializer init/* v0.0.1 Xandria
 ********************************************************************************
-*     HVF Core library which provides some useful functions
-*
+* HVF Core library which provides some useful functions
+*   Better to put prerequisite libraries here
 ********************************************************************************
 *
 *   */ uses /*
 *   
 *       */ Utils /*
 *       */ Glue  /* 
+*       */ Params/*
 *
 ********************************************************************************
 *    *** NAMING ***
