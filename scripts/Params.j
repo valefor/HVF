@@ -24,6 +24,12 @@ globals
     constant integer CST_INT_MaxFarmers=8
     constant integer CST_INT_MaxAnimals=550
     
+    // *** Begin resource
+    constant integer CST_INT_FarmerBeginGold=43
+    constant integer CST_INT_FarmerBeginLumber=0
+    constant integer CST_INT_HunterBeginGold=43
+    constant integer CST_INT_HunterBeginLumber=10
+    
     // *** Timers - Onetime Timer(postfix must be '.01')
     // Game host has 10 seconds to choose game mode
     constant real CST_OT_GameMode=10.01
@@ -61,7 +67,8 @@ globals
     constant integer CST_INT_InitHunterSkillPoints=3
     constant integer CST_INT_InitFarmerSkillPoints=2
     
-    // *** Salary based on aminal type
+    // *** Salary based on aminal type (every 15secs)
+    constant integer CST_INT_SalaryAlms=1
     constant integer CST_INT_SalaryBaseSheep=1
     constant integer CST_INT_SalaryBasePig=2
     constant integer CST_INT_SalaryBaseSnake=3
@@ -107,13 +114,13 @@ struct Params extends array
     static boolean flagGameModeNi   = false
     
     // Medal
-    
-    /***************************************************************************
-    * Library Initiation
-    ***************************************************************************/
-    private function init takes nothing returns nothing
-    endfunction
-
 endstruct
 
+/***************************************************************************
+* Library Initiation
+***************************************************************************/
+private function init takes nothing returns nothing
+endfunction
+    
+    
 endlibrary

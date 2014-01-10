@@ -118,16 +118,25 @@ struct EventManager
         // return IsUnitHunterHero(GetFilterUnit())
         return true
     endmethod
+    private static method reviveHunterHero takes nothing returns nothing
+        local TimerPointer tp = TimerPool[GetExpiredTimer()]
+        local Hunter h = tp.count
+        
+        call h.reviveHero()
+        call tp.destroy()
+    endmethod
     // Event Handler
     private static method onHunterUnitDeath takes nothing returns boolean
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
         local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
-        if IsUnitHunterHero(dyingUnit) then
+        local TimerPointer tp = TimerPointer.create()
+        
+        if IsUnitHunterHero(dyingUnit) or GetUnitTypeId(dyingUnit) == CST_UTI_HunterHeroSkeleton then
             // Hunter hero was killed, give a giant skeleton as hunter hero
-            call h.reviveSkeleton(true)
-        elseif GetUnitTypeId(dyingUnit) == CST_UTI_HunterHeroSkeleton then
-            call h.reviveSkeleton(false)
+            set tp.count = h
+            // In order to display hero death anima, we need to postponed revive
+            call TimerStart(tp.timer, 1.25, false, function thistype.reviveHunterHero)
         endif
         if Farmer.contain(GetOwningPlayer(killingUnit)) then
         endif
@@ -140,6 +149,13 @@ struct EventManager
     * When farmer player unit die, update counters
     ***************************************************************************/
     // Event Filter
+    private static method reviveFarmerHero takes nothing returns nothing
+        local TimerPointer tp = TimerPool[GetExpiredTimer()]
+        local Farmer f = tp.count
+        
+        call f.reviveHero()
+        call tp.destroy()
+    endmethod
     // Event Handler
     private static method onFarmerUnitDeath takes nothing returns boolean    
         local unit dyingUnit = GetDyingUnit()
@@ -148,7 +164,8 @@ struct EventManager
         local integer killingUnitTypeId = GetUnitTypeId(killingUnit)
         local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(dyingUnit))]
         local Hunter h = Hunter[GetPlayerId(GetOwningPlayer(killingUnit))]
-        
+        local TimerPointer tp = TimerPointer.create()
+
         debug call BJDebugMsg(GetUnitName(GetTriggerUnit()) + " die") 
         // If farmer Hero die
         if dyingUnitTypeId == CST_UTI_FarmerHero then
@@ -160,7 +177,9 @@ struct EventManager
                 // Revive Farmer Hero at random location
             else // Farmer hero was killed by ally or neutral 
             endif
-            call f.reviveHero()
+            set tp.count = f
+            // In order to display hero death anima, we need to postponed revive
+            call TimerStart(tp.timer, 1.25, false, function thistype.reviveFarmerHero)
         endif
         
         // If farmer farming animal die
@@ -309,9 +328,14 @@ struct EventManager
     ***************************************************************************/
     // Event Handler
     private static method onUnitIssuedAttackOrder takes nothing returns boolean
-        if GetIssuedOrderId() == ORDERID_attack then
+        local integer orderId = GetIssuedOrderId()
+        local integer targetUti = GetUnitTypeId(GetOrderTargetUnit())
+        
+        debug call BJDebugMsg(GetPlayerName(GetOwningPlayer(GetOrderedUnit()))+ " issued order: " + OrderId2String(orderId)) 
+        if GetIssuedOrderId() == ORDERID_attack and (targetUti == CST_UTI_FarmerHero or IsUnitHunterHero(GetOrderTargetUnit())) then
+            debug call BJDebugMsg(GetUnitName(GetOrderedUnit())+" is trying to attack " + GetUnitName(GetOrderTargetUnit()))
             if InSameForce(GetOwningPlayer(GetOrderTargetUnit()), GetOwningPlayer(GetOrderedUnit())) then
-                call IssueImmediateOrderById(GetOrderedUnit(), ORDERID_cancel)
+                call IssueImmediateOrderById(GetOrderedUnit(), ORDERID_holdposition)
             endif
         endif
         return false

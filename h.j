@@ -17,8 +17,8 @@
 //! import "scripts\lib\TimerPool.j"
 
 // AIDS Library
-//! import "scripts\aids\HunterAIDS.j"
-//! import "scripts\aids\FarmerAIDS.j"
+// import "scripts\aids\HunterAIDS.j"
+// import "scripts\aids\FarmerAIDS.j"
 
 
 // HVF vJass Library - for HVF map only

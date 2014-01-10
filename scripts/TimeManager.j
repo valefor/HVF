@@ -63,6 +63,8 @@ In multiplayer however, this trigger should work.
         readonly static TimerPointer otDetectionOff
         readonly static TimerPointer otPlayTimeOver
         
+        private static timerTickCount
+        
         // !DEPRECATED
         static method getTimer takes real timeout returns TimerPointer
             if timeout == CST_OT_SelectHero then
@@ -100,7 +102,18 @@ In multiplayer however, this trigger should work.
         
         private static method onExpire takes nothing returns nothing
             local TimerPointer tp = TimerPool[GetExpiredTimer()]
+            set timerTickCount = timerTickCount + 1
+            
             //debug call BJDebugMsg("Timer timeout")
+            if IsIntDividableBy(timerTickCount, 2) then
+                call TriggerEvaluate(thistype.pt10s.trigger)
+            elseif IsIntDividableBy(timerTickCount, 3) then
+                call TriggerEvaluate(thistype.pt15s.trigger)
+            elseif IsIntDividableBy(timerTickCount, 6) then
+                call TriggerEvaluate(thistype.pt30s.trigger)
+            elseif IsIntDividableBy(timerTickCount, 12) then
+                call TriggerEvaluate(thistype.pt60s.trigger)
+            endif
             /*
             if tp == pt1s then
                 debug call BJDebugMsg("Periodic timer(1s) timeout")
@@ -129,10 +142,10 @@ In multiplayer however, this trigger should work.
         
         static method start takes nothing returns nothing
             // PT
-            call TimerStart(thistype.pt10s.timer, thistype.pt10s.timeout, true, function thistype.onExpire)
-            call TimerStart(thistype.pt15s.timer, thistype.pt15s.timeout, true, function thistype.onExpire)
-            call TimerStart(thistype.pt30s.timer, thistype.pt30s.timeout, true, function thistype.onExpire)
-            call TimerStart(thistype.pt60s.timer, thistype.pt60s.timeout, true, function thistype.onExpire)
+            //call TimerStart(thistype.pt10s.timer, thistype.pt10s.timeout, true, function thistype.onExpire)
+            //call TimerStart(thistype.pt15s.timer, thistype.pt15s.timeout, true, function thistype.onExpire)
+            //call TimerStart(thistype.pt30s.timer, thistype.pt30s.timeout, true, function thistype.onExpire)
+            //call TimerStart(thistype.pt60s.timer, thistype.pt60s.timeout, true, function thistype.onExpire)
             
             // OT
             call TimerStart(thistype.otGameStart.timer, 0.01, false, function thistype.onExpire)
@@ -153,7 +166,8 @@ In multiplayer however, this trigger should work.
         
         private static method onInit takes nothing returns nothing
             // set VAR_INT_PlayTimeDelta to 1 seconds in debug mode to fast debugging
-            debug set VAR_INT_PlayTimeDelta = 1
+            // debug set VAR_INT_PlayTimeDelta = 1
+            set timerTickCount = 0
             
             // PT
             set pt1s = TimerPointer.create()
@@ -200,7 +214,7 @@ In multiplayer however, this trigger should work.
             call TIMEOVER.register(c)
         endmethod
         */
-        static method setTime takes real t returns boolean
+        static method setTime takes real t returns nothing
             set thistype.playTime = t
         endmethod
         

@@ -50,11 +50,7 @@ library Glue initializer init /* v0.0.1 by Xandria
     * Globals
     ***************************************************************************/
     globals
-        
-        constant rect    CST_RCT_DefaultBirthPlace= Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
-        //private location locHeroShop = Location(- 6240.0, - 2208.0)
-        
-        
+
         /***********************************************************************
         * UnitTypeId (UTI)
         ***********************************************************************/
@@ -99,6 +95,9 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_BTI_SmallTree  ='h00O'
         constant integer CST_BTI_MagicTree  ='h00T'
         
+        constant integer CST_BTI_Slaughterhouse = 'h00K'
+        constant integer CST_BTI_ArmsRecycler   = 'h014'
+        
         /***********************************************************************
         * AbilityId (ABI)
         ***********************************************************************/
@@ -118,15 +117,16 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_ITI_MythticGrass   ='I003'
         constant integer CST_ITI_MythticFlower  ='I00G'
         
-        constant integer CST_ITI_TowerBase  ='I00Y'
-        constant integer CST_ITI_RetrainBook='tret'
+        constant integer CST_ITI_TowerBase      ='I00Y'
+        constant integer CST_ITI_RetrainBook    ='tret'
         
-        constant integer CST_ITI_RabbitMeat ='I00H'
-        constant integer CST_ITI_Venision   ='I00X'
-        constant integer CST_ITI_DogMeat    ='I00W'
-        constant integer CST_ITI_VultureMeat='I018'
+        constant integer CST_ITI_RabbitMeat     ='I00H'
+        constant integer CST_ITI_Venision       ='I00X'
+        constant integer CST_ITI_DogMeat        ='I00W'
+        constant integer CST_ITI_VultureMeat    ='I018'
         
-        constant integer CST_ITI_HunterMiniShop='I000'
+        constant integer CST_ITI_HunterMiniShop ='I000'
+        constant integer CST_ITI_HewAxe         ='I005'
         
         /***********************************************************************
         * DestructableTypeId (DTI)
@@ -144,25 +144,78 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_TCI_TowerHealing   ='R00L'
         constant integer CST_TCI_TowerVisionUp  ='R00R'
         
+        
         /***********************************************************************
-        * Region & location, little memory leakage, not big deal, let it be
+        * Others
         ***********************************************************************/
-        constant rect CST_RGN_SkeletonRevive=Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
-        constant rect CST_RGN_SecretGarden=Rect(5888.0, - 3840.0, 6400.0, - 3328.0)
-        constant rect CST_RGN_WaterLand1=Rect(3840.0, 4640.0, 6848.0, 6944.0)
-        constant rect CST_RGN_WaterLand2=Rect(5376.0, 1408.0, 6560.0, 3584.0)
-        constant rect CST_RGN_WaterLand3=Rect(- 7712.0, - 1600.0, - 7232.0, - 1248.0)
-        
-        constant location CST_LCT_SkeletonRevive=GetRectCenter(CST_RGN_SkeletonRevive)
-
-        // Hunters item box location
-        constant real VAR_ItemBoxFacing = 270.0
-        
-        real array VAR_ItemBoxXs
-        real array VAR_ItemBoxYs
+        constant real CST_Facing_Building = 270.0
+        constant real CST_Facing_Unit = 90.0
         
     endglobals
 
+    struct MapLocation
+        /***********************************************************************
+        * Region & location, little memory leakage, not big deal, let it be
+        *   Note! Don't use bj_VARs like 'bj_mapInitialPlayableArea' since it's 
+        *   blizzard var that wouldn't be available until 'InitBlizzard()' is 
+        *   called, if you try to use these vars, you'll always get '0'
+        ***********************************************************************/
+        static rect regionHeroRevive
+        static rect regionSecretGarden
+        static rect regionWaterLand1
+        static rect regionWaterLand2
+        static rect regionWaterLand3
+        
+        real array itemBoxXs
+        real array itemBoxYs
+        real mapMaxX
+        real mapMinX
+        real mapMaxY
+        real mapMinY
+        
+        static location heroReviveLoc
+        
+        static method operator randomX takes nothing returns real
+            call SetRandomSeed(GetRandomInt(0, 1000000))
+            return GetRandomReal(mapMinX, mapMaxX)
+        endmethod
+        
+        static method operator randomY takes nothing returns real
+            call SetRandomSeed(GetRandomInt(0, 1000000))
+            return GetRandomReal(mapMinY, mapMaxY)
+        endmethod
+        
+        /***********************************************************************
+        * NOTE: call this function in library init function
+        ***********************************************************************/
+        private static method onInit takes nothing returns nothing
+            set regionHeroRevive=Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
+            set regionSecretGarden=Rect(5888.0, - 3840.0, 6400.0, - 3328.0)
+            set regionWaterLand1=Rect(3840.0, 4640.0, 6848.0, 6944.0)
+            set regionWaterLand2=Rect(5376.0, 1408.0, 6560.0, 3584.0)
+            set regionWaterLand3=Rect(- 7712.0, - 1600.0, - 7232.0, - 1248.0)
+            set heroReviveLoc=Location(GetRectCenterX(regionHeroRevive), GetRectCenterY(regionHeroRevive))
+            
+            set itemBoxXs[0] = - 6976.0
+            set itemBoxXs[1] = - 6720.0
+            set itemBoxXs[2] = - 6976.0
+            set itemBoxXs[3] = - 6720.0
+            
+            set itemBoxYs[0] = - 1472.0
+            set itemBoxYs[1] = - 1472.0
+            set itemBoxYs[2] = - 1728.0
+            set itemBoxYs[3] = - 1728.0
+            
+            set mapMaxX = GetCameraBoundMaxX()+GetCameraMargin(CAMERA_MARGIN_RIGHT)
+            set mapMinX = GetCameraBoundMinX()-GetCameraMargin(CAMERA_MARGIN_LEFT)
+            set mapMaxY = GetCameraBoundMaxY()+GetCameraMargin(CAMERA_MARGIN_TOP)
+            set mapMinY = GetCameraBoundMinY()-GetCameraMargin(CAMERA_MARGIN_BOTTOM)
+            
+            debug call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
+            
+        endmethod
+    endstruct
+    
     function IsUnitHunterHero takes unit u returns boolean
         return GetUnitTypeId(u) < CST_UTI_HunterHeroLastcode and GetUnitTypeId(u) > CST_UTI_HunterHeroFirstcode
     endfunction
@@ -175,18 +228,22 @@ library Glue initializer init /* v0.0.1 by Xandria
         return GetUnitTypeId(u)==CST_BTI_SheepFold or GetUnitTypeId(u)==CST_BTI_Pigen or GetUnitTypeId(u)==CST_BTI_SnakeHole or GetUnitTypeId(u)==CST_BTI_Cage
     endfunction
     
+    function CreateHunterBeginUnits takes player p, integer i returns nothing
+        local unit u = CreateUnit(p, CST_UTI_HunterItemBox, MapLocation.itemBoxXs[i], MapLocation.itemBoxYs[i], VAR_ItemBoxFacing)
+        call UnitAddItemToSlotById(u, 'I005', 0)
+        call UnitAddItemToSlotById(u, 'shrs', 1)
+        call UnitAddItemToSlotById(u, 'pman', 2)
+        call UnitAddItemToSlotById(u, 'moon', 3)
+        call UnitAddItemToSlotById(u, 'dust', 4)
+        call UnitAddItemToSlotById(u, 'I000', 5)
+        call CreateUnit(p, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(CST_RGN_SkeletonRevive), GetRectMaxX(CST_RGN_SkeletonRevive)), GetRandomReal(GetRectMinY(CST_RGN_SkeletonRevive), GetRectMaxY(CST_RGN_SkeletonRevive)), bj_UNIT_FACING)
+        set u = null
+    endfunction
+    
     /***************************************************************************
 	* Library Initiation
 	***************************************************************************/
     private function init takes nothing returns nothing
-        set VAR_ItemBoxXs[0] = - 6976.0
-        set VAR_ItemBoxXs[1] = - 6720.0
-        set VAR_ItemBoxXs[2] = - 6976.0
-        set VAR_ItemBoxXs[3] = - 6720.0
-        
-        set VAR_ItemBoxYs[0] = - 1472.0
-        set VAR_ItemBoxYs[1] = - 1472.0
-        set VAR_ItemBoxYs[2] = - 1728.0
-        set VAR_ItemBoxYs[3] = - 1728.0
+        call MapLocation.init()
     endfunction
 endlibrary

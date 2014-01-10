@@ -38,7 +38,7 @@ GetOwningPlayer
     function GenRandomHunterHeroForPlayer takes player p, location loc returns unit
         local integer iRandom = GetRandomInt(1, CST_INT_MaxHunterHeroType)
         // Notice, 'location' would leak
-        local location rctLoc = GetRectCenter(CST_RCT_DefaultBirthPlace)
+        local location rctLoc = GetRectCenter(CST_RGN_SkeletonRevive)
         local integer iUnitTypeId
         
         if loc !=null then
@@ -71,53 +71,79 @@ GetOwningPlayer
     struct UnitManager
         // Create neutral aggresive units randomly every 30s
         private static method createRandomNeutralAggrUnits takes nothing returns boolean
-            local rect playableRect = GetPlayableMapRect()
             local integer i = 0
             local unit u
             
+            debug call BJDebugMsg("Create random units")
+            
             if GetPlayerState(Player(PLAYER_NEUTRAL_AGGRESSIVE), PLAYER_STATE_RESOURCE_FOOD_USED) <= 100 then
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
+                debug call BJDebugMsg("Create random units")
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_RabbitMeat, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_Venision, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_DogMeat, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_VultureMeat, GetUnitX(u), GetUnitY(u)))
             endif
             
-            call RemoveRect(playableRect)
-            set playableRect = null
             set u = null
             return false
         endmethod
         
         // Create neutral aggresive units at beginning
-        private static method createBeiginNeutralAggrUnits takes nothing returns boolean
+        // This function can't be condition or filter
+        static method createBeiginNeutralAggrUnits takes nothing returns boolean
             //GetRandomReal(GetRectMinX(whichRect), GetRectMaxX(whichRect)), GetRandomReal(GetRectMinY(whichRect), GetRectMaxY(whichRect))
             local rect playableRect = GetPlayableMapRect()
+            local location rndLoc = GetRandomLocInRect(playableRect)
             local integer i = 0
             local unit u
             
             loop
                 exitwhen i >= 10
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
+                /*
+                call BJDebugMsg("X:" + R2S(GetLocationX(rndLoc))+ ", Y:"+ R2S(GetLocationY(rndLoc)) )
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, GetLocationX(rndLoc), GetLocationY(rndLoc), bj_UNIT_FACING)
+                call UnitAddItem(u, CreateItem(CST_ITI_RabbitMeat, GetUnitX(u), GetUnitY(u)))
+                call RemoveLocation(rndLoc)
+                //call TriggerSleepAction(0.01)
+                set rndLoc = GetRandomLocInRect(playableRect)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, GetLocationX(rndLoc), GetLocationY(rndLoc), bj_UNIT_FACING)
+                call UnitAddItem(u, CreateItem(CST_ITI_Venision, GetUnitX(u), GetUnitY(u)))
+                call RemoveLocation(rndLoc)
+                //call TriggerSleepAction(0.01)
+                set rndLoc = GetRandomLocInRect(playableRect)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, GetLocationX(rndLoc), GetLocationY(rndLoc), bj_UNIT_FACING)
+                call UnitAddItem(u, CreateItem(CST_ITI_DogMeat, GetUnitX(u), GetUnitY(u)))
+                call RemoveLocation(rndLoc)
+                //call TriggerSleepAction(0.01)
+                set rndLoc = GetRandomLocInRect(playableRect)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, GetLocationX(rndLoc), GetLocationY(rndLoc), bj_UNIT_FACING)
+                call UnitAddItem(u, CreateItem(CST_ITI_VultureMeat, GetUnitX(u), GetUnitY(u)))
+                call RemoveLocation(rndLoc)
+                //call TriggerSleepAction(0.01)
+                set rndLoc = GetRandomLocInRect(playableRect)
+                */
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_RabbitMeat, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_Venision, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_DogMeat, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect)), GetRandomReal(GetRectMinY(playableRect), GetRectMaxY(playableRect)), bj_UNIT_FACING)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_VultureMeat, GetUnitX(u), GetUnitY(u)))
+                
                 set i = i + 1
             endloop
-            
+            call RemoveLocation(rndLoc)
             call RemoveRect(playableRect)
             set playableRect = null
             set u = null
@@ -125,7 +151,7 @@ GetOwningPlayer
         endmethod
         
         private static method onInit takes nothing returns nothing
-            call TimerManager.otGameStart.register(Filter(function thistype.createBeiginNeutralAggrUnits))
+            // call TimerManager.otGameStart.register(Filter(function thistype.createBeiginNeutralAggrUnits))
             call TimerManager.pt30s.register(Filter(function thistype.createRandomNeutralAggrUnits))
         endmethod
     endstruct

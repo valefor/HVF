@@ -200,7 +200,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     function InstallCommand takes nothing returns nothing
         // Add some test command in debug mode
         static if (DEBUG_MODE) then
-            call ChatCommand.create(RandomHeroCmd.CHAT_COMMAND,function RandomHeroCmd.onCommand)
+            //call ChatCommand.create(RandomHeroCmd.CHAT_COMMAND,function RandomHeroCmd.onCommand)
         endif
     endfunction
     
@@ -208,9 +208,9 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 	* Common Use Functions
 	***************************************************************************/
 	function InvalidGameModeCommands takes nothing returns nothing
-	    set ShufflePlayerCmd.valid == false
-	    set NoVotingCmd.valid == false
-	    set NoInfightCmd.valid == false
+	    set ShufflePlayerCmd.valid = false
+	    set NoVotingCmd.valid = false
+	    set NoInfightCmd.valid = false
 	endfunction
 	
 	public function EnableGameUtilCommands takes nothing returns nothing

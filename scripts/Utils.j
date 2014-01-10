@@ -68,4 +68,23 @@ library Utils/*
     function AppendHotkey takes string source, string hotkey returns string
         return "|cffffcc00[" + hotkey + "]|r " + source
     endfunction
+    
+    
+    // Get Random Real
+    function GetRandomRectX takes rect r returns real
+        call SetRandomSeed(GetRandomInt(0, 1000000))
+        return GetRandomReal(GetRectMinX(r), GetRectMaxX(r))
+    endfunction
+    
+    function GetRandomRectY takes rect r returns real
+        call SetRandomSeed(GetRandomInt(0, 1000000))
+        return GetRandomReal(GetRectMinY(r), GetRectMaxY(r))
+    endfunction
+    
+    function IsIntDividableBy takes integer dividen, integer divisor returns boolean
+        //local integer result = dividen/divisor
+        //local integer mod = dividen - result*divisor
+        return dividen - R2I(R2I(dividen/divisor)*divisor) == 0
+    endfunction
+    
 endlibrary
