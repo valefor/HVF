@@ -35,6 +35,7 @@ GetOwningPlayer
     endfunction
     
     // Generate a randome hunter hero for player
+    /*
     function GenRandomHunterHeroForPlayer takes player p, location loc returns unit
         local integer iRandom = GetRandomInt(1, CST_INT_MaxHunterHeroType)
         // Notice, 'location' would leak
@@ -44,7 +45,7 @@ GetOwningPlayer
         if loc !=null then
             set rctLoc = loc
         endif
-        /*
+        
         if iRandom == 1 then
             set iUnitTypeId = 'U003'
         elseif iRandom == 2 then
@@ -64,9 +65,10 @@ GetOwningPlayer
         elseif iRandom == 9 then
             set iUnitTypeId = 'U00B'
         endif
-        */
+        
         return CreateUnitAtLoc(p, CST_UTI_HunterHeroFirstcode+iRandom, rctLoc, 0)
     endfunction
+    */
     
     struct UnitManager
         // Create neutral aggresive units randomly every 30s

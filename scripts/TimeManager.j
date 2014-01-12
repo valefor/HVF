@@ -50,7 +50,7 @@ In multiplayer however, this trigger should work.
     ***************************************************************************/
     struct TimerManager extends array
         // Periodic Timers(PT)
-        readonly static TimerPointer pt1s
+        readonly static TimerPointer pt5s
         readonly static TimerPointer pt10s
         readonly static TimerPointer pt15s
         readonly static TimerPointer pt30s
@@ -63,7 +63,8 @@ In multiplayer however, this trigger should work.
         readonly static TimerPointer otDetectionOff
         readonly static TimerPointer otPlayTimeOver
         
-        private static timerTickCount
+        private static integer ptTickCount
+        private static integer otTickCount
         
         // !DEPRECATED
         static method getTimer takes real timeout returns TimerPointer
@@ -100,19 +101,21 @@ In multiplayer however, this trigger should work.
             return true
         endmethod
         
-        private static method onExpire takes nothing returns nothing
-            local TimerPointer tp = TimerPool[GetExpiredTimer()]
-            set timerTickCount = timerTickCount + 1
+        private static method onPtExpired takes nothing returns nothing
+            set ptTickCount = ptTickCount + 1
             
-            //debug call BJDebugMsg("Timer timeout")
-            if IsIntDividableBy(timerTickCount, 2) then
-                call TriggerEvaluate(thistype.pt10s.trigger)
-            elseif IsIntDividableBy(timerTickCount, 3) then
-                call TriggerEvaluate(thistype.pt15s.trigger)
-            elseif IsIntDividableBy(timerTickCount, 6) then
-                call TriggerEvaluate(thistype.pt30s.trigger)
-            elseif IsIntDividableBy(timerTickCount, 12) then
+            debug call BJDebugMsg("Periodic timer timeout")
+            if IsIntDividableBy(ptTickCount, 12) then
                 call TriggerEvaluate(thistype.pt60s.trigger)
+            endif
+            if IsIntDividableBy(ptTickCount, 6) then
+                call TriggerEvaluate(thistype.pt30s.trigger)
+            endif
+            if IsIntDividableBy(ptTickCount, 3) then
+                call TriggerEvaluate(thistype.pt15s.trigger)
+            endif
+            if IsIntDividableBy(ptTickCount, 2) then
+                call TriggerEvaluate(thistype.pt10s.trigger)
             endif
             /*
             if tp == pt1s then
@@ -127,6 +130,12 @@ In multiplayer however, this trigger should work.
                 debug call BJDebugMsg("Periodic timer(60s) timeout")
             endif
             */
+        endmethod
+        
+        private static method onOtExpired takes nothing returns nothing
+            local TimerPointer tp = TimerPool[GetExpiredTimer()]
+            
+            debug call BJDebugMsg("Periodic timer timeout")
             call TriggerEvaluate(tp.trigger)
             
             // If timer is not periodic timer, recycle it
@@ -141,21 +150,20 @@ In multiplayer however, this trigger should work.
         endmethod
         
         static method start takes nothing returns nothing
-            // PT
+            // PT - we select 5s as base timer
+            call TimerStart(thistype.pt5s.timer, thistype.pt5s.timeout, true, function thistype.onPtExpired)
             //call TimerStart(thistype.pt10s.timer, thistype.pt10s.timeout, true, function thistype.onExpire)
             //call TimerStart(thistype.pt15s.timer, thistype.pt15s.timeout, true, function thistype.onExpire)
             //call TimerStart(thistype.pt30s.timer, thistype.pt30s.timeout, true, function thistype.onExpire)
             //call TimerStart(thistype.pt60s.timer, thistype.pt60s.timeout, true, function thistype.onExpire)
-            
             // OT
-            call TimerStart(thistype.otGameStart.timer, 0.01, false, function thistype.onExpire)
-            call TimerStart(thistype.otSelectHero.timer, thistype.otSelectHero.timeout, false, function thistype.onExpire)
-            call TimerStart(thistype.otDetectionOn.timer, thistype.otDetectionOn.timeout, false, function thistype.onExpire)
+            call TimerStart(thistype.otGameStart.timer, 0.01, false, function thistype.onOtExpired)
+            call TimerStart(thistype.otSelectHero.timer, thistype.otSelectHero.timeout, false, function thistype.onOtExpired)
+            call TimerStart(thistype.otDetectionOn.timer, thistype.otDetectionOn.timeout, false, function thistype.onOtExpired)
             // Detection off time depends on play time
             set thistype.otDetectionOff.timeout = thistype.otPlayTimeOver.timeout - thistype.otDetectionOn.timeout + 0.01
-            call TimerStart(thistype.otDetectionOff.timer, thistype.otDetectionOff.timeout, false, function thistype.onExpire)
-            call TimerStart(thistype.otPlayTimeOver.timer, thistype.otPlayTimeOver.timeout, false, function thistype.onExpire)
-            
+            call TimerStart(thistype.otDetectionOff.timer, thistype.otDetectionOff.timeout, false, function thistype.onOtExpired)
+            call TimerStart(thistype.otPlayTimeOver.timer, thistype.otPlayTimeOver.timeout, false, function thistype.onOtExpired)
             /*
             debug call BJDebugMsg("Onetime timer(" +R2S(thistype.otSelectHero.timeout)+ ") start")
             debug call BJDebugMsg("Onetime timer(" +R2S(thistype.otDetectionOn.timeout)+ ") start")
@@ -167,16 +175,17 @@ In multiplayer however, this trigger should work.
         private static method onInit takes nothing returns nothing
             // set VAR_INT_PlayTimeDelta to 1 seconds in debug mode to fast debugging
             // debug set VAR_INT_PlayTimeDelta = 1
-            set timerTickCount = 0
+            set ptTickCount = 0
+            set otTickCount = 0
             
             // PT
-            set pt1s = TimerPointer.create()
+            set pt5s = TimerPointer.create()
             set pt10s = TimerPointer.create()
             set pt15s = TimerPointer.create()
             set pt30s = TimerPointer.create()
             set pt60s = TimerPointer.create()
             // !Don't forget to set timeout for these timers
-            set pt1s.timeout = CST_PT_1s
+            set pt5s.timeout = CST_PT_5s
             set pt10s.timeout = CST_PT_10s
             set pt15s.timeout = CST_PT_15s
             set pt30s.timeout = CST_PT_30s

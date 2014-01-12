@@ -33,10 +33,10 @@ library GameManager initializer init /*
 	struct Game extends array
 	
 	    static method initialize takes nothing returns nothing
-	        call FogEnableOff()
+	        // call FogEnableOff()
             call BJDebugMsg(MSG_GameInitializing)
 	        call TriggerSleepAction(2.0)
-	        //call UnitManager.createBeiginNeutralAggrUnits()
+	        call UnitManager.createBeiginNeutralAggrUnits()
 	        call BJDebugMsg(MSG_GameInitializingDone)
 	        //debug call BJDebugMsg("Waiting host for chosing game mode...")
 	        

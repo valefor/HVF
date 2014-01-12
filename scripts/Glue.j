@@ -166,23 +166,23 @@ library Glue initializer init /* v0.0.1 by Xandria
         static rect regionWaterLand2
         static rect regionWaterLand3
         
-        real array itemBoxXs
-        real array itemBoxYs
-        real mapMaxX
-        real mapMinX
-        real mapMaxY
-        real mapMinY
+        static real array itemBoxXs[4]
+        static real array itemBoxYs[4]
+        static real mapMaxX
+        static real mapMinX
+        static real mapMaxY                
+        static real mapMinY
         
         static location heroReviveLoc
         
         static method operator randomX takes nothing returns real
             call SetRandomSeed(GetRandomInt(0, 1000000))
-            return GetRandomReal(mapMinX, mapMaxX)
+            return GetRandomReal(thistype.mapMinX, thistype.mapMaxX)
         endmethod
         
         static method operator randomY takes nothing returns real
             call SetRandomSeed(GetRandomInt(0, 1000000))
-            return GetRandomReal(mapMinY, mapMaxY)
+            return GetRandomReal(thistype.mapMinY, thistype.mapMaxY)
         endmethod
         
         /***********************************************************************
@@ -229,14 +229,14 @@ library Glue initializer init /* v0.0.1 by Xandria
     endfunction
     
     function CreateHunterBeginUnits takes player p, integer i returns nothing
-        local unit u = CreateUnit(p, CST_UTI_HunterItemBox, MapLocation.itemBoxXs[i], MapLocation.itemBoxYs[i], VAR_ItemBoxFacing)
+        local unit u = CreateUnit(p, CST_UTI_HunterItemBox, MapLocation.itemBoxXs[i], MapLocation.itemBoxYs[i], CST_Facing_Building)
         call UnitAddItemToSlotById(u, 'I005', 0)
         call UnitAddItemToSlotById(u, 'shrs', 1)
         call UnitAddItemToSlotById(u, 'pman', 2)
         call UnitAddItemToSlotById(u, 'moon', 3)
         call UnitAddItemToSlotById(u, 'dust', 4)
         call UnitAddItemToSlotById(u, 'I000', 5)
-        call CreateUnit(p, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(CST_RGN_SkeletonRevive), GetRectMaxX(CST_RGN_SkeletonRevive)), GetRandomReal(GetRectMinY(CST_RGN_SkeletonRevive), GetRectMaxY(CST_RGN_SkeletonRevive)), bj_UNIT_FACING)
+        call CreateUnit(p, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(MapLocation.regionHeroRevive), GetRectMaxX(MapLocation.regionHeroRevive)), GetRandomReal(GetRectMinY(MapLocation.regionHeroRevive), GetRectMaxY(MapLocation.regionHeroRevive)), CST_Facing_Unit)
         set u = null
     endfunction
     
@@ -244,6 +244,6 @@ library Glue initializer init /* v0.0.1 by Xandria
 	* Library Initiation
 	***************************************************************************/
     private function init takes nothing returns nothing
-        call MapLocation.init()
+        // call MapLocation.init()
     endfunction
 endlibrary
