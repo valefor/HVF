@@ -763,7 +763,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // Bind predefined hero to farmer
             // call iterateUnits(Filter(function thistype.filterBindHero))
             // Set begin resource, limitations
-            call BJDebugMsg("Init gold:" + I2S(CST_INT_HunterBeginGold))
+            debug call BJDebugMsg("Init gold:" + I2S(CST_INT_HunterBeginGold))
             call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, this.get)
             call AdjustPlayerStateBJ(CST_INT_FarmerBeginGold, this.get, PLAYER_STATE_RESOURCE_GOLD)
             call AdjustPlayerStateBJ(CST_INT_FarmerBeginLumber, this.get, PLAYER_STATE_RESOURCE_LUMBER)
