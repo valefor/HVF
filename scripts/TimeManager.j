@@ -157,7 +157,7 @@ In multiplayer however, this trigger should work.
             //call TimerStart(thistype.pt30s.timer, thistype.pt30s.timeout, true, function thistype.onExpire)
             //call TimerStart(thistype.pt60s.timer, thistype.pt60s.timeout, true, function thistype.onExpire)
             // OT
-            call TimerStart(thistype.otGameStart.timer, 0.01, false, function thistype.onOtExpired)
+            call TimerStart(thistype.otGameStart.timer, 0, false, function thistype.onOtExpired)
             call TimerStart(thistype.otSelectHero.timer, thistype.otSelectHero.timeout, false, function thistype.onOtExpired)
             call TimerStart(thistype.otDetectionOn.timer, thistype.otDetectionOn.timeout, false, function thistype.onOtExpired)
             // Detection off time depends on play time

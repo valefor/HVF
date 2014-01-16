@@ -9,9 +9,9 @@ library GameManager initializer init /*
 ********************************************************************************
 *
 *   */ uses /*
-*   
-*       */ TimeManager /*
+*
 *       */ UnitManager /*
+*       */ ItemManager /*
 *       */ Commands /*
 *
 *******************************************************************************/
@@ -36,7 +36,9 @@ library GameManager initializer init /*
 	        // call FogEnableOff()
             call BJDebugMsg(MSG_GameInitializing)
 	        call TriggerSleepAction(2.0)
+	        // For better performance, generate begin items/neutral unit at beginning
 	        call UnitManager.createBeiginNeutralAggrUnits()
+	        call ItemManager.createBeginMapItems()
 	        call BJDebugMsg(MSG_GameInitializingDone)
 	        //debug call BJDebugMsg("Waiting host for chosing game mode...")
 	        

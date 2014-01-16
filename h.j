@@ -30,6 +30,7 @@
 //! import "scripts\EventManager.j"
 //! import "scripts\SimpleTrigger.j"
 //! import "scripts\UnitManager.j"
+//! import "scripts\ItemManager.j"
 //! import "scripts\Commands.j"
 //! import "scripts\GameManager.j"
 //! import "scripts\TimeManager.j"

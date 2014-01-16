@@ -7,7 +7,7 @@ CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 GetOwningPlayer
 *******************************************************************************/
-    struct UnitManager
+    struct UnitManager extends array
         // Create neutral aggresive units randomly every 30s
         private static method createRandomNeutralAggrUnits takes nothing returns boolean
             local integer i = 0
