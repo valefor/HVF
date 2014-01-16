@@ -1,11 +1,8 @@
 globals
-
     /***************************************************************************
-    * Color
+    * Language
     ***************************************************************************/
-    constant string COLOR_RED 		= "|cffff0000"
-    constant string COLOR_YELLOW 	= "|cffffff00"
-    constant string COLOR_BLUE 	= "|cffffff00"
+    constant integer CST_LANG_I18N = CST_LANG_CN
 
     /***************************************************************************
     * Literalization
@@ -20,6 +17,15 @@ globals
     
     constant string CST_STR_Hunter= "猎人"
     constant string CST_STR_Farmer= "农民"
+    constant string CST_STR_FarmerScoreBoard= "农民排行榜"
+    constant string CST_STR_HunterScoreBoard= "猎人排行榜"
+    constant string CST_STR_Player= "玩家"
+    constant string CST_STR_Kills= "击杀数"
+    constant string CST_STR_Deaths= "死亡数"
+    constant string CST_STR_Status= "在线状态"
+    constant string CST_STR_StatusPlaying= "正在游戏"
+    constant string CST_STR_StatusHasLeft= "已经离开"
+    constant string CST_STR_EnemyInfo= "敌方情报"
     
     // The following nick name must be identical with that in propername list
     constant string CST_STR_FarmerProperNameGreedy= "敛财者"

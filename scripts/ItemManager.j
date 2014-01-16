@@ -15,38 +15,31 @@ struct ItemManager
     endmethod
     
     private static method createBeginMapItems takes nothing returns boolean
-        local rect playableRect = GetPlayableMapRect()
-        local location loc
+        local real x
+        local real y
         local integer numberOfItem = 0
         
         loop
-            set loc = GetRandomLocInRect(playableRect)
-            call CreateItem(CST_ITI_MagicSeed, GetLocationX(loc), GetLocationY(loc))
-            call CreateItem(CST_ITI_MythticGrass, GetLocationX(loc), GetLocationY(loc))
-            call CreateItem(CST_ITI_MythticFlower, GetLocationX(loc), GetLocationY(loc))
-            call RemoveLocation(loc)
+            set x = MapLocation.randomX
+            set y = MapLocation.randomY
+            call CreateItem(CST_ITI_MagicSeed, x, y)
+            call CreateItem(CST_ITI_MythticGrass, x, y)
+            call CreateItem(CST_ITI_MythticFlower, x, y)
             set numberOfItem = numberOfItem + 1
             exitwhen numberOfItem > CST_INT_MaxItemCount
         endif
-        
-        call RemoveRect(playableRect)
-        set loc = null
-        set playableRect = null
+
         return false
     endmethod
     
     // Create a random item in whole map for every 10 secs
     private static method createMapRandomItem takes nothing returns boolean
-        local rect playableRect = GetPlayableMapRect()
-        local location loc = GetRandomLocInRect(playableRect)
+        local real x = MapLocation.randomX
+        local real y = MapLocation.randomY
         
         // GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect))
-        call CreateItem(ChooseRandomItemEx(8, ITEM_TYPE_ANY), GetLocationX(loc), GetLocationY(loc))
+        call CreateItem(ChooseRandomItemEx(8, ITEM_TYPE_ANY), x, y)
         
-        call RemoveLocation(loc)
-        call RemoveRect(playableRect)
-        set loc = null
-        set playableRect = null
         return false
     endmethod
 

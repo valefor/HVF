@@ -15,6 +15,23 @@ globals
     constant integer CST_INT_FarmerRoleMaster=666
     constant integer CST_INT_FarmerRoleDefender=777
     constant integer CST_INT_FarmerRolePlague=888
+    
+    /***************************************************************************
+    * Color
+    ***************************************************************************/
+    constant string COLOR_RED 		= "|cffff0000"
+    constant string COLOR_YELLOW 	= "|cffffff00"
+    constant string COLOR_BLUE 	= "|cffffff00"
+    
+    constant integer COLOR_ARGB_RED     = 0xFFFF0000
+    constant integer COLOR_ARGB_YELLOW  = 0xFFFFFF00
+    
+    /***************************************************************************
+    * I18N
+    ***************************************************************************/
+    constant integer CST_LANG_CN = 0
+    constant integer CST_LANG_EN = 1
+    
     /***************************************************************************
     * Game Parameters
     ***************************************************************************/

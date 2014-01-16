@@ -852,21 +852,21 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer i = 2
             call thistype.createStatsBoard()
             call thistype.statsBoard.clear()
-            set statsBoard.title = "Hunter Score Board"
+            set statsBoard.title = CST_STR_HunterScoreBoard
             set statsBoard.all.width = 0.02
             call statsBoard.all.setDisplay(true, false)
-            set statsBoard[0][0].text = "The Hunter"
+            set statsBoard[0][0].text = CST_STR_Hunter
             set statsBoard[0][0].color = 0xFFFF00
-            set statsBoard[CST_BDCOL_PN][1].text = "Player"
-            set statsBoard[CST_BDCOL_KL][1].text = "Kills"
-            set statsBoard[CST_BDCOL_ST][1].text = "Status"
+            set statsBoard[CST_BDCOL_PN][1].text = CST_STR_Player
+            set statsBoard[CST_BDCOL_KL][1].text = CST_STR_Kills
+            set statsBoard[CST_BDCOL_ST][1].text = CST_STR_Status
             debug set statsBoard[CST_BDCOL_DF][1].text = "Row"
             loop
                 exitwhen h.end
                 set h.rowIndex = i
                 set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(h.get)
                 set statsBoard[CST_BDCOL_KL][i].text = I2S(h.killCount)
-                set statsBoard[CST_BDCOL_ST][i].text = "Playing"
+                set statsBoard[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
                 debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
                 set i = i + 1
                 set h= h.next
@@ -874,19 +874,19 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endloop
             
             // Enemy Stats
-            set statsBoard[0][i].text   = "The Farmer"
+            set statsBoard[0][i].text   = CST_STR_EnemyInfo
             set statsBoard[0][i].width  = 0.04
             set i = i + 1
-            set statsBoard[CST_BDCOL_PN][i].text = "Player"
-            set statsBoard[CST_BDCOL_DE][i].text = "Deaths"
-            set statsBoard[CST_BDCOL_ST][i].text = "Status"
+            set statsBoard[CST_BDCOL_PN][i].text = CST_STR_Player
+            set statsBoard[CST_BDCOL_DE][i].text = CST_STR_Deaths
+            set statsBoard[CST_BDCOL_ST][i].text = CST_STR_Status
             set i = i + 1
             loop
                 exitwhen f.end
                 set f.erowIndex = i
                 set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(f.get)
                 set statsBoard[CST_BDCOL_DE][i].text = I2S(f.deathCount)
-                set statsBoard[CST_BDCOL_ST][i].text = "Playing"
+                set statsBoard[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
                 debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
                 set i = i + 1
                 set f= f.next
@@ -953,8 +953,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local thistype f = thistype[GetPlayerId(p)]
 
             if statsBoard != -1 then
-                set thistype.statsBoard[CST_BDCOL_ST][f.rowIndex].text = "Left"
-                set Hunter.statsBoard[CST_BDCOL_ST][f.erowIndex].text = "Left"
+                set thistype.statsBoard[CST_BDCOL_ST][f.rowIndex].text = CST_STR_StatusHasLeft
+                set Hunter.statsBoard[CST_BDCOL_ST][f.erowIndex].text = CST_STR_StatusHasLeft
             else
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
@@ -1051,14 +1051,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer i = 2
             call thistype.createStatsBoard()
             call thistype.statsBoard.clear()
-            set statsBoard.title = "Farmer Score Board"
+            set statsBoard.title = CST_STR_FarmerScoreBoard
             set statsBoard.all.width = 0.02
             call statsBoard.all.setDisplay(true, false)
-            set statsBoard[0][0].text = "The Farmer"
-            set statsBoard[0][0].color = 0xFFFF00
-            set statsBoard[CST_BDCOL_PN][1].text = "Player"
-            set statsBoard[CST_BDCOL_DE][1].text = "Deaths"
-            set statsBoard[CST_BDCOL_ST][1].text = "Status"
+            set statsBoard[0][0].text = CST_STR_Farmer
+            set statsBoard[0][0].color = COLOR_ARGB_RED
+            set statsBoard[CST_BDCOL_PN][1].text = CST_STR_Player
+            set statsBoard[CST_BDCOL_DE][1].text = CST_STR_Deaths
+            set statsBoard[CST_BDCOL_ST][1].text = CST_STR_Status
             debug set statsBoard[CST_BDCOL_DF][1].text = "Row"
 
             loop
@@ -1066,26 +1066,26 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 set f.rowIndex = i
                 set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(f.get)
                 set statsBoard[CST_BDCOL_DE][i].text = I2S(f.deathCount)
-                set statsBoard[CST_BDCOL_ST][i].text = "Playing"
+                set statsBoard[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
                 debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
                 set i = i + 1
                 set f= f.next
             endloop
             
             // Enemy Stats
-            set statsBoard[0][i].text   = "The Hunter"
+            set statsBoard[0][i].text   = CST_STR_EnemyInfo
             set statsBoard[0][i].width  = 0.04
             set i = i + 1
-            set statsBoard[CST_BDCOL_PN][i].text = "Player"
-            set statsBoard[CST_BDCOL_KL][i].text = "Kills"
-            set statsBoard[CST_BDCOL_ST][i].text = "Status"
+            set statsBoard[CST_BDCOL_PN][i].text = CST_STR_Player
+            set statsBoard[CST_BDCOL_KL][i].text = CST_STR_Kills
+            set statsBoard[CST_BDCOL_ST][i].text = CST_STR_Status
             set i = i + 1
             loop
                 exitwhen h.end
                 set h.erowIndex = i
                 set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(h.get)
                 set statsBoard[CST_BDCOL_KL][i].text = I2S(h.killCount)
-                set statsBoard[CST_BDCOL_ST][i].text = "Playing"
+                set statsBoard[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
                 debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
                 set i = i + 1
                 set h= h.next

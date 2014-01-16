@@ -1,5 +1,9 @@
 globals
-
+    /***************************************************************************
+    * Language
+    ***************************************************************************/
+    constant integer CST_LANG_I18N = CST_LANG_EN
+    
     /***************************************************************************
     * Literalization
     ***************************************************************************/
@@ -11,18 +15,27 @@ globals
     
     constant string CST_STR_RemainedTime="剩余游戏时间"
     
-    constant string CST_STR_Hunter= "猎人"
-    constant string CST_STR_Farmer= "农民"
+    constant string CST_STR_Hunter= "The Hunter"
+    constant string CST_STR_Farmer= "The Farmer"
+    constant string CST_STR_FarmerScoreBoard= "Farmer Score Board"
+    constant string CST_STR_HunterScoreBoard= "Hunter Score Board"
+    constant string CST_STR_Player= "Player"
+    constant string CST_STR_Kills= "Kills"
+    constant string CST_STR_Deaths= "Deaths"
+    constant string CST_STR_Status= "Status"
+    constant string CST_STR_StatusPlaying= "Playing"
+    constant string CST_STR_StatusHasLeft= "Has Left"
+    constant string CST_STR_EnemyInfo= "Enemy Info"
     
     // The following nick name must be identical with that in propername list
-    constant string CST_STR_FarmerProperNameGreedy= "敛财者"
-    constant string CST_STR_FarmerProperNameKiller= "杀狼者"
-    constant string CST_STR_FarmerProperNameNomader= "游牧者"
-    constant string CST_STR_FarmerProperNameCoward= "胆小鬼"
-    constant string CST_STR_FarmerProperNameWoody= "伐木工"
-    constant string CST_STR_FarmerProperNameMaster= "老农民"
-    constant string CST_STR_FarmerProperNameDefender= "炮塔狂"
-    constant string CST_STR_FarmerProperNamePlague= "瘟疫农"
+    constant string CST_STR_FarmerProperNameGreedy= "Greedy"
+    constant string CST_STR_FarmerProperNameKiller= "WolfKiller"
+    constant string CST_STR_FarmerProperNameNomader= "Nomader"
+    constant string CST_STR_FarmerProperNameCoward= "Coward"
+    constant string CST_STR_FarmerProperNameWoody= "Woody"
+    constant string CST_STR_FarmerProperNameMaster= "Master"
+    constant string CST_STR_FarmerProperNameDefender= "Defender"
+    constant string CST_STR_FarmerProperNamePlague= "Plague"
     
     /***************************************************************************
     * The messages delivered to players
