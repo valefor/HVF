@@ -31,7 +31,15 @@ library GameManager initializer init /*
 	* Structs
 	***************************************************************************/
 	struct Game extends array
-	
+		    //private static method gameInfo
+		// Perform action accoding to selected game mode    
+		private static method performGameMode takes nothing returns nothing
+		    if Params.flagGameModeSp then
+		        call ShufflePlayer()
+		    endif
+		    
+		endmethod
+		
 	    static method initialize takes nothing returns nothing
 	        // call FogEnableOff()
             call BJDebugMsg(MSG_GameInitializing)
@@ -59,6 +67,11 @@ library GameManager initializer init /*
 	    
 	    static method start takes nothing returns nothing
 	        // call FogEnableOn()
+	        if Params.flagGameModeSp then
+		        call ShufflePlayer()
+		    endif
+	        
+	        call TriggerSleepAction(2.0)
 	        if not Params.flagGameModeNv then
                 // Vote for play time
                 debug call BJDebugMsg("Please vote for play time...")

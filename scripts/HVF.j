@@ -796,6 +796,27 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call this.deleteHunterVars()
         endmethod
         
+        // Static methods
+        // Print force info
+        static method info takes boolean showHeroInfo returns string
+            local string str = " " + ARGB(COLOR_ARGB_YELLOW).str(CST_STR_Hunter) + "(" + CST_STR_Number + ARGB(COLOR_ARGB_GREEN).str(I2S(thistype.count)) + ")" + "\n"
+            local thistype p = thistype[thistype.first]
+            local ARGB ac
+            
+            if thistype.count > 0 then
+                loop
+                    exitwhen p.end
+                    set ac = ARGB.fromPlayer(p.get)
+                    set str = str + "  " + I2S(GetPlayerId(p.get)+1) + " - " + ac.str(GetPlayerName(h.get))
+                    if showHeroInfo then
+                        set str = str + "[" + ARGB(COLOR_ARGB_ORANGE).str(GetHeroProperName(p.hero)) + ", "+CST_STR_Level+ARGB(COLOR_ARGB_GREEN).str(I2S(GetHeroLevel(p.hero)))+"]"
+                    endif
+                    set str = str + "\n"
+                    set p = p.next
+                endloop
+            endif
+            return str
+        endmethod
         public static method removeLeaving takes player p returns nothing
             local thistype h = thistype[GetPlayerId(p)]
 
@@ -949,6 +970,27 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
 
         // Static methods
+        // Print force info
+        static method info takes boolean showHeroInfo returns string
+            local string str = " " + ARGB(COLOR_ARGB_YELLOW).str(CST_STR_Farmer) + "(" + CST_STR_Number + ARGB(COLOR_ARGB_GREEN).str(I2S(thistype.count)) + ")" + "\n"
+            local thistype p = thistype[thistype.first]
+            local ARGB ac
+            
+            if thistype.count > 0 then
+                loop
+                    exitwhen p.end
+                    set ac = ARGB.fromPlayer(p.get)
+                    set str = str + "  " + I2S(GetPlayerId(p.get)+1) + " - " + ac.str(GetPlayerName(h.get))
+                    if showHeroInfo then
+                        set str = str + "[" + ARGB(COLOR_ARGB_ORANGE).str(GetHeroProperName(p.hero)) + ", "+CST_STR_Level+ARGB(COLOR_ARGB_GREEN).str(I2S(GetHeroLevel(p.hero)))+"]"
+                    endif
+                    set str = str + "\n"
+                    set p = p.next
+                endloop
+            endif
+            return str
+        endmethod
+        
         public static method removeLeaving takes player p returns nothing
             local thistype f = thistype[GetPlayerId(p)]
 
@@ -1226,21 +1268,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             exitwhen ap.end
             if iHunterCount < iNbrHunters and iFarmerCount < iNbrFarmers then
                 if GetRandomInt(0,1) == 1 then
-                    debug call BJDebugMsg("Shuffling player:" + GetPlayerName(ap.get) + " to Hunter")
+                    //debug call BJDebugMsg("Shuffling player:" + GetPlayerName(ap.get) + " to Hunter")
+                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_YELLOW).str(CST_STR_Hunter))
                     call Hunter.add(ap.get)
                     set iHunterCount = iHunterCount + 1
                 else
-                    debug call BJDebugMsg("Shuffling player:" + GetPlayerName(ap.get) + " to Farmer")
+                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_YELLOW).str(CST_STR_Farmer))
                     call Farmer.add(ap.get)
                     set iFarmerCount = iFarmerCount + 1
                 endif
             else
                 if iFarmerCount == iNbrFarmers then
-                    debug call BJDebugMsg("Shuffling player:" + GetPlayerName(ap.get) + " to Hunter")
+                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_YELLOW).str(CST_STR_Hunter))
                     call Hunter.add(ap.get)
                     set iHunterCount = iHunterCount + 1
                 else
-                    debug call BJDebugMsg("Shuffling player:" + GetPlayerName(ap.get) + " to Farmer")
+                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_YELLOW).str(CST_STR_Farmer))
                     call Farmer.add(ap.get)
                     set iFarmerCount = iFarmerCount + 1
                 endif
@@ -1249,7 +1292,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endloop
         
         debug call BJDebugMsg("Shuffling finished! Number of Farmer:" + I2S(iNbrFarmers) + ", Number of Hunter:" +I2S(iNbrHunters))
-        
+        call BJDebugMsg(Farmer.info(false))
+        call BJDebugMsg(Hunter.info(false))
         // Re-assemble team and alliance after shuffling
         call SetupTeam()
         call SetupAlly()

@@ -19,12 +19,38 @@ globals
     /***************************************************************************
     * Color
     ***************************************************************************/
-    constant string COLOR_RED 		= "|cffff0000"
-    constant string COLOR_YELLOW 	= "|cffffff00"
-    constant string COLOR_BLUE 	= "|cffffff00"
+    constant string COLOR_END       = "|r"
+    
+    constant string COLOR_RED       = "|cFFFF0000"
+    constant string COLOR_GREEN     = "|cFF00FF00"
+    constant string COLOR_BLUE      = "|cFF0000FF"
+    constant string COLOR_YELLOW    = "|cFFFFFF00"
+    constant string COLOR_BLACK     = "|cFF000000"
+    constant string COLOR_WHITE     = "|cFFFFFFFF"
+    constant string COLOR_CYAN      = "|cFF1CE6B9"
+    constant string COLOR_PURPLE    = "|cFF540081"
+    constant string COLOR_ORANGE    = "|cFFFE8A0E"
+    constant string COLOR_PINK      = "|cFFE55BB0"
+    constant string COLOR_AQUA      = "|cFF106246"
+    constant string COLOR_BROWN     = "|cFF4E2A04"
+    constant string COLOR_LIGHT_GRAY= "|cFF959697"
+    constant string COLOR_LIGHT_BLUE= "|cFF7EBFF1"
+    
     
     constant integer COLOR_ARGB_RED     = 0xFFFF0000
+    constant integer COLOR_ARGB_GREEN   = 0xFF00FF00
+    constant integer COLOR_ARGB_BLUE    = 0xFF0000FF
     constant integer COLOR_ARGB_YELLOW  = 0xFFFFFF00
+    constant integer COLOR_ARGB_BLACK   = 0xFF000000
+    constant integer COLOR_ARGB_WHITE   = 0xFFFFFFFF
+    constant integer COLOR_ARGB_CYAN    = 0xFF1CE6B9
+    constant integer COLOR_ARGB_PURPLE  = 0xFF540081
+    constant integer COLOR_ARGB_ORANGE  = 0xFFFE8A0E
+    constant integer COLOR_ARGB_PINK    = 0xFFE55BB0
+    constant integer COLOR_ARGB_AQUA    = 0xFF106246
+    constant integer COLOR_ARGB_BROWN   = 0xFF4E2A04
+    constant integer COLOR_ARGB_LIGHT_GRAY   = 0xFF959697
+    constant integer COLOR_ARGB_LIGHT_BLUE   = 0xFF7EBFF1
     
     /***************************************************************************
     * I18N

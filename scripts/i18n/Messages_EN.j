@@ -15,6 +15,10 @@ globals
     
     constant string CST_STR_RemainedTime="剩余游戏时间"
     
+    // Common str
+    constant string CST_STR_Level= "等级"
+    constant string CST_STR_Number= "Number:"
+    
     constant string CST_STR_Hunter= "The Hunter"
     constant string CST_STR_Farmer= "The Farmer"
     constant string CST_STR_FarmerScoreBoard= "Farmer Score Board"
@@ -26,6 +30,14 @@ globals
     constant string CST_STR_StatusPlaying= "Playing"
     constant string CST_STR_StatusHasLeft= "Has Left"
     constant string CST_STR_EnemyInfo= "Enemy Info"
+    
+    constant string CST_STR_GameInfo= "游戏信息"
+    constant string CST_STR_GameModeSp= "洗牌模式"
+    constant string CST_STR_GameModeSpIntro= "所有玩家将会被重新洗牌，，随机分配为农民或猎人"
+    constant string CST_STR_GameModeNv= "禁止投票模式"
+    constant string CST_STR_GameModeNvIntro= "不对游戏时间进行投票，使用默认游戏时间（50分钟）进行游戏"
+    constant string CST_STR_GameModeNi= "禁止内斗模式"
+    constant string CST_STR_GameModeNiIntro= "禁止内斗，盟友单位之间无法强制攻击"
     
     // The following nick name must be identical with that in propername list
     constant string CST_STR_FarmerProperNameGreedy= "Greedy"
@@ -50,6 +62,10 @@ globals
     constant string MSG_CantKickYourself = "You must be kidding me, you can't kick yourself!"
     constant string MSG_HasBeenKicked = "has been kicked out by host"
     constant string MSG_YouHaveBeenKicked = "You have been kicked out by host"
+    
+    // *** Shuffle player
+    constant string MSG_ShufflePlayerTo= "Shuffling player to:"
+    constant string MSG_ShufflePlayerTo= "Shuffling player to:"
     
     // *** Select game mode
     constant string MSG_HostIs = "Host is:"

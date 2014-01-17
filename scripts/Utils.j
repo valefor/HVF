@@ -64,7 +64,11 @@ library Utils/*
         return StringStripRight(text, chars)
     endfunction
     
-    // Append hot key, highlight the key
+    // Tint string with given color
+    function Tint takes string str, string colorCode returns string
+        return colorCode + str + COLOR_END
+    endfunction
+    
     function AppendHotkey takes string source, string hotkey returns string
         return "|cffffcc00[" + hotkey + "]|r " + source
     endfunction

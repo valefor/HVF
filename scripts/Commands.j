@@ -124,8 +124,8 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         // implement ChatCommandModule
     endstruct
     
-    struct ShufflePlayerCmd extends array
-        readonly static constant string CHAT_COMMAND = "sp"
+    struct GameInfoCmd extends array
+        readonly static constant string CHAT_COMMAND = "gi"
         static ChatCommand cmd
         static boolean valid = true
         
@@ -146,8 +146,31 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                 call ChatCommand.eventCommand.enable(false)
             endif
         endmethod
+    endstruct
     
-        // implement ChatCommandModule
+    struct ShufflePlayerCmd extends array
+        readonly static constant string CHAT_COMMAND = "sp"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-sp') callback")
+
+            // Only do shuffling when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+
+                call BJDebugMsg(MSG_ShufflePlayerModeSelected)
+                
+                set Params.flagGameModeSp = true
+                // this is a one shoot command, disable this command from now
+                call ChatCommand.eventCommand.enable(false)
+            endif
+        endmethod
     endstruct
 
     struct NoVotingCmd extends array

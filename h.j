@@ -8,6 +8,7 @@
 //! import "scripts\lib\Event.j"
 //! import "scripts\lib\Table.j"
 //! import "scripts\lib\ORDERID.j"
+//! import "scripts\lib\RecipeSYS.j"
 
 //! import "scripts\lib\ChatCommand.j"
 //! import "scripts\lib\Dialog.j"

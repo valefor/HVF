@@ -1,8 +1,8 @@
-library RecipeManager initializer init uses Table
+library RecipeSYS initializer init uses Table
     
     //               ¤           v0.7b           ¤
     //              ( *'*-._.-*'*-._.-*'*-._.-*'* )
-    //               )         RecipeManager     (
+    //               )         RecipeSYS         (
     //              (    Created by Artificial    )
     //               )*'*-._.-*'*-._.-*'*-._.-*'*(
     //              ¤                             ¤

@@ -15,6 +15,10 @@ globals
     
     constant string CST_STR_RemainedTime="剩余游戏时间"
     
+    // Common str
+    constant string CST_STR_Level= "等级"
+    constant string CST_STR_Number= "玩家人数："
+    
     constant string CST_STR_Hunter= "猎人"
     constant string CST_STR_Farmer= "农民"
     constant string CST_STR_FarmerScoreBoard= "农民排行榜"
@@ -26,6 +30,14 @@ globals
     constant string CST_STR_StatusPlaying= "正在游戏"
     constant string CST_STR_StatusHasLeft= "已经离开"
     constant string CST_STR_EnemyInfo= "敌方情报"
+    
+    constant string CST_STR_GameInfo= "游戏信息"
+    constant string CST_STR_GameModeSp= "洗牌模式"
+    constant string CST_STR_GameModeSpIntro= "所有玩家将会被重新洗牌，，随机分配为农民或猎人"
+    constant string CST_STR_GameModeNv= "禁止投票模式"
+    constant string CST_STR_GameModeNvIntro= "不对游戏时间进行投票，使用默认游戏时间（50分钟）进行游戏"
+    constant string CST_STR_GameModeNi= "禁止内斗模式"
+    constant string CST_STR_GameModeNiIntro= "禁止内斗，盟友单位之间无法强制攻击"
     
     // The following nick name must be identical with that in propername list
     constant string CST_STR_FarmerProperNameGreedy= "敛财者"
@@ -50,6 +62,11 @@ globals
     constant string MSG_CantKickYourself    = "你他妈在逗我？不能踢出你自己！"
     constant string MSG_HasBeenKicked       = "已经被踢出游戏"
     constant string MSG_YouHaveBeenKicked   = "你已经被主机踢出游戏！"
+    
+    // *** Shuffle player
+    constant string MSG_ShufflePlayerModeSelected= "主机已经选择了洗牌模式，玩家将会被随机分配阵营。。。"
+    constant string MSG_ShufflePlayerTo= "你已经被随机分配为："
+    constant string MSG_ShufflePlayerDone= "洗牌结束！"
     
     // *** Select game mode
     constant string MSG_HostSelected = "主机选择了"
