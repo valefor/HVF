@@ -197,7 +197,7 @@ endglobals
             //call BJDebugMsg("Debug instance:" + I2S(instances[StringHash(str)]))
             set cmd = ChatCommand[str]
             if cmd != 0 then
-            	call BJDebugMsg("Debug cmd:" + cmd.command)
+            	debug call BJDebugMsg("Debug cmd:" + cmd.command)
                 loop
                     set i = i+1
                     set char = SubString(chat,i,i+1)

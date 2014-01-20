@@ -1,4 +1,4 @@
-library RecipeSYS initializer init uses Table
+library RecipeSYS initializer init uses TableBC
     
     //               ¤           v0.7b           ¤
     //              ( *'*-._.-*'*-._.-*'*-._.-*'* )
@@ -374,7 +374,7 @@ library RecipeSYS initializer init uses Table
             
             //Free the array and flush if the slots are empty.
             if integer(ing[0]) == 0 then
-                call ING_TABLE.flush(it)
+                call ING_TABLE.remove(it)
                 call ing.destroy()
             endif
         endmethod
@@ -411,7 +411,7 @@ library RecipeSYS initializer init uses Table
             
             //Free the array slots and flush if it's empty.
             if res[0] == 0 then
-                call RES_TABLE.flush(it)
+                call RES_TABLE.remove(it)
                 call res.destroy()
             endif
         endmethod

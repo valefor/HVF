@@ -807,7 +807,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 loop
                     exitwhen p.end
                     set ac = ARGB.fromPlayer(p.get)
-                    set str = str + "  " + I2S(GetPlayerId(p.get)+1) + " - " + ac.str(GetPlayerName(h.get))
+                    set str = str + "  " + I2S(GetPlayerId(p.get)+1) + " - " + ac.str(GetPlayerName(p.get))
                     if showHeroInfo then
                         set str = str + "[" + ARGB(COLOR_ARGB_ORANGE).str(GetHeroProperName(p.hero)) + ", "+CST_STR_Level+ARGB(COLOR_ARGB_GREEN).str(I2S(GetHeroLevel(p.hero)))+"]"
                     endif
@@ -980,7 +980,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 loop
                     exitwhen p.end
                     set ac = ARGB.fromPlayer(p.get)
-                    set str = str + "  " + I2S(GetPlayerId(p.get)+1) + " - " + ac.str(GetPlayerName(h.get))
+                    set str = str + "  " + I2S(GetPlayerId(p.get)+1) + " - " + ac.str(GetPlayerName(p.get))
                     if showHeroInfo then
                         set str = str + "[" + ARGB(COLOR_ARGB_ORANGE).str(GetHeroProperName(p.hero)) + ", "+CST_STR_Level+ARGB(COLOR_ARGB_GREEN).str(I2S(GetHeroLevel(p.hero)))+"]"
                     endif
@@ -1269,21 +1269,21 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             if iHunterCount < iNbrHunters and iFarmerCount < iNbrFarmers then
                 if GetRandomInt(0,1) == 1 then
                     //debug call BJDebugMsg("Shuffling player:" + GetPlayerName(ap.get) + " to Hunter")
-                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_YELLOW).str(CST_STR_Hunter))
+                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_ARGB_YELLOW).str(CST_STR_Hunter))
                     call Hunter.add(ap.get)
                     set iHunterCount = iHunterCount + 1
                 else
-                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_YELLOW).str(CST_STR_Farmer))
+                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_ARGB_YELLOW).str(CST_STR_Farmer))
                     call Farmer.add(ap.get)
                     set iFarmerCount = iFarmerCount + 1
                 endif
             else
                 if iFarmerCount == iNbrFarmers then
-                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_YELLOW).str(CST_STR_Hunter))
+                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_ARGB_YELLOW).str(CST_STR_Hunter))
                     call Hunter.add(ap.get)
                     set iHunterCount = iHunterCount + 1
                 else
-                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_YELLOW).str(CST_STR_Farmer))
+                    call DisplayTimedTextToPlayer(ap.get, 0, 0, CST_MSGDUR_Normal, MSG_ShufflePlayerTo+ARGB(COLOR_ARGB_YELLOW).str(CST_STR_Farmer))
                     call Farmer.add(ap.get)
                     set iFarmerCount = iFarmerCount + 1
                 endif

@@ -148,6 +148,38 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         endmethod
     endstruct
     
+    struct ShowAllyInfoCmd extends array
+        readonly static constant string CHAT_COMMAND = "ma"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-ma') callback")
+
+            if Hunter.contain(GetTriggerPlayer()) then
+                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, Hunter.info(true))
+            else
+                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, Farmer.info(true))
+            endif
+        endmethod
+    endstruct
+    
+    struct ShowEnemyInfoCmd extends array
+        readonly static constant string CHAT_COMMAND = "me"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-me') callback")
+
+            if Hunter.contain(GetTriggerPlayer()) then
+                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, Farmer.info(true))
+            else
+                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, Hunter.info(true))
+            endif
+        endmethod
+    endstruct
+    
     struct ShufflePlayerCmd extends array
         readonly static constant string CHAT_COMMAND = "sp"
         static ChatCommand cmd
@@ -236,7 +268,11 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 	    set NoInfightCmd.valid = false
 	endfunction
 	
-	public function EnableGameUtilCommands takes nothing returns nothing
+	function EnableGameUtilCommands takes nothing returns nothing
+	    // command "-kick" created
+        call ChatCommand.create(KickPlayerCmd.CHAT_COMMAND,function KickPlayerCmd.onCommand)
+        call ChatCommand.create(ShowAllyInfoCmd.CHAT_COMMAND,function ShowAllyInfoCmd.onCommand)
+        call ChatCommand.create(ShowEnemyInfoCmd.CHAT_COMMAND,function ShowEnemyInfoCmd.onCommand)
 	endfunction
 	
     /***************************************************************************
@@ -248,9 +284,6 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
         set NoVotingCmd.cmd = ChatCommand.create(NoVotingCmd.CHAT_COMMAND,function NoVotingCmd.onCommand)
         set NoInfightCmd.cmd = ChatCommand.create(NoInfightCmd.CHAT_COMMAND,function NoInfightCmd.onCommand)
-        
-        // command "-kick" created
-        call ChatCommand.create(KickPlayerCmd.CHAT_COMMAND,function KickPlayerCmd.onCommand)
     endfunction
     
 endlibrary

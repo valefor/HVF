@@ -70,6 +70,8 @@ library GameManager initializer init /*
 	        if Params.flagGameModeSp then
 		        call ShufflePlayer()
 		    endif
+		    
+		    call EnableGameUtilCommands()
 	        
 	        call TriggerSleepAction(2.0)
 	        if not Params.flagGameModeNv then

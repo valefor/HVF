@@ -7,6 +7,7 @@
 //! import "scripts\lib\ErrorMessage.j"
 //! import "scripts\lib\Event.j"
 //! import "scripts\lib\Table.j"
+//! import "scripts\lib\TableBC.j"
 //! import "scripts\lib\ORDERID.j"
 //! import "scripts\lib\RecipeSYS.j"
 
