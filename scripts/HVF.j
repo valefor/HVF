@@ -877,7 +877,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set statsBoard.all.width = 0.02
             call statsBoard.all.setDisplay(true, false)
             set statsBoard[0][0].text = CST_STR_Hunter
-            set statsBoard[0][0].color = 0xFFFF00
+            set statsBoard[0][0].color = COLOR_ARGB_RED
             set statsBoard[CST_BDCOL_PN][1].text = CST_STR_Player
             set statsBoard[CST_BDCOL_KL][1].text = CST_STR_Kills
             set statsBoard[CST_BDCOL_ST][1].text = CST_STR_Status
