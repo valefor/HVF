@@ -1,4 +1,4 @@
-globals
+﻿globals
     /***************************************************************************
     * Language
     ***************************************************************************/
@@ -55,6 +55,11 @@ globals
     ***************************************************************************/
     constant string MSG_GameInitializing    = "游戏初始化..."
     constant string MSG_GameInitializingDone= "游戏初始化完毕..."
+    constant string MSG_GameWillStart= "游戏马上开始..."
+    constant string MSG_GameStartTipsHunter= "游戏开始！\n  |cFFFFFF00猎人胜利条件|r:在倒计时结束前没有全部阵亡,或者所有农民玩家退出游戏"
+    constant string MSG_GameStartTipsFarmer= "游戏开始！\n  |cFFFFFF00农民胜利条件|r:在倒计时结束前杀死所有猎人,或者所有猎人玩家退出游戏"
+    
+    constant string MSG_VoteForPlayTime="请投票选择游戏时间！"
     
     // *** Kick player
     constant string MSG_KickPlayerClaim     = "声明：\n你正在使用|cffff0000踢人（-kick）|r命令，作者赋予你这项权利是为了提供给大家一个良好的游戏环境，素质游戏从我做起。\n"

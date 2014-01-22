@@ -433,7 +433,7 @@ endstruct
 * Library Initiation
 *******************************************************************************/
 private function init takes nothing returns nothing
-    call EventManager.listen()
+    // call EventManager.listen()
 endfunction
 
 

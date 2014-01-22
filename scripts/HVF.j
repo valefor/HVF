@@ -590,8 +590,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         // Revive hero at random location
         public method reviveHero takes nothing returns nothing
-            //local rect playableRect = GetPlayableMapRect()
-            //local location rndLoc = GetRandomLocInRect(playableRect)
             local real x = MapLocation.randomX
             local real y = MapLocation.randomY
             
@@ -607,10 +605,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             call initHero()
             call PanCameraToTimedForPlayer(this.get, x, y, 0.50)
-            //call RemoveLocation(rndLoc)
-            //call RemoveRect(playableRect)
-            //set rndLoc = null
-            //set playableRect = null
         endmethod
         
         // Add a farming building to group
@@ -646,7 +640,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                     set cageNsCount = cageNsCount - 1
                 endif
             endif
-            
         endmethod
         
         // Upgrade a farming building
@@ -918,7 +911,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         // On game start
-        private static method onGameStart takes nothing returns boolean
+        private static method init takes nothing returns boolean
             local thistype h = thistype[thistype.first]
             local integer i = 0
             // Init statistics board
@@ -942,7 +935,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 
         private static method onInit takes nothing returns nothing
             call TimerManager.pt60s.register(Filter(function thistype.goldBonusForKilling))
-            call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
+            //call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
             call TimerManager.otSelectHero.register(Filter(function thistype.onSelectHeroExpire))
             // Play time is over, hunters win
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.win))
@@ -1138,7 +1131,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         // On game start
-        private static method onGameStart takes nothing returns boolean
+        private static method init takes nothing returns boolean
             local thistype f = thistype[thistype.first]
             local integer i = 0
             // Init statistics board
@@ -1173,7 +1166,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call TimerManager.pt60s.register(Filter(function thistype.incomeSettlement))
             call TimerManager.pt60s.register(Filter(function thistype.aquireFreeExp))
             // Init and display multiboard at game start
-            call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
+            // call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
             // Play time is over, farmers lose
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.lose))
         endmethod

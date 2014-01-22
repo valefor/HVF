@@ -116,6 +116,163 @@
     call DestroyTrigger(GetTriggeringTrigger())
 endfunction
 
+struct TimerManager extends array
+    // Periodic Timers(PT)
+    readonly static TimerPointer pt5s
+    readonly static TimerPointer pt10s
+    readonly static TimerPointer pt15s
+    readonly static TimerPointer pt30s
+    readonly static TimerPointer pt60s
+    
+    // Onetime Timers(OT)
+    readonly static TimerPointer otGameStart
+    readonly static TimerPointer otSelectHero
+    readonly static TimerPointer otDetectionOn
+    readonly static TimerPointer otDetectionOff
+    readonly static TimerPointer otPlayTimeOver
+    
+    private static integer ptTickCount
+    private static integer otTickCount
+    
+    // !DEPRECATED
+    static method getTimer takes real timeout returns TimerPointer
+        if timeout == CST_OT_SelectHero then
+            return otSelectHero
+        elseif timeout == CST_PT_1s then
+            return pt10s
+        elseif timeout == CST_PT_10s then
+            return pt10s
+        elseif timeout == CST_PT_15s then
+            return pt15s
+        elseif timeout == CST_PT_30s then
+            return pt30s
+        elseif timeout == CST_PT_60s then
+            return pt60s
+        else
+            debug call BJDebugMsg("Unsupported timeout:" + R2S(timeout))
+        endif
+        return 0
+    endmethod
+    
+    // Format any reals to OT timer count, something like 10.01, xx.01
+    static method formatOtTimeout takes real c returns real
+        local integer n = R2I(c/1)
+        return I2R(n)+0.01
+    endmethod
+    
+    static method isPeriodicTimer takes real timeout returns boolean
+        local integer n = R2I(timeout/1)
+        if (timeout - n) != 0.00 then
+            //debug call BJDebugMsg("Is not a periodic timer")
+            return false
+        endif
+        return true
+    endmethod
+    
+    private static method onPtExpired takes nothing returns nothing
+        set ptTickCount = ptTickCount + 1
+        
+        debug call BJDebugMsg("Periodic timer timeout")
+        if IsIntDividableBy(ptTickCount, 12) then
+            call TriggerEvaluate(thistype.pt60s.trigger)
+        endif
+        if IsIntDividableBy(ptTickCount, 6) then
+            call TriggerEvaluate(thistype.pt30s.trigger)
+        endif
+        if IsIntDividableBy(ptTickCount, 3) then
+            call TriggerEvaluate(thistype.pt15s.trigger)
+        endif
+        if IsIntDividableBy(ptTickCount, 2) then
+            call TriggerEvaluate(thistype.pt10s.trigger)
+        endif
+        /*
+        if tp == pt1s then
+            debug call BJDebugMsg("Periodic timer(1s) timeout")
+        elseif tp == pt10s then
+            debug call BJDebugMsg("Periodic timer(10s) timeout")
+        elseif tp == pt15s then
+            debug call BJDebugMsg("Periodic timer(15s) timeout")
+        elseif tp == pt30s then
+            debug call BJDebugMsg("Periodic timer(30s) timeout")
+        elseif tp == pt60s then
+            debug call BJDebugMsg("Periodic timer(60s) timeout")
+        endif
+        */
+    endmethod
+    
+    private static method onOtExpired takes nothing returns nothing
+        local TimerPointer tp = TimerPool[GetExpiredTimer()]
+        
+        debug call BJDebugMsg("Periodic timer timeout")
+        call TriggerEvaluate(tp.trigger)
+        
+        // If timer is not periodic timer, recycle it
+        if not isPeriodicTimer(tp.timeout) then
+            call tp.destroy()
+        endif
+    endmethod
+    
+    // It's used by other module to register actions at timer expired
+    static method register takes real timeout, boolexpr action returns triggercondition
+        return thistype.getTimer(timeout).register(action)
+    endmethod
+    
+    static method start takes nothing returns nothing
+        // PT - we select 5s as base timer
+        call TimerStart(thistype.pt5s.timer, thistype.pt5s.timeout, true, function thistype.onPtExpired)
+        //call TimerStart(thistype.pt10s.timer, thistype.pt10s.timeout, true, function thistype.onExpire)
+        //call TimerStart(thistype.pt15s.timer, thistype.pt15s.timeout, true, function thistype.onExpire)
+        //call TimerStart(thistype.pt30s.timer, thistype.pt30s.timeout, true, function thistype.onExpire)
+        //call TimerStart(thistype.pt60s.timer, thistype.pt60s.timeout, true, function thistype.onExpire)
+        // OT
+        call TimerStart(thistype.otGameStart.timer, 0, false, function thistype.onOtExpired)
+        call TimerStart(thistype.otSelectHero.timer, thistype.otSelectHero.timeout, false, function thistype.onOtExpired)
+        call TimerStart(thistype.otDetectionOn.timer, thistype.otDetectionOn.timeout, false, function thistype.onOtExpired)
+        // Detection off time depends on play time
+        set thistype.otDetectionOff.timeout = thistype.otPlayTimeOver.timeout - thistype.otDetectionOn.timeout + 0.01
+        call TimerStart(thistype.otDetectionOff.timer, thistype.otDetectionOff.timeout, false, function thistype.onOtExpired)
+        call TimerStart(thistype.otPlayTimeOver.timer, thistype.otPlayTimeOver.timeout, false, function thistype.onOtExpired)
+        /*
+        debug call BJDebugMsg("Onetime timer(" +R2S(thistype.otSelectHero.timeout)+ ") start")
+        debug call BJDebugMsg("Onetime timer(" +R2S(thistype.otDetectionOn.timeout)+ ") start")
+        debug call BJDebugMsg("Onetime timer(" +R2S(thistype.otDetectionOff.timeout)+ ") start")
+        debug call BJDebugMsg("Onetime timer(" +R2S(thistype.otPlayTimeOver.timeout)+ ") start")
+        */
+    endmethod
+    
+    private static method onInit takes nothing returns nothing
+        // set VAR_INT_PlayTimeDelta to 1 seconds in debug mode to fast debugging
+        // debug set VAR_INT_PlayTimeDelta = 1
+        set ptTickCount = 0
+        set otTickCount = 0
+        
+        // PT
+        set pt5s = TimerPointer.create()
+        set pt10s = TimerPointer.create()
+        set pt15s = TimerPointer.create()
+        set pt30s = TimerPointer.create()
+        set pt60s = TimerPointer.create()
+        // !Don't forget to set timeout for these timers
+        set pt5s.timeout = CST_PT_5s
+        set pt10s.timeout = CST_PT_10s
+        set pt15s.timeout = CST_PT_15s
+        set pt30s.timeout = CST_PT_30s
+        set pt60s.timeout = CST_PT_60s
+        
+        // OT
+        set otGameStart = TimerPointer.create()
+        set otSelectHero = TimerPointer.create()
+        set otDetectionOn = TimerPointer.create()
+        set otDetectionOff = TimerPointer.create()
+        set otPlayTimeOver = TimerPointer.create()
+        // !Don't forget to set timeout for these timers
+        set otSelectHero.timeout = CST_OT_SelectHero
+        set otDetectionOn.timeout = thistype.formatOtTimeout(CST_OT_Detect*VAR_INT_PlayTimeDelta)
+        set otPlayTimeOver.timeout = thistype.formatOtTimeout(CST_OT_PlayTime*VAR_INT_PlayTimeDelta)
+    endmethod
+    
+endstruct
+
 function CreateUnitsForPlayer0 takes nothing returns nothing
     local player p= Player(0)
     local unit u
@@ -154,3 +311,5 @@ function InitTrig_Stacking takes nothing returns nothing
     call TriggerAddCondition(gg_trg_Stacking, Condition(function Trig_StackingConditions))
     call TriggerAddAction(gg_trg_Stacking, function Trig_StackingActions)
 endfunction
+
+

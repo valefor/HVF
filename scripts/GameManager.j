@@ -58,32 +58,38 @@ library GameManager initializer init /*
 	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_WaitHostSelectGameMode)
 	        endif
 
-	        call TriggerSleepAction(5.0)
-	        debug call BJDebugMsg("Debug1")
-	        
+	        call TriggerSleepAction(10.0)
+	        call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_WaitHostSelectGameMode)
 	        // Disable game mode commands
-	        call InvalidGameModeCommands() 
-	    endmethod
-	    
-	    static method start takes nothing returns nothing
-	        // call FogEnableOn()
+	        call InvalidGameModeCommands()
+	        
+	        // Shuffle players
 	        if Params.flagGameModeSp then
 		        call ShufflePlayer()
 		    endif
 		    
+		    // Enable game utils commands
 		    call EnableGameUtilCommands()
+		    
+		    // Start event listener
+		    call EventManager.listen()
+	    endmethod
+	    
+	    static method start takes nothing returns nothing
+	        // call FogEnableOn()
 	        
 	        call TriggerSleepAction(2.0)
 	        if not Params.flagGameModeNv then
                 // Vote for play time
-                debug call BJDebugMsg("Please vote for play time...")
+                call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Tips, MSG_VoteForPlayTime)
                 call PlayTime.vote()
             else
                 // No need to vote for play time, start game
                 call PlayTime.setTime(CST_OT_PlayTime)
                 call PlayTime.countdownStart()
             endif
-            // Enable game utils commands
+	        
+            // Init Farmer/Hunter units
 	    endmethod
 	endstruct
 	/***************************************************************************
