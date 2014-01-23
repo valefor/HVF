@@ -103,7 +103,8 @@ struct EventManager
         // Hunter hero can not take tower base
         if GetItemTypeId(manItem) == CST_ITI_TowerBase then
             call RemoveItem(manItem)
-            call DisplayTimedTextToPlayer(h.get, 0, 0, 5, "Hunters can't take tower base")
+            call ShowNoticeToPlayer(h.get, MSG_NoticeHunterCantTakeTowerBase)
+            //call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Beaware, ARGB(CST_COLOR_Beaware).str())
             call AdjustPlayerStateBJ(10, h.get, PLAYER_STATE_RESOURCE_LUMBER)
         endif
         set manItem = null
@@ -175,7 +176,20 @@ struct EventManager
                 set h.kills=h.kills + 1
                 // Give Hunter reward for killing
                 // Revive Farmer Hero at random location
-            else // Farmer hero was killed by ally or neutral 
+                call ShowMsgToAll( ARGB.fromPlayer(h.get).str(GetPlayerName(h.get)) +CST_STR_Killed+ ARGB.fromPlayer(f.get).str(GetPlayerName(f.get)) )
+            else
+                // Farmer hero was killed by ally or neutral, punish all farmers
+                call ShowNoticeToAllPlayer(MSG_NoticeFarmerKilledByAlly)
+                set f = Farmer[Farmer.first]
+                loop
+                    exitwhen f.end
+                    if f.get == GetOwningPlayer(killingUnit) then
+                        call SetPlayerState(f.get, PLAYER_STATE_RESOURCE_GOLD, R2I(GetPlayerState(f.get, PLAYER_STATE_RESOURCE_GOLD)/2))
+                    else
+                        call SetPlayerState(f.get, PLAYER_STATE_RESOURCE_GOLD, R2I(GetPlayerState(f.get, PLAYER_STATE_RESOURCE_GOLD)/4*3))
+                    endif
+                    set f = f.next
+                endloop
             endif
             set tp.count = f
             // In order to display hero death anima, we need to postponed revive

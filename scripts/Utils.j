@@ -4,6 +4,11 @@ library Utils/*
 *
 *******************************************************************************/
 
+    globals
+        private sound errorSound
+        private sound hintSound
+    endglobals
+
     /***************************************************************************
     * Common Use Functions
     ***************************************************************************/
@@ -72,8 +77,7 @@ library Utils/*
     function AppendHotkey takes string source, string hotkey returns string
         return "|cffffcc00[" + hotkey + "]|r " + source
     endfunction
-    
-    
+
     // Get Random Real
     function GetRandomRectX takes rect r returns real
         call SetRandomSeed(GetRandomInt(0, 1000000))
@@ -91,4 +95,57 @@ library Utils/*
         return dividen - R2I(R2I(dividen/divisor)*divisor) == 0
     endfunction
     
+    // Show messages at different level at mid-bottom of screen
+    function ShowErrorToPlayer takes player p, string str returns nothing
+        local string msg = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + str
+        if GetLocalPlayer() == p then
+            call ClearTextMessages()
+            call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Normal, ARGB(CST_COLOR_Important).str(msg))
+            call StartSound (errorSound)
+        endif
+    endfunction
+    
+    function ShowNoticeToPlayer takes player p, string str returns nothing
+        local string msg = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + str
+        if GetLocalPlayer() == p then
+            call ClearTextMessages()
+            call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Normal, ARGB(CST_COLOR_Beaware).str(msg))
+            call StartSound (hintSound)
+        endif
+    endfunction
+    
+    function ShowErrorToAll takes string str returns nothing
+        local integer i = 0
+        loop
+            call ShowErrorToPlayer(Player(i),str)
+            set i = i + 1
+            exitwhen i == 12
+        endloop
+    endfunction
+    
+    function ShowNoticeToAll takes string str returns nothing
+        local integer i = 0
+        loop
+            call ShowNoticeToPlayer(Player(i),str)
+            set i = i + 1
+            exitwhen i == 12
+        endloop
+    endfunction
+
+    // Show normal message to all player with specific argb color
+    function ShowMsgToAll takes string str returns nothing
+        local integer i = 0
+        loop
+            call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Normal, str)
+            set i = i + 1
+            exitwhen i == 12
+        endloop
+    endfunction
+    
+    private function init takes nothing returns nothing
+        set errorSound=CreateSoundFromLabel("InterfaceError",false,false,false,10,10)
+        set hintSound=CreateSoundFromLabel("Hint", false, false, false, 10, 10)
+        //call StartSound( error )  //apparently the bug in which you play a sound for the first time
+                                    //and it doesn't work is not there anymore in patch 1.22
+    endfunction
 endlibrary

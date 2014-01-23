@@ -35,8 +35,7 @@ globals
     constant string COLOR_BROWN     = "|cFF4E2A04"
     constant string COLOR_LIGHT_GRAY= "|cFF959697"
     constant string COLOR_LIGHT_BLUE= "|cFF7EBFF1"
-    
-    
+
     constant integer COLOR_ARGB_RED     = 0xFFFF0000
     constant integer COLOR_ARGB_GREEN   = 0xFF00FF00
     constant integer COLOR_ARGB_BLUE    = 0xFF0000FF
@@ -142,10 +141,16 @@ globals
     constant integer CST_BDCOL_DF=9   // DEBUG FLAG
     
     // *** Message display duration
-    constant integer CST_MSGDUR_Important=60
-    constant integer CST_MSGDUR_Beaware =30
-    constant integer CST_MSGDUR_Normal  =10
-    constant integer CST_MSGDUR_Tips    =5
+    constant integer CST_MSGDUR_Important=15
+    constant integer CST_MSGDUR_Beaware =10
+    constant integer CST_MSGDUR_Normal  =5
+    constant integer CST_MSGDUR_Tips    =2
+    
+    // *** Message display color
+    constant integer CST_COLOR_Important=COLOR_ARGB_RED
+    constant integer CST_COLOR_Beaware =COLOR_ARGB_ORANGE
+    constant integer CST_COLOR_Normal  =COLOR_ARGB_WHITE
+    constant integer CST_COLOR_Tips    =COLOR_ARGB_GREEN
     
     /* ==============================Variables=============================== */
     // *** Deltas, for debug use

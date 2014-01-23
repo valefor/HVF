@@ -39,6 +39,8 @@
     constant string CST_STR_GameModeNi= "禁止内斗模式"
     constant string CST_STR_GameModeNiIntro= "禁止内斗，盟友单位之间无法强制攻击"
     
+    constant string CST_STR_Killed= "杀死了"
+    
     // The following nick name must be identical with that in propername list
     constant string CST_STR_FarmerProperNameGreedy= "敛财者"
     constant string CST_STR_FarmerProperNameKiller= "杀狼者"
@@ -81,4 +83,7 @@
     constant string MSG_CantSelectGameMode  = "游戏已经开始，无法选择游戏模式！"
     constant string MSG_WaitHostSelectGameMode  = "请等待主机选择游戏模式..."
     
+    // *** Notice
+    constant string MSG_NoticeHunterCantTakeTowerBase = "猎人不能携带塔基！"
+    constant string MSG_NoticeFarmerKilledByAlly = "农民被盟友杀死了，所有农民减少1/4金钱，凶手减少1/2金钱！"
 endglobals

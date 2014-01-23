@@ -176,7 +176,7 @@ In multiplayer however, this trigger should work.
             set pt30s = TimerPointer.create()
             set pt60s = TimerPointer.create()
             // !Don't forget to set timeout for these timers
-            set ptBase.timeout = CST_PT_5s
+            set ptBase.timeout = CST_PT_base
             set pt10s.timeout = CST_PT_10s
             set pt15s.timeout = CST_PT_15s
             set pt30s.timeout = CST_PT_30s
@@ -268,13 +268,13 @@ In multiplayer however, this trigger should work.
         
         // callback for clicking vote buttons
         private static method onVote takes nothing returns boolean
-            local Dialog      dgClicked  = Dialog.getClickedDialog()
-            local button      btClicked   = Dialog.getClickedButton()
+            local Dialog    dgClicked  = Dialog.getClickedDialog()
+            local button    btClicked   = Dialog.getClickedButton()
             
             //debug call BJDebugMsg("Dialog button clicked!!!")
             set thistype.selects = thistype.selects + 1
             if btClicked == btsSelect[0] then
-                set thistype.playTime = thistype.playTime + 40.0
+                set thistype.playTime = thistype.playTime + 45.0
             elseif btClicked == btsSelect[1] then
                 set thistype.playTime = thistype.playTime + 50.0
             elseif btClicked == btsSelect[2] then
@@ -365,13 +365,7 @@ In multiplayer however, this trigger should work.
             // dialogs can't be displayed on init and the scope's init-func is run during init
             // so we need to use TimerStart to call functions which need to show dialog
             debug call BJDebugMsg("Play.vote")
-            if not Params.flagGameModeNv then
-                call TimerStart(CreateTimer(), 0, false, function thistype.startVote)
-            else
-                // No need to vote for play time, start game
-                set thistype.playTime = CST_OT_PlayTime 
-                call thistype.countdownStart()
-            endif
+            call TimerStart(CreateTimer(), 0, false, function thistype.startVote)
         endmethod
         
         private static method onInit takes nothing returns nothing
