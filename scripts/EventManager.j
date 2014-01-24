@@ -177,8 +177,8 @@ struct EventManager
                 // Give Hunter reward for killing
                 // Revive Farmer Hero at random location
                 call ShowMsgToAll( ARGB.fromPlayer(h.get).str(GetPlayerName(h.get)) +CST_STR_Killed+ ARGB.fromPlayer(f.get).str(GetPlayerName(f.get)) )
-            else
-                // Farmer hero was killed by ally or neutral, punish all farmers
+            elseif Farmer.contain(GetOwningPlayer(killingUnit)) then
+                // Farmer hero was killed by ally, punish all farmers
                 call ShowNoticeToAllPlayer(MSG_NoticeFarmerKilledByAlly)
                 set f = Farmer[Farmer.first]
                 loop
@@ -190,6 +190,9 @@ struct EventManager
                     endif
                     set f = f.next
                 endloop
+                set f = Farmer[GetPlayerId(GetOwningPlayer(dyingUnit))]
+            else
+                //Farmer hero was killed by neutral, impossible
             endif
             set tp.count = f
             // In order to display hero death anima, we need to postponed revive
@@ -201,8 +204,7 @@ struct EventManager
         
         // If farmer farming building is destroyed/canceled
         call f.removeFarmingBuilding(dyingUnit, false)
-        
-        
+
         set dyingUnit = null
         set killingUnit = null
         return false
