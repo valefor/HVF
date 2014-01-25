@@ -313,3 +313,5 @@ function InitTrig_Stacking takes nothing returns nothing
 endfunction
 
 
+// units\orc\WolfRider\WolfRider.mdl
+
