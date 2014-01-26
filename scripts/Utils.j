@@ -114,7 +114,7 @@ library Utils/*
         endif
     endfunction
     
-    function ShowErrorToAll takes string str returns nothing
+    function ShowErrorToAllPlayer takes string str returns nothing
         local integer i = 0
         loop
             call ShowErrorToPlayer(Player(i),str)
@@ -123,7 +123,7 @@ library Utils/*
         endloop
     endfunction
     
-    function ShowNoticeToAll takes string str returns nothing
+    function ShowNoticeToAllPlayer takes string str returns nothing
         local integer i = 0
         loop
             call ShowNoticeToPlayer(Player(i),str)
@@ -136,7 +136,7 @@ library Utils/*
     function ShowMsgToAll takes string str returns nothing
         local integer i = 0
         loop
-            call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Normal, str)
+            call DisplayTimedTextToPlayer(Player(i), 0.52, 0.96, CST_MSGDUR_Normal, str)
             set i = i + 1
             exitwhen i == 12
         endloop

@@ -50,18 +50,21 @@ In multiplayer however, this trigger should work.
     ***************************************************************************/
     struct TimerManager extends array
         // Periodic Timers(PT)
-        readonly static TimerPointer ptBase // The only one that would start as a timer
+        private static TimerPointer ptBase // The only one that would start as a timer
         readonly static TimerPointer pt10s
         readonly static TimerPointer pt15s
         readonly static TimerPointer pt30s
         readonly static TimerPointer pt60s
         
         // Onetime Timers(OT)
-        readonly static TimerPointer otBase // The only one that would start as a timer
+        private static TimerPointer otBase // The only one that would start as a timer
         readonly static TimerPointer otSelectHero
         readonly static TimerPointer otDetectionOn
         readonly static TimerPointer otDetectionOff
         readonly static TimerPointer otPlayTimeOver
+        
+        // Use this TimerPointer as a trigger, and it'll be evaluated at game start
+        readonly static TimerPointer onGameStart
         
         private static integer ptTickCount
         private static integer otTickCount
@@ -111,10 +114,7 @@ In multiplayer however, this trigger should work.
             set otTickCount = otTickCount + 1
             
             debug call BJDebugMsg("Single timer timeout")
-            if isTimerValid(otPlayTimeOver) and IsIntDividableBy(otTickCount, thistype.otPlayTimeOver.count) then
-                call TriggerEvaluate(thistype.otPlayTimeOver.trigger)
-                call disableTimer(otPlayTimeOver)
-            elseif isTimerValid(otDetectionOff) and IsIntDividableBy(otTickCount, thistype.otDetectionOff.count) then
+            if isTimerValid(otDetectionOff) and IsIntDividableBy(otTickCount, thistype.otDetectionOff.count) then
                 call TriggerEvaluate(thistype.otDetectionOff.trigger)
                 call disableTimer(otDetectionOff)
             elseif isTimerValid(otDetectionOn) and IsIntDividableBy(otTickCount, thistype.otDetectionOn.count) then
@@ -129,6 +129,11 @@ In multiplayer however, this trigger should work.
             //if not isPeriodicTimer(tp.timeout) then
             //    call tp.destroy()
             //endif
+        endmethod
+        
+        private static method onPlayTimeOver takes nothing returns nothing
+            // Game over
+            call TriggerEvaluate(thistype.otPlayTimeOver.trigger)
         endmethod
         
         // This should only be call just before timer starts
@@ -147,20 +152,18 @@ In multiplayer however, this trigger should work.
             set otPlayTimeOver.count = R2I(otPlayTimeOver.timeout/CST_OT_base)
         endmethod
         
-        
-        // It's used by other module to register actions at timer expired
-        static method register takes real timeout, boolexpr action returns triggercondition
-            return thistype.getTimer(timeout).register(action)
-        endmethod
-        
         static method start takes nothing returns nothing
             call thistype.setTimerCount()
         
+            call TriggerEvaluate(thistype.onGameStart.trigger)
             // PT - we select 5s as base periodic timer
             call TimerStart(thistype.ptBase.timer, thistype.ptBase.timeout, true, function thistype.onPtExpired)
            
             // OT - we select 60s as base single timer
             call TimerStart(thistype.otBase.timer, thistype.otBase.timeout, true, function thistype.onOtExpired)
+            
+            // Playtime countdown, this timer must be started for time dialog displaying
+            call TimerStart(thistype.otPlayTimeOver.timer, thistype.otPlayTimeOver.timeout, false, function thistype.onPlayTimeOver)
         endmethod
         
         private static method onInit takes nothing returns nothing
@@ -169,6 +172,7 @@ In multiplayer however, this trigger should work.
             set ptTickCount = 0
             set otTickCount = 0
             
+            set onGameStart = TimerPointer.create()
             // PT
             set ptBase = TimerPointer.create()
             set pt10s = TimerPointer.create()

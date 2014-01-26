@@ -934,8 +934,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
 
         private static method onInit takes nothing returns nothing
+            call TimerManager.onGameStart.register(Filter(function thistype.init))
+            
             call TimerManager.pt60s.register(Filter(function thistype.goldBonusForKilling))
-            //call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
             call TimerManager.otSelectHero.register(Filter(function thistype.onSelectHeroExpire))
             // Play time is over, hunters win
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.win))
@@ -1162,11 +1163,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         private static method onInit takes nothing returns nothing
+            // Init and display multiboard at game start
+            call TimerManager.onGameStart.register(Filter(function thistype.init))
+            
             call TimerManager.pt15s.register(Filter(function thistype.salarySettlement))
             call TimerManager.pt60s.register(Filter(function thistype.incomeSettlement))
             call TimerManager.pt60s.register(Filter(function thistype.aquireFreeExp))
-            // Init and display multiboard at game start
-            // call TimerManager.otGameStart.register(Filter(function thistype.onGameStart))
+            
             // Play time is over, farmers lose
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.lose))
         endmethod
