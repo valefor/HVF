@@ -183,9 +183,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         public method createRandomHero takes location l returns nothing
-            local integer randomInt = GetRandomInt(1, CST_INT_MaxHunterHeroType)
             local location loc = Location(GetLocationX(MapLocation.heroReviveLoc), GetLocationY(MapLocation.heroReviveLoc))
-            local integer randomHeroUti
             
             debug call BJDebugMsg("Center X of MapLocation.regionHeroRevive:" + R2S(GetRectCenterX(MapLocation.regionHeroRevive)))
             debug call BJDebugMsg("Create random hero at location >> X:" + R2S(GetLocationX(loc))+ ", Y:"+ R2S(GetLocationY(loc)) )
@@ -195,26 +193,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
             debug call BJDebugMsg("Create random hero for " + GetPlayerName(this.get))
             
-            if randomInt == 1 then
-                set randomHeroUti = 'U003'
-            elseif randomInt == 2 then
-                set randomHeroUti = 'U004'
-            elseif randomInt == 3 then
-                set randomHeroUti = 'U005'
-            elseif randomInt == 4 then
-                set randomHeroUti = 'U006'
-            elseif randomInt == 5 then
-                set randomHeroUti = 'U007'
-            elseif randomInt == 6 then
-                set randomHeroUti = 'U008'
-            elseif randomInt == 7 then
-                set randomHeroUti = 'U009'
-            elseif randomInt == 8 then
-                set randomHeroUti = 'U00A'
-            elseif randomInt == 9 then
-                set randomHeroUti = 'U00B'
-            endif
-            set this.hero = CreateUnitAtLoc(this.get, randomHeroUti, loc, 0)
+            set this.hero = CreateUnitAtLoc(this.get, GetRandomHeroUti(), loc, 0)
             // Give random hunter hero extra bonus such as life(+2000) agi(+3) int(+2)... 
             set Bonus_Life[hero]=CST_INT_RandomBonusLife
             set Bonus_Armor[hero]=CST_INT_RandomBonusArmor

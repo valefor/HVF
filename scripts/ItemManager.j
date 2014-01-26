@@ -19,7 +19,7 @@ struct ItemManager extends array
         local real y
         local integer numberOfItem = 0
         
-        call BJDebugMsg("Create begin items")
+        debug call BJDebugMsg("Create begin items")
         
         loop
             set x = MapLocation.randomX

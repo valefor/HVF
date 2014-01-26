@@ -159,7 +159,7 @@ globals
 endglobals
 
 struct Params extends array
-    // Game Mode
+    // Default game mode
     static boolean flagGameModeSp   = false
     static boolean flagGameModeNv   = false
     static boolean flagGameModeNi   = false

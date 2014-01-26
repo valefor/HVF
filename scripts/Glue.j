@@ -56,9 +56,19 @@ library Glue initializer init /* v0.0.1 by Xandria
         ***********************************************************************/
         // *** Hunter
         constant integer CST_INT_MaxHunterHeroType  = 9
+        constant integer CST_UTI_HunterHeroMiner    ='U003'
+        constant integer CST_UTI_HunterHeroPeeper   ='U004'
+        constant integer CST_UTI_HunterHeroDogger   ='U005'
+        constant integer CST_UTI_HunterHeroPelter   ='U006'
+        constant integer CST_UTI_HunterHeroSneaker  ='U007'
+        constant integer CST_UTI_HunterHeroAssaulter='U008'
+        constant integer CST_UTI_HunterHeroDarter   ='U009'
+        constant integer CST_UTI_HunterHeroBalancer ='U00A'
+        constant integer CST_UTI_HunterHeroButcher  ='U00B'
+        constant integer CST_UTI_HunterHeroRandom   ='U00C'
         constant integer CST_UTI_HunterHeroFirstcode='U002'// First Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroLastcode ='U00D'// Last Raw Code of Hunter Hero
-        constant integer CST_UTI_HunterHeroRandom   ='U00C'
+        
         constant integer CST_UTI_HunterHeroSkeleton ='nskg'
         // Itembox
         constant integer CST_UTI_HunterItemBox  ='h00I'
@@ -153,6 +163,60 @@ library Glue initializer init /* v0.0.1 by Xandria
         
     endglobals
 
+    /***************************************************************************
+    * Preloading:
+    *   To have better game experience, aka reducing in-game lag,
+    *   we have to preloading some units/abilities before game start
+    ***************************************************************************/
+    struct Preloading extends array
+    
+        private static group preloadUnits
+        private static real invX = -99999.0
+        private static real invY = -99999.0
+        
+        // This method must be called in struct's onInit method if other struct
+        // wants to preload some units
+        static method addUnit takes integer uti returns nothing
+            if preloadUnits == null
+                return
+            endif
+            
+            call GroupAddUnit( CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), uti, invX, invY, CST_Facing_Unit) )
+        endmethod
+        
+        private method filterRemoveUnit takes nothing returns nothing
+            call RemoveUnit(GetFilterUnit())
+        endmethod
+        
+        // Delete preloading units at beginning of game
+        static method destroy takes unit u returns nothing
+            call GroupEnumUnitsOfPlayer(preloadUnits, Player(PLAYER_NEUTRAL_PASSIVE), Filter(function thistype.filterRemoveUnit))
+            call DestroyGroup(preloadUnits)
+        endmethod
+        
+        private static method onInit takes nothing returns nothing
+            set preloadUnits = CreateGroup()
+            
+            call thistype.addUnit(CST_UTI_HunterHeroMiner)
+            call thistype.addUnit(CST_UTI_HunterHeroPeeper)
+            call thistype.addUnit(CST_UTI_HunterHeroDogger)
+            call thistype.addUnit(CST_UTI_HunterHeroPelter)
+            call thistype.addUnit(CST_UTI_HunterHeroSneaker)
+            call thistype.addUnit(CST_UTI_HunterHeroAssaulter)
+            call thistype.addUnit(CST_UTI_HunterHeroDarter)
+            call thistype.addUnit(CST_UTI_HunterHeroBalancer)
+            call thistype.addUnit(CST_UTI_HunterHeroButcher)
+            call thistype.addUnit(CST_UTI_HunterHeroRandom)
+            
+            call thistype.addUnit(CST_UTI_FarmerHero)
+            
+            call thistype.addUnit(CST_UTI_Sheep)
+            call thistype.addUnit(CST_UTI_Pig)
+            call thistype.addUnit(CST_UTI_Snake)
+            call thistype.addUnit(CST_UTI_Chicken)
+        endmethod
+    endstruct
+    
     struct MapLocation
         /***********************************************************************
         * Region & location, little memory leakage, not big deal, let it be
@@ -240,10 +304,33 @@ library Glue initializer init /* v0.0.1 by Xandria
         set u = null
     endfunction
     
+    function GetRandomHeroUti takes nothing returns integer
+        local integer randomInt = GetRandomInt(1, CST_INT_MaxHunterHeroType)
+        if randomInt == 1 then
+            return CST_UTI_HunterHeroMiner
+        elseif randomInt == 2 then
+            return CST_UTI_HunterHeroPeeper
+        elseif randomInt == 3 then
+            return CST_UTI_HunterHeroDogger
+        elseif randomInt == 4 then
+            return CST_UTI_HunterHeroPelter
+        elseif randomInt == 5 then
+            return CST_UTI_HunterHeroSneaker
+        elseif randomInt == 6 then
+            return CST_UTI_HunterHeroAssaulter
+        elseif randomInt == 7 then
+            return CST_UTI_HunterHeroDarter
+        elseif randomInt == 8 then
+            return CST_UTI_HunterHeroBalancer
+        elseif randomInt == 9 then
+            return CST_UTI_HunterHeroButcher
+        endif
+    endfunction
+    
     /***************************************************************************
 	* Library Initiation
 	***************************************************************************/
     private function init takes nothing returns nothing
-        // call MapLocation.init()
+        call Preloading.destroy()
     endfunction
 endlibrary
