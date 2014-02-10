@@ -166,7 +166,7 @@ library Glue initializer init /* v0.0.1 by Xandria
     /***************************************************************************
     * Preloading:
     *   To have better game experience, aka reducing in-game lag,
-    *   we have to preloading some units/abilities before game start
+    *   we have to preload some units/abilities before game start
     ***************************************************************************/
     struct Preloading extends array
     
@@ -181,7 +181,7 @@ library Glue initializer init /* v0.0.1 by Xandria
                 return
             endif
             
-            call GroupAddUnit( CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), uti, invX, invY, CST_Facing_Unit) )
+            call GroupAddUnit( preloadUnits ,CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), uti, invX, invY, CST_Facing_Unit) )
         endmethod
         
         private method filterRemoveUnit takes nothing returns nothing
