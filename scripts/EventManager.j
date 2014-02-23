@@ -1,6 +1,7 @@
 library EventManager initializer init/* v0.0.1 Xandria
 */  uses    SimpleTrigger   /*  
 */          HVF             /*
+*/          EasyItemStacknSplit /*
 ********************************************************************************
 * HVF event manager
 ********************************************************************************
@@ -12,7 +13,7 @@ struct EventManager
     static trigger trigSelectHero
     static trigger trigPlantTree
     static trigger trigHunterUnitDeath
-    static trigger trigHunterPickupItem
+    static trigger trigPickupItem
     static trigger trigFarmerUnitDeath
     static trigger trigFarmerFarmingBuildingFinish
     static trigger trigFarmerFarmingBuildingUpgrade
@@ -89,26 +90,38 @@ struct EventManager
     endmethod
     
     /***************************************************************************
-    * When hunter hero pickup item, need to check if the item is tower base
+    * When hunter/farmer pickup item, need to check if the item is tower base
     ***************************************************************************/
     // Event Filter
-    private static method filterHunterPickupItem takes nothing returns boolean
+    private static method filterPickupItem takes nothing returns boolean
         // return IsUnitHunterHero(GetFilterUnit())
         return true
     endmethod
     // Event Handler
-    private static method onHunterPickupItem takes nothing returns boolean
+    private static method onPickupItem takes nothing returns boolean
         local item manItem = GetManipulatedItem()
-        local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
+        local Hunter h
+        
+        debug call BJDebugMsg("Call function: onPickupItem")
+        
         // Hunter hero can not take tower base
-        if GetItemTypeId(manItem) == CST_ITI_TowerBase then
-            call RemoveItem(manItem)
-            call ShowNoticeToPlayer(h.get, MSG_NoticeHunterCantTakeTowerBase)
-            //call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Beaware, ARGB(CST_COLOR_Beaware).str())
-            call AdjustPlayerStateBJ(10, h.get, PLAYER_STATE_RESOURCE_LUMBER)
+        if Hunter.contain(GetTriggerPlayer()) and manItem !=null then
+            if GetItemTypeId(manItem) == CST_ITI_TowerBase then
+                set h = Hunter[GetPlayerId(GetTriggerPlayer())]
+                //call BJDebugMsg("[1]Item:"+GetItemName(manItem)+", Charges:"+I2S(GetItemCharges(manItem))+", Player:"+GetPlayerName(h.get))
+                call RemoveItem(manItem)
+                call BJDebugMsg("Current lumber:" + R2S(GetPlayerState(h.get, PLAYER_STATE_LUMBER_GATHERED)))
+                call AdjustPlayerStateBJ(10, h.get, PLAYER_STATE_RESOURCE_LUMBER)
+                call ShowNoticeToPlayer(h.get, MSG_NoticeHunterCantTakeTowerBase)
+                //call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Beaware, ARGB(CST_COLOR_Beaware).str())
+                //call SetPlayerState(h.get, PLAYER_STATE_LUMBER_GATHERED, GetPlayerState(h.get, PLAYER_STATE_LUMBER_GATHERED) + 10)
+            endif
+            set manItem = null
+            return false
         endif
+        
         set manItem = null
-        return false
+        return true
     endmethod
     
     /***************************************************************************
@@ -308,7 +321,7 @@ struct EventManager
         
         return false
     endmethod
-    
+
     /***************************************************************************
     * Do clean-up work for leaving player
     ***************************************************************************/
@@ -324,9 +337,7 @@ struct EventManager
             debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmer")
             call Farmer.removeLeaving(pLeave)
         endif
-        
-        
-        
+
         if Hunter.count == 0 then
             call Farmer.win()
         endif
@@ -385,9 +396,14 @@ struct EventManager
     static method listen takes nothing returns nothing
         local Farmer f = Farmer[Farmer.first]
         local Hunter h = Hunter[Hunter.first]
+        local trigger cancelTrigger = CreateTrigger()
+        local trigger preloadTrigger = CreateTrigger()
         local region r=CreateRegion()
         
         call RegionAddRect(r,GetWorldBounds())
+        
+        // Integrate item stacking system, register cb
+        call EasyItemStacknSplit_RegisterCb(Filter(function thistype.onPickupItem))
         
         debug call BJDebugMsg("Event manager: start to listen")
         // Register a leave action callback of player leave event
@@ -408,14 +424,15 @@ struct EventManager
         
         loop
             exitwhen f.end
-            call TriggerRegisterPlayerUnitEvent(trigFarmerUnitDeath, f.get, EVENT_PLAYER_UNIT_DEATH, null)
             call TriggerRegisterPlayerUnitEvent(trigPlantTree, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
+            call TriggerRegisterPlayerUnitEvent(trigFarmerUnitDeath, f.get, EVENT_PLAYER_UNIT_DEATH, null)
             call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingFinish, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH, Filter(function thistype.filterFarmerFarmingBuildingFinish))
             call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingUpgrade, f.get, EVENT_PLAYER_UNIT_UPGRADE_FINISH, Filter(function thistype.filterFarmerFarmingBuildingUpgrade))
             call TriggerRegisterPlayerUnitEvent(trigFarmerSpellCast, f.get, EVENT_PLAYER_UNIT_SPELL_CAST, Filter(function thistype.filterFarmerSpellCast))
             call TriggerRegisterPlayerUnitEvent(trigFarmerUnitIssuedOrder, f.get, EVENT_PLAYER_UNIT_ISSUED_ORDER, Filter(function thistype.filterFarmerUnitIssuedOrder))
             set f= f.next
         endloop
+        
     endmethod
     
     private static method onInit takes nothing returns nothing
@@ -423,7 +440,7 @@ struct EventManager
         set thistype.trigSelectHero = CreateTrigger()
         set thistype.trigPlantTree = CreateTrigger()
         set thistype.trigHunterUnitDeath = CreateTrigger()
-        set thistype.trigHunterPickupItem = CreateTrigger()
+        set thistype.trigPickupItem = CreateTrigger()
         set thistype.trigFarmerUnitDeath = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingFinish = CreateTrigger()
         set thistype.trigFarmerFarmingBuildingUpgrade = CreateTrigger()
@@ -434,8 +451,8 @@ struct EventManager
         // Set up triggers handle function
         call TriggerAddCondition( trigSelectHero,Condition(function thistype.onSelectHero) )
         call TriggerAddCondition( trigPlantTree,Condition(function thistype.onPlantTree) )
+        call TriggerAddCondition( trigPickupItem,Condition(function thistype.onPickupItem) )
         call TriggerAddCondition( trigHunterUnitDeath,Condition(function thistype.onHunterUnitDeath) )
-        call TriggerAddCondition( trigHunterPickupItem,Condition(function thistype.onHunterPickupItem) )
         call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
         call TriggerAddCondition( trigFarmerFarmingBuildingFinish,Condition(function thistype.onFarmerFarmingBuildingFinish) )
         call TriggerAddCondition( trigFarmerFarmingBuildingUpgrade,Condition(function thistype.onFarmerFarmingBuildingUpgrade) )

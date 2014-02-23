@@ -71,7 +71,7 @@ globals
     constant string MSG_YouHaveBeenKicked   = "你已经被主机踢出游戏！"
     
     // *** Shuffle player
-    constant string MSG_ShufflePlayerModeSelected= "主机已经选择了洗牌模式，玩家将会被随机分配阵营。。。"
+    constant string MSG_ShufflePlayerModeSelected= "主机已经选择了洗牌模式，玩家将会被随机分配阵营..."
     constant string MSG_ShufflePlayerTo= "你已经被随机分配为："
     constant string MSG_ShufflePlayerDone= "洗牌结束！"
     
@@ -84,6 +84,6 @@ globals
     constant string MSG_WaitHostSelectGameMode  = "请等待主机选择游戏模式..."
     
     // *** Notice
-    constant string MSG_NoticeHunterCantTakeTowerBase = "猎人不能携带塔基！"
+    constant string MSG_NoticeHunterCantTakeTowerBase = "猎人不能携带塔基,删除物品并给与猎人奖励(+10木材)！"
     constant string MSG_NoticeFarmerKilledByAlly = "农民被盟友杀死了，所有农民减少1/4金钱，凶手减少1/2金钱！"
 endglobals

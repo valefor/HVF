@@ -1,4 +1,5 @@
 // Standard vJass Library - for common use
+// Foundational
 //! import "scripts\lib\Alloc.j"
 //! import "scripts\lib\AIDS.j"
 //! import "scripts\lib\ARGB.j"
@@ -11,8 +12,10 @@
 //! import "scripts\lib\ORDERID.j"
 //! import "scripts\lib\RecipeSYS.j"
 
+// Plugin
 //! import "scripts\lib\ChatCommand.j"
 //! import "scripts\lib\Dialog.j"
+//! import "scripts\lib\EasyItemStacknSplit.j"
 //! import "scripts\lib\PlayerManager.j"
 //! import "scripts\lib\PlayerAlliance.j"
 //! import "scripts\lib\TimerUtils.j"

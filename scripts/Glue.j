@@ -177,21 +177,33 @@ library Glue initializer init /* v0.0.1 by Xandria
         // This method must be called in struct's onInit method if other struct
         // wants to preload some units
         static method addUnit takes integer uti returns nothing
-            if preloadUnits == null
+            if preloadUnits == null then
                 return
             endif
             
             call GroupAddUnit( preloadUnits ,CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), uti, invX, invY, CST_Facing_Unit) )
         endmethod
         
-        private method filterRemoveUnit takes nothing returns nothing
+        private static method filterRemoveUnit takes nothing returns nothing
             call RemoveUnit(GetFilterUnit())
         endmethod
         
-        // Delete preloading units at beginning of game
-        static method destroy takes unit u returns nothing
-            call GroupEnumUnitsOfPlayer(preloadUnits, Player(PLAYER_NEUTRAL_PASSIVE), Filter(function thistype.filterRemoveUnit))
+        // Flush preloading units at beginning of game
+        static method flush takes nothing returns nothing
+            // Don't use GroupEnumUnitsOfPlayer since it'll iterate all units of PLAYER_NEUTRAL_PASSIVE
+            // call GroupEnumUnitsOfPlayer(preloadUnits, Player(PLAYER_NEUTRAL_PASSIVE), Filter(function thistype.filterRemoveUnit))
+            // Here we just want to clear the preloadUnits
+            local unit u
+
+            loop
+                set u = FirstOfGroup(preloadUnits)
+                exitwhen u == null
+                call GroupRemoveUnit(preloadUnits,u)
+                call RemoveUnit(u)
+            endloop
+
             call DestroyGroup(preloadUnits)
+            set u = null
         endmethod
         
         private static method onInit takes nothing returns nothing
@@ -325,12 +337,14 @@ library Glue initializer init /* v0.0.1 by Xandria
         elseif randomInt == 9 then
             return CST_UTI_HunterHeroButcher
         endif
+        
+        return CST_UTI_HunterHeroBalancer
     endfunction
     
     /***************************************************************************
 	* Library Initiation
 	***************************************************************************/
     private function init takes nothing returns nothing
-        call Preloading.destroy()
+        call Preloading.flush()
     endfunction
 endlibrary

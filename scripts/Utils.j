@@ -101,7 +101,8 @@ library Utils/*
         if GetLocalPlayer() == p then
             call ClearTextMessages()
             call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Normal, ARGB(CST_COLOR_Important).str(msg))
-            call StartSound (errorSound)
+            // !!!Buggy StartSound!!! which will cause jass skip next statement
+            //call StartSound (errorSound)
         endif
     endfunction
     
@@ -110,7 +111,7 @@ library Utils/*
         if GetLocalPlayer() == p then
             call ClearTextMessages()
             call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Normal, ARGB(CST_COLOR_Beaware).str(msg))
-            call StartSound (hintSound)
+            //call StartSound (hintSound)
         endif
     endfunction
     
