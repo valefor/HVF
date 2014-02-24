@@ -67,7 +67,7 @@ globals
     constant integer CST_INT_MaxAnimals=550
     
     // *** Begin resource
-    constant integer CST_INT_FarmerBeginGold=4300
+    constant integer CST_INT_FarmerBeginGold=43
     constant integer CST_INT_FarmerBeginLumber=0
     constant integer CST_INT_HunterBeginGold=43
     constant integer CST_INT_HunterBeginLumber=10
@@ -105,7 +105,7 @@ globals
     
     // *** Magnification of resource bonus
     constant integer CST_INT_GoldMagForDeath=20
-    constant integer CST_INT_GoldMagForKilling=5   
+    constant integer CST_INT_GoldMagForKilling=10   
     constant integer CST_INT_LumberMagForKilling=1
     
     // *** Skill points of initial hero
