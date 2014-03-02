@@ -229,7 +229,11 @@ library Glue initializer init /* v0.0.1 by Xandria
         endmethod
     endstruct
     
-    struct MapLocation
+    /***********************************************************************
+    * Map struct:
+    * contains map locations, settings, util functions
+    ***********************************************************************/
+    struct Map
         /***********************************************************************
         * Region & location, little memory leakage, not big deal, let it be
         *   Note! Don't use bj_VARs like 'bj_mapInitialPlayableArea' since it's 
@@ -242,15 +246,28 @@ library Glue initializer init /* v0.0.1 by Xandria
         static rect regionWaterLand2
         static rect regionWaterLand3
         
+        static location heroReviveLoc
+        
+        /***********************************************************************
+        * Settings & Parameters
+        ***********************************************************************/
         static real array itemBoxXs[4]
         static real array itemBoxYs[4]
+        static real array mapCenterXs[4]
+        static real array mapCenterYs[4]
+        static real array mapAlignXs[4]
+        static real array mapAlignYs[4]
+        static integer mapSize  = 3 // Full size(default)
+        static real boundBase   = 8192.0
+        static real baseX
+        static real baseY
+        static real marginX
+        static real marginY
         static real mapMaxX
         static real mapMinX
         static real mapMaxY                
         static real mapMinY
-        
-        static location heroReviveLoc
-        
+
         static method operator randomX takes nothing returns real
             call SetRandomSeed(GetRandomInt(0, 1000000))
             return GetRandomReal(thistype.mapMinX, thistype.mapMaxX)
@@ -259,6 +276,57 @@ library Glue initializer init /* v0.0.1 by Xandria
         static method operator randomY takes nothing returns real
             call SetRandomSeed(GetRandomInt(0, 1000000))
             return GetRandomReal(thistype.mapMinY, thistype.mapMaxY)
+        endmethod
+        
+        private static method enumDest takes nothing returns nothing
+            local destructable dest = GetEnumDestructable()
+            call CreateDestructable(GetDestructableTypeId(dest), GetDestructableX(dest) + mapCenterXs[mapSize]-mapCenterXs[3], GetDestructableY(dest) + mapCenterYs[mapSize]-mapCenterYs[3], GetRandomReal(0, 360), GetRandomReal(0.80, 1.20), GetRandomInt(0, 9))
+            call RemoveDestructable( dest )
+            set dest = null
+        endmethod
+        
+        static method resize takes player p,integer n returns nothing
+            local real minX
+            local real minY
+            local real maxX
+            local real maxY
+            local rect r = Rect(mapCenterXs[3]-boundBase, mapCenterYs[3]-boundBase, mapCenterXs[3]+boundBase, mapCenterYs[3]+boundBase)
+            call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
+            set mapSize = n
+            
+            // Rebuild trees/units...
+            call EnumDestructablesInRect(r, null, function thistype.enumDest)
+            
+            if (GetLocalPlayer() == p) then
+                // The playerable area
+                set mapMinX = mapCenterXs[mapSize] - baseX
+                set mapMinY = mapCenterYs[mapSize] - baseY
+                set mapMaxX = mapCenterXs[mapSize] + mapAlignXs[mapSize]
+                set mapMaxY = mapCenterYs[mapSize] + mapAlignYs[mapSize]
+
+                set minX = mapCenterXs[mapSize] - baseX
+                set minY = mapCenterYs[mapSize] - baseY
+                set maxX = mapCenterXs[mapSize] + baseX
+                set maxY = mapCenterYs[mapSize] + baseY
+                // Use only local code (no net traffic) within this block to avoid desyncs.
+                //call SetCameraBounds(mapMinX+marginX, mapMinY+marginY, mapMinX+marginX, mapMaxY-marginY, mapMaxX-marginX, mapMaxY-marginY, mapMaxX-marginX, mapMinY+marginY)
+                call SetCameraBounds(minX+marginX, minY+marginY, maxX-marginX, maxY-marginY, minX+marginX, maxY-marginY, maxX-marginX, minY+marginY)
+            endif
+            //call SetCameraBounds((0-baseX) + GetCameraMargin(CAMERA_MARGIN_LEFT),(0-baseY) + GetCameraMargin(CAMERA_MARGIN_BOTTOM),mapXs[n] - GetCameraMargin(CAMERA_MARGIN_RIGHT),mapYs[n] - GetCameraMargin(CAMERA_MARGIN_TOP),(0-baseX) + GetCameraMargin(CAMERA_MARGIN_LEFT),mapYs[n] - GetCameraMargin(CAMERA_MARGIN_TOP),mapXs[n] - GetCameraMargin(CAMERA_MARGIN_RIGHT),(0-baseY) + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
+            
+            // Reset bound points
+            //call thistype.getBoundPoints()
+            call RemoveRect(r)
+            set r = null
+        endmethod
+        
+        private static method getBoundPoints takes nothing returns nothing
+            //call BJDebugMsg("Margin left:"+R2S(GetCameraMargin(CAMERA_MARGIN_LEFT))+", Margin bottom:"+R2S(GetCameraMargin(CAMERA_MARGIN_BOTTOM))+", Margin right:"+R2S(GetCameraMargin(CAMERA_MARGIN_RIGHT))+", Margin top:"+R2S(GetCameraMargin(CAMERA_MARGIN_TOP)))
+            //set mapMinX = GetCameraBoundMinX()-GetCameraMargin(CAMERA_MARGIN_LEFT)
+            //set mapMinY = GetCameraBoundMinY()-GetCameraMargin(CAMERA_MARGIN_BOTTOM)
+            //set mapMaxX = GetCameraBoundMaxX()+GetCameraMargin(CAMERA_MARGIN_RIGHT)
+            //set mapMaxY = GetCameraBoundMaxY()+GetCameraMargin(CAMERA_MARGIN_TOP)
+            //call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
         endmethod
         
         /***********************************************************************
@@ -282,11 +350,57 @@ library Glue initializer init /* v0.0.1 by Xandria
             set itemBoxYs[2] = - 1728.0
             set itemBoxYs[3] = - 1728.0
             
-            set mapMaxX = GetCameraBoundMaxX()+GetCameraMargin(CAMERA_MARGIN_RIGHT)
-            set mapMinX = GetCameraBoundMinX()-GetCameraMargin(CAMERA_MARGIN_LEFT)
-            set mapMaxY = GetCameraBoundMaxY()+GetCameraMargin(CAMERA_MARGIN_TOP)
-            set mapMinY = GetCameraBoundMinY()-GetCameraMargin(CAMERA_MARGIN_BOTTOM)
+            // minX = -7424.0, maxX = 7424.0, minY = -7680.0, maxY = 7680.0
+            set baseX = boundBase - 256.0  // 8192-256
+            set baseY = boundBase - 256.0  // 8192-256
+            // marginX = 512, marginY = 256
+            set marginX = 512.0 // up to your map setting
+            set marginY = 256.0 // up to your map setting
             
+            /*******************************************************************
+            * Center position:
+            *       0.0    -16384.0 (m1)
+            *   16384.0    -16384.0 (m2)
+            *   16384.0         0.0 (m3)
+            *       0.0         0.0 (m4)
+            *******************************************************************/
+            set mapCenterXs[0] = 0.0
+            set mapCenterXs[1] = boundBase * 2
+            set mapCenterXs[2] = boundBase * 2
+            set mapCenterXs[3] = 0.0
+            
+            set mapCenterYs[0] = 0.0 - boundBase * 2
+            set mapCenterYs[1] = 0.0 - boundBase * 2
+            set mapCenterYs[2] = 0.0
+            set mapCenterYs[3] = 0.0
+            
+            /*******************************************************************
+            * Align for different map size:
+            *   128.0 * 7   128.0 * 3   (m1)
+            *   128.0 * 62  128.0 * 3   (m2)
+            *   128.0 * 40  128.0 * 48  (m3)
+            *   128.0 * 62  128.0 * 62  (m4)
+            *******************************************************************/
+            set mapAlignXs[0]  = 128.0 * 7
+            set mapAlignXs[1]  = 128.0 * 62
+            set mapAlignXs[2]  = 128.0 * 40
+            set mapAlignXs[3]  = 128.0 * 62
+            
+            set mapAlignYs[0]  = 128.0 * 5
+            set mapAlignYs[1]  = 128.0 * 5
+            set mapAlignYs[2]  = 128.0 * 48
+            set mapAlignYs[3]  = 128.0 * 62
+            
+            //
+            //      X1          Y1          X2          Y2          X3          Y3          X4          Y5
+            //      XL          YB          XR          YT          XL          YT          XR          YB
+            //   -7424.0     -7680.0      7424.0      7680.0     -7424.0      7680.0      7424.0      -7680.0    
+            
+            // The initial value
+            set mapMinX = GetCameraBoundMinX()-GetCameraMargin(CAMERA_MARGIN_LEFT)
+            set mapMinY = GetCameraBoundMinY()-GetCameraMargin(CAMERA_MARGIN_BOTTOM)
+            set mapMaxX = GetCameraBoundMaxX()+GetCameraMargin(CAMERA_MARGIN_RIGHT)
+            set mapMaxY = GetCameraBoundMaxY()+GetCameraMargin(CAMERA_MARGIN_TOP)
             debug call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
             
         endmethod
@@ -305,14 +419,14 @@ library Glue initializer init /* v0.0.1 by Xandria
     endfunction
     
     function CreateHunterBeginUnits takes player p, integer i returns nothing
-        local unit u = CreateUnit(p, CST_UTI_HunterItemBox, MapLocation.itemBoxXs[i], MapLocation.itemBoxYs[i], CST_Facing_Building)
+        local unit u = CreateUnit(p, CST_UTI_HunterItemBox, Map.itemBoxXs[i], Map.itemBoxYs[i], CST_Facing_Building)
         call UnitAddItemToSlotById(u, 'I005', 0)
         call UnitAddItemToSlotById(u, 'shrs', 1)
         call UnitAddItemToSlotById(u, 'pman', 2)
         call UnitAddItemToSlotById(u, 'moon', 3)
         call UnitAddItemToSlotById(u, 'dust', 4)
         call UnitAddItemToSlotById(u, 'I000', 5)
-        call CreateUnit(p, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(MapLocation.regionHeroRevive), GetRectMaxX(MapLocation.regionHeroRevive)), GetRandomReal(GetRectMinY(MapLocation.regionHeroRevive), GetRectMaxY(MapLocation.regionHeroRevive)), CST_Facing_Unit)
+        call CreateUnit(p, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(Map.regionHeroRevive), GetRectMaxX(Map.regionHeroRevive)), GetRandomReal(GetRectMinY(Map.regionHeroRevive), GetRectMaxY(Map.regionHeroRevive)), CST_Facing_Unit)
         set u = null
     endfunction
     

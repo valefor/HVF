@@ -40,13 +40,44 @@ library GameManager initializer init /*
 		    
 		endmethod
 		
+		private static method adjustMapSize takes nothing returns nothing
+		    local ActivePlayer ap = ActivePlayer[ActivePlayer.first]
+	        local integer mapSize = Hunter.count - 1
+		    /*
+	        if Hunter.count < 1 then
+	            Farmer.win()
+	        endif
+	        
+	        if Farmer.count < 1 then
+	            Hunter.win()
+	        endif
+	        */
+	        if mapSize < 0 then
+	            set mapSize = 0
+	        endif
+	        
+	        // Resize map
+	        loop
+	            exitwhen ap.end
+	            // Adjust map size upon hunters number
+	            call Map.resize(ap.get,mapSize)
+	            set ap = ap.next
+	        endloop
+	        
+	        
+	        
+		endmethod
+		
 	    static method initialize takes nothing returns nothing
-	        // call FogEnableOff()
+	        
+	        
+	        call FogEnable(false)
+	        call FogMaskEnable(false)
             call BJDebugMsg(MSG_GameInitializing)
 	        call TriggerSleepAction(2.0)
 	        // For better performance, generate begin items/neutral unit at beginning
-	        call UnitManager.createBeiginNeutralAggrUnits()
-	        call ItemManager.createBeginMapItems()
+	        //call UnitManager.createBeiginNeutralAggrUnits()
+	        //call ItemManager.createBeginMapItems()
 	        call BJDebugMsg(MSG_GameInitializingDone)
 	        //debug call BJDebugMsg("Waiting host for chosing game mode...")
 	        
@@ -68,16 +99,27 @@ library GameManager initializer init /*
 		        call ShufflePlayer()
 		    endif
 		    
+		    // Adjust map size, put it here since it relies on numbers of hunters
+		    call thistype.adjustMapSize()
+		    
+		    // For better performance, generate begin items/neutral unit at beginning
+	        // Do this after map adjustion since these funcions need to know playerable
+	        // bound
+		    call UnitManager.createBeiginNeutralAggrUnits()
+	        call ItemManager.createBeginMapItems()
+
 		    // Enable game utils commands
 		    call EnableGameUtilCommands()
 		    
 		    // Start event listener
 		    call EventManager.listen()
-	    endmethod
+
+		endmethod
 	    
 	    static method start takes nothing returns nothing
-	        // call FogEnableOn()
-	        
+	        call FogEnable(true)
+	        call FogMaskEnable(true)
+
 	        call TriggerSleepAction(2.0)
 	        if not Params.flagGameModeNv then
                 // Vote for play time

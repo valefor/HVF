@@ -22,8 +22,8 @@ struct ItemManager extends array
         debug call BJDebugMsg("Create begin items")
         
         loop
-            set x = MapLocation.randomX
-            set y = MapLocation.randomY
+            set x = Map.randomX
+            set y = Map.randomY
             call CreateItem(CST_ITI_MagicSeed, x, y)
             call CreateItem(CST_ITI_MythticGrass, x, y)
             call CreateItem(CST_ITI_MythticFlower, x, y)
@@ -36,8 +36,8 @@ struct ItemManager extends array
     
     // Create a random item in whole map for every 10 secs
     private static method createMapRandomItem takes nothing returns boolean
-        local real x = MapLocation.randomX
-        local real y = MapLocation.randomY
+        local real x = Map.randomX
+        local real y = Map.randomY
         
         // GetRandomReal(GetRectMinX(playableRect), GetRectMaxX(playableRect))
         call CreateItem(ChooseRandomItemEx(ITEM_TYPE_ANY, 8), x, y)
@@ -47,16 +47,16 @@ struct ItemManager extends array
 
     // Create a random item at secret garden and magic tree for every 30 secs
     private static method createRandomItemAtSgAndMagicTree takes nothing returns boolean
-        local location loc = GetRandomLocInRect(MapLocation.regionSecretGarden)
+        local location loc = GetRandomLocInRect(Map.regionSecretGarden)
         
         // Create a random item in secret garden
         call CreateItem(ChooseRandomItemEx(ITEM_TYPE_ANY, 8), GetLocationX(loc), GetLocationY(loc))
         
         // Create a random item under magic tree
-        call EnumDestructablesInRect(MapLocation.regionWaterLand1, null, function thistype.enumCreateRandomItem)
-        call EnumDestructablesInRect(MapLocation.regionWaterLand2, null, function thistype.enumCreateRandomItem)
-        call EnumDestructablesInRect(MapLocation.regionWaterLand3, null, function thistype.enumCreateRandomItem)
-        call EnumDestructablesInRect(MapLocation.regionSecretGarden, null, function thistype.enumCreateRandomItem)
+        call EnumDestructablesInRect(Map.regionWaterLand1, null, function thistype.enumCreateRandomItem)
+        call EnumDestructablesInRect(Map.regionWaterLand2, null, function thistype.enumCreateRandomItem)
+        call EnumDestructablesInRect(Map.regionWaterLand3, null, function thistype.enumCreateRandomItem)
+        call EnumDestructablesInRect(Map.regionSecretGarden, null, function thistype.enumCreateRandomItem)
         
         call RemoveLocation(loc)
         set loc = null

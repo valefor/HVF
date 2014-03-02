@@ -164,16 +164,16 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // If it's first blood, that means hunter hero die
             // Notice, now skeleton is a unit not a hero, we can not use ReviveHero
             if IsUnitHunterHero(this.hero) then
-                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, MapLocation.heroReviveLoc, CST_Facing_Unit)
+                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, Map.heroReviveLoc, CST_Facing_Unit)
                 // If all hunter hero die, farmer win
                 if thistype.isAllHerosDie() then
                     call Farmer.win()
                     call Hunter.lose()
                 endif
             else
-                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, MapLocation.heroReviveLoc, CST_Facing_Unit)
+                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, Map.heroReviveLoc, CST_Facing_Unit)
             endif
-            call PanCameraToTimedLocForPlayer(this.get, MapLocation.heroReviveLoc, 0.50)
+            call PanCameraToTimedLocForPlayer(this.get, Map.heroReviveLoc, 0.50)
         endmethod
         
         private method initHero takes nothing returns nothing
@@ -183,9 +183,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         public method createRandomHero takes location l returns nothing
-            local location loc = Location(GetLocationX(MapLocation.heroReviveLoc), GetLocationY(MapLocation.heroReviveLoc))
+            local location loc = Location(GetLocationX(Map.heroReviveLoc), GetLocationY(Map.heroReviveLoc))
             
-            debug call BJDebugMsg("Center X of MapLocation.regionHeroRevive:" + R2S(GetRectCenterX(MapLocation.regionHeroRevive)))
+            debug call BJDebugMsg("Center X of Map.regionHeroRevive:" + R2S(GetRectCenterX(Map.regionHeroRevive)))
             debug call BJDebugMsg("Create random hero at location >> X:" + R2S(GetLocationX(loc))+ ", Y:"+ R2S(GetLocationY(loc)) )
             if l !=null then
                 call RemoveLocation(loc)
@@ -569,8 +569,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         // Revive hero at random location
         public method reviveHero takes nothing returns nothing
-            local real x = MapLocation.randomX
-            local real y = MapLocation.randomY
+            local real x = Map.randomX
+            local real y = Map.randomY
             
             // If hero hasn't been created
             if this.hero == null then

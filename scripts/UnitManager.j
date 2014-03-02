@@ -17,16 +17,16 @@ GetOwningPlayer
             
             if GetPlayerState(Player(PLAYER_NEUTRAL_AGGRESSIVE), PLAYER_STATE_RESOURCE_FOOD_USED) <= 100 then
                 debug call BJDebugMsg("Create random units")
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_RabbitMeat, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_Venision, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_DogMeat, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_VultureMeat, GetUnitX(u), GetUnitY(u)))
             endif
             
@@ -65,16 +65,16 @@ GetOwningPlayer
                 //call TriggerSleepAction(0.01)
                 set rndLoc = GetRandomLocInRect(playableRect)
                 */
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_RabbitMeat, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_Venision, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Dog, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_DogMeat, GetUnitX(u), GetUnitY(u)))
                 
-                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, MapLocation.randomX, MapLocation.randomY, CST_Facing_Unit)
+                set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Vulture, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_VultureMeat, GetUnitX(u), GetUnitY(u)))
                 
                 set i = i + 1
