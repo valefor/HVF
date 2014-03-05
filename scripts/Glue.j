@@ -278,11 +278,26 @@ library Glue initializer init /* v0.0.1 by Xandria
             return GetRandomReal(thistype.mapMinY, thistype.mapMaxY)
         endmethod
         
-        private static method enumDest takes nothing returns nothing
+        static method operator centerX takes nothing returns real
+            return mapCenterXs[mapSize]
+        endmethod
+        
+        static method operator centerY takes nothing returns real
+            return mapCenterYs[mapSize]
+        endmethod
+        
+        private static method enumMoveDest takes nothing returns nothing
             local destructable dest = GetEnumDestructable()
             call CreateDestructable(GetDestructableTypeId(dest), GetDestructableX(dest) + mapCenterXs[mapSize]-mapCenterXs[3], GetDestructableY(dest) + mapCenterYs[mapSize]-mapCenterYs[3], GetRandomReal(0, 360), GetRandomReal(0.80, 1.20), GetRandomInt(0, 9))
             call RemoveDestructable( dest )
             set dest = null
+        endmethod
+        
+        private static method filterMoveUnit takes nothing returns boolean
+            local unit u = GetFilterUnit()
+            call SetUnitPosition(u, GetUnitX(u)+mapCenterXs[mapSize], GetUnitY(u)+mapCenterYs[mapSize])
+            set u = null
+            return false
         endmethod
         
         static method resize takes player p,integer n returns nothing
@@ -290,12 +305,15 @@ library Glue initializer init /* v0.0.1 by Xandria
             local real minY
             local real maxX
             local real maxY
+            local group dummyGroup = CreateGroup()
             local rect r = Rect(mapCenterXs[3]-boundBase, mapCenterYs[3]-boundBase, mapCenterXs[3]+boundBase, mapCenterYs[3]+boundBase)
             call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
             set mapSize = n
             
             // Rebuild trees/units...
-            call EnumDestructablesInRect(r, null, function thistype.enumDest)
+            call EnumDestructablesInRect(r, null, function thistype.enumMoveDest)
+            // Move preset unit/building to new position
+            call GroupEnumUnitsInRect(dummyGroup, r, Filter(function thistype.filterMoveUnit))
             
             if (GetLocalPlayer() == p) then
                 // The playerable area
@@ -314,10 +332,12 @@ library Glue initializer init /* v0.0.1 by Xandria
             endif
             //call SetCameraBounds((0-baseX) + GetCameraMargin(CAMERA_MARGIN_LEFT),(0-baseY) + GetCameraMargin(CAMERA_MARGIN_BOTTOM),mapXs[n] - GetCameraMargin(CAMERA_MARGIN_RIGHT),mapYs[n] - GetCameraMargin(CAMERA_MARGIN_TOP),(0-baseX) + GetCameraMargin(CAMERA_MARGIN_LEFT),mapYs[n] - GetCameraMargin(CAMERA_MARGIN_TOP),mapXs[n] - GetCameraMargin(CAMERA_MARGIN_RIGHT),(0-baseY) + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
             
-            // Reset bound points
-            //call thistype.getBoundPoints()
+            // Reset/Init coordinates
+            call thistype.initCoordinates()
             call RemoveRect(r)
+            call DestroyGroup(dummyGroup)
             set r = null
+            set dummyGroup = null
         endmethod
         
         private static method getBoundPoints takes nothing returns nothing
@@ -329,27 +349,30 @@ library Glue initializer init /* v0.0.1 by Xandria
             //call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
         endmethod
         
+        // Init all coordinates of rect, location, must be called on each map resizing
+        private static method initCoordinates takes nothing returns nothing
+            set regionHeroRevive=Rect(- 6464.0 + mapCenterXs[mapSize], - 2464.0 + mapCenterYs[mapSize], - 5984.0 + mapCenterXs[mapSize], - 1952.0 + mapCenterYs[mapSize])
+            set regionSecretGarden=Rect(5888.0 + mapCenterXs[mapSize], - 3840.0 + mapCenterYs[mapSize], 6400.0 + mapCenterXs[mapSize], - 3328.0 + mapCenterYs[mapSize])
+            set regionWaterLand1=Rect(3840.0 + mapCenterXs[mapSize], 4640.0 + mapCenterYs[mapSize], 6848.0 + mapCenterXs[mapSize], 6944.0 + mapCenterYs[mapSize])
+            set regionWaterLand2=Rect(5376.0 + mapCenterXs[mapSize], 1408.0 + mapCenterYs[mapSize], 6560.0 + mapCenterXs[mapSize], 3584.0 + mapCenterYs[mapSize])
+            set regionWaterLand3=Rect(- 7712.0 + mapCenterXs[mapSize], - 1600.0 + mapCenterYs[mapSize], - 7232.0 + mapCenterXs[mapSize], - 1248.0 + mapCenterYs[mapSize])
+            set heroReviveLoc=Location(GetRectCenterX(regionHeroRevive) + mapCenterXs[mapSize], GetRectCenterY(regionHeroRevive) + mapCenterYs[mapSize])
+            
+            set itemBoxXs[0] = - 6976.0 + mapCenterXs[mapSize]
+            set itemBoxXs[1] = - 6720.0 + mapCenterXs[mapSize]
+            set itemBoxXs[2] = - 6976.0 + mapCenterXs[mapSize]
+            set itemBoxXs[3] = - 6720.0 + mapCenterXs[mapSize]
+            
+            set itemBoxYs[0] = - 1472.0 + mapCenterYs[mapSize]
+            set itemBoxYs[1] = - 1472.0 + mapCenterYs[mapSize]
+            set itemBoxYs[2] = - 1728.0 + mapCenterYs[mapSize]
+            set itemBoxYs[3] = - 1728.0 + mapCenterYs[mapSize]
+        endmethod
+        
         /***********************************************************************
         * NOTE: call this function in library init function
         ***********************************************************************/
         private static method onInit takes nothing returns nothing
-            set regionHeroRevive=Rect(- 6464.0, - 2464.0, - 5984.0, - 1952.0)
-            set regionSecretGarden=Rect(5888.0, - 3840.0, 6400.0, - 3328.0)
-            set regionWaterLand1=Rect(3840.0, 4640.0, 6848.0, 6944.0)
-            set regionWaterLand2=Rect(5376.0, 1408.0, 6560.0, 3584.0)
-            set regionWaterLand3=Rect(- 7712.0, - 1600.0, - 7232.0, - 1248.0)
-            set heroReviveLoc=Location(GetRectCenterX(regionHeroRevive), GetRectCenterY(regionHeroRevive))
-            
-            set itemBoxXs[0] = - 6976.0
-            set itemBoxXs[1] = - 6720.0
-            set itemBoxXs[2] = - 6976.0
-            set itemBoxXs[3] = - 6720.0
-            
-            set itemBoxYs[0] = - 1472.0
-            set itemBoxYs[1] = - 1472.0
-            set itemBoxYs[2] = - 1728.0
-            set itemBoxYs[3] = - 1728.0
-            
             // minX = -7424.0, maxX = 7424.0, minY = -7680.0, maxY = 7680.0
             set baseX = boundBase - 256.0  // 8192-256
             set baseY = boundBase - 256.0  // 8192-256
