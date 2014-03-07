@@ -143,6 +143,8 @@ library Glue initializer init /* v0.0.1 by Xandria
         ***********************************************************************/
         constant integer CST_DTI_MagicTree      ='ZTtc'
         constant integer CST_DTI_SummerTree     ='LTlt'
+        constant integer CST_DTI_GateLever      ='DTlv'
+        constant integer CST_DTI_Gate           ='LTg3'
         
         /***********************************************************************
         * TechID (TCI)
@@ -203,7 +205,6 @@ library Glue initializer init /* v0.0.1 by Xandria
             endloop
 
             call DestroyGroup(preloadUnits)
-            set u = null
         endmethod
         
         private static method onInit takes nothing returns nothing
@@ -228,12 +229,12 @@ library Glue initializer init /* v0.0.1 by Xandria
             call thistype.addUnit(CST_UTI_Chicken)
         endmethod
     endstruct
-    
+
     /***********************************************************************
     * Map struct:
     * contains map locations, settings, util functions
     ***********************************************************************/
-    struct Map
+    struct Map extends array
         /***********************************************************************
         * Region & location, little memory leakage, not big deal, let it be
         *   Note! Don't use bj_VARs like 'bj_mapInitialPlayableArea' since it's 
@@ -267,6 +268,10 @@ library Glue initializer init /* v0.0.1 by Xandria
         static real mapMinX
         static real mapMaxY                
         static real mapMinY
+        
+        /***********************************************************************
+        * Settings & Parameters
+        ***********************************************************************/
 
         static method operator randomX takes nothing returns real
             call SetRandomSeed(GetRandomInt(0, 1000000))
@@ -404,6 +409,18 @@ library Glue initializer init /* v0.0.1 by Xandria
             debug call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
             
         endmethod
+    endstruct
+    
+    /***********************************************************************
+    * Widgets on map:
+    *   1 - WGT_Gate, control gate of hunter base
+    ***********************************************************************/
+    struct WGT_Gate extends array
+        private static destructable inUpLever
+        private static destructable inDownLever
+        private static destructable outUpLever
+        private static destructable outUpLever
+        private static destructable gate
     endstruct
     
     function IsUnitHunterHero takes unit u returns boolean
