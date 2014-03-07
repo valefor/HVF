@@ -68,9 +68,8 @@ library GameManager initializer init /*
 	        
 		endmethod
 		
+		// DO NOT MODIFY THIS METHOD UNLESS YOU KNOW WHAT YOU ARE DOING
 	    static method initialize takes nothing returns nothing
-	        
-	        
 	        call FogEnable(false)
 	        call FogMaskEnable(false)
             call BJDebugMsg(MSG_GameInitializing)
