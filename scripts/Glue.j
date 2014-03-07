@@ -270,8 +270,10 @@ library Glue initializer init /* v0.0.1 by Xandria
         static real mapMinY
         
         /***********************************************************************
-        * Settings & Parameters
+        * Widegets
         ***********************************************************************/
+        // static integer array iWidgets
+        // static integer iWidgetsCount
 
         static method operator randomX takes nothing returns real
             call SetRandomSeed(GetRandomInt(0, 1000000))
@@ -290,7 +292,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         static method operator centerY takes nothing returns real
             return mapCenterYs[mapSize]
         endmethod
-        
+
         private static method enumMoveDest takes nothing returns nothing
             local destructable dest = GetEnumDestructable()
             call CreateDestructable(GetDestructableTypeId(dest), GetDestructableX(dest) + mapCenterXs[mapSize]-mapCenterXs[3], GetDestructableY(dest) + mapCenterYs[mapSize]-mapCenterYs[3], GetRandomReal(0, 360), GetRandomReal(0.80, 1.20), GetRandomInt(0, 9))
@@ -339,6 +341,9 @@ library Glue initializer init /* v0.0.1 by Xandria
             
             // Reset/Init coordinates
             call thistype.initCoordinates()
+            // Reset/Init widgets
+            call thistype.initWidgets()
+            
             call RemoveRect(r)
             call DestroyGroup(dummyGroup)
             set r = null
@@ -352,6 +357,11 @@ library Glue initializer init /* v0.0.1 by Xandria
             //set mapMaxX = GetCameraBoundMaxX()+GetCameraMargin(CAMERA_MARGIN_RIGHT)
             //set mapMaxY = GetCameraBoundMaxY()+GetCameraMargin(CAMERA_MARGIN_TOP)
             //call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
+        endmethod
+        
+        // Init all map widgets which relies on map size, must be called on each map resizing
+        private static method initWidgets takes nothing returns nothing
+            call WGT_Gate.init()
         endmethod
         
         // Init all coordinates of rect, location, must be called on each map resizing
@@ -374,9 +384,6 @@ library Glue initializer init /* v0.0.1 by Xandria
             set itemBoxYs[3] = - 1728.0 + mapCenterYs[mapSize]
         endmethod
         
-        /***********************************************************************
-        * NOTE: call this function in library init function
-        ***********************************************************************/
         private static method onInit takes nothing returns nothing
             // minX = -7424.0, maxX = 7424.0, minY = -7680.0, maxY = 7680.0
             set baseX = boundBase - 256.0  // 8192-256
@@ -442,8 +449,51 @@ library Glue initializer init /* v0.0.1 by Xandria
         private static destructable inUpLever
         private static destructable inDownLever
         private static destructable outUpLever
-        private static destructable outUpLever
+        private static destructable outDownLever
         private static destructable gate
+        
+        static method open takes nothing returns boolean
+            call KillDestructable(gate)
+            // call KillDestructable(inUpLever)
+            // call KillDestructable(outUpLever)
+            call DestructableRestoreLife(inUpLever, 0.00, true)
+            call DestructableRestoreLife(outUpLever, 0.00, true)
+            call DestructableRestoreLife(inDownLever, GetDestructableMaxLife(inDownLever), true)
+            call DestructableRestoreLife(outDownLever, GetDestructableMaxLife(outDownLever), true)
+            return false
+        endmethod
+        
+        static method close takes nothing returns boolean
+            call DestructableRestoreLife(inDownLever, 0.00, true)
+            call DestructableRestoreLife(outDownLever, 0.00, true)
+            call DestructableRestoreLife(inUpLever, GetDestructableMaxLife(inUpLever), true)
+            call DestructableRestoreLife(outUpLever, GetDestructableMaxLife(outUpLever), true)
+            call DestructableRestoreLife(gate, GetDestructableMaxLife(gate), true)
+            return false
+        endmethod
+        
+        private static method onLeverDeath takes nothing returns boolean
+            return false
+        endmethod
+        
+        static method init takes nothing returns nothing
+            local trigger trigGateOpen  = CreateTrigger()
+            local trigger trigGateClose = CreateTrigger()
+            set inUpLever   = CreateDeadDestructable(CST_DTI_GateLever, - 5088.0 + Map.centerX, - 2080.0 + Map.centerY, 39.000, 1.063, 0)
+            set inDownLever = CreateDeadDestructable(CST_DTI_GateLever, - 5088.0 + Map.centerX, - 2528.0 + Map.centerY, 39.000, 1.063, 0)
+            set outUpLever  = CreateDeadDestructable(CST_DTI_GateLever, - 4896.0 + Map.centerX, - 2080.0 + Map.centerY, 39.000, 1.063, 0)
+            set outDownLever= CreateDeadDestructable(CST_DTI_GateLever, - 4896.0 + Map.centerX, - 2528.0 + Map.centerY, 39.000, 1.063, 0)
+            set gate        = CreateDeadDestructable(CST_DTI_Gate, - 4992.0 + Map.centerX, - 2304.0 + Map.centerY, 39.000, 1.063, 0)
+            
+            call SetDestructableInvulnerable(gate, true)
+            
+            call TriggerAddAction(trigGateOpen, Filter(function thistype.open) )
+            call TriggerAddAction(trigGateClose, Filter(function thistype.close) )
+            call TriggerRegisterDeathEvent(trigGateOpen, inUpLever)
+            call TriggerRegisterDeathEvent(trigGateOpen, outUpLever)
+            call TriggerRegisterDeathEvent(trigGateClose, inDownLever)
+            call TriggerRegisterDeathEvent(trigGateClose, outDownLever)
+        endmethod
     endstruct
     
     function IsUnitHunterHero takes unit u returns boolean

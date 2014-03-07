@@ -64,8 +64,6 @@ library GameManager initializer init /*
 	            set ap = ap.next
 	        endloop
 	        
-	        
-	        
 		endmethod
 		
 		// DO NOT MODIFY THIS METHOD UNLESS YOU KNOW WHAT YOU ARE DOING
