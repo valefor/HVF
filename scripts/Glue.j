@@ -453,22 +453,28 @@ library Glue initializer init /* v0.0.1 by Xandria
         private static destructable gate
         
         static method open takes nothing returns boolean
-            call KillDestructable(gate)
-            // call KillDestructable(inUpLever)
-            // call KillDestructable(outUpLever)
-            call DestructableRestoreLife(inUpLever, 0.00, true)
-            call DestructableRestoreLife(outUpLever, 0.00, true)
-            call DestructableRestoreLife(inDownLever, GetDestructableMaxLife(inDownLever), true)
-            call DestructableRestoreLife(outDownLever, GetDestructableMaxLife(outDownLever), true)
+            if (GetDestructableLife(gate) > 0) then
+                call KillDestructable(gate)
+            endif
+            call SetDestructableAnimation(gate, "death alternate")
+            
+            call SetDestructableLife(inUpLever, 0.00)
+            call SetDestructableLife(outUpLever, 0.00)
+            call SetDestructableLife(inDownLever, GetDestructableMaxLife(inDownLever))
+            call SetDestructableLife(outDownLever, GetDestructableMaxLife(outDownLever))
             return false
         endmethod
         
         static method close takes nothing returns boolean
-            call DestructableRestoreLife(inDownLever, 0.00, true)
-            call DestructableRestoreLife(outDownLever, 0.00, true)
-            call DestructableRestoreLife(inUpLever, GetDestructableMaxLife(inUpLever), true)
-            call DestructableRestoreLife(outUpLever, GetDestructableMaxLife(outUpLever), true)
-            call DestructableRestoreLife(gate, GetDestructableMaxLife(gate), true)
+            
+            if (GetDestructableLife(gate) <= 0) then
+                call DestructableRestoreLife(gate, GetDestructableMaxLife(gate), true)
+            endif
+            call SetDestructableAnimation(gate, "stand")
+            call SetDestructableLife(inDownLever, 0.00)
+            call SetDestructableLife(outDownLever, 0.00)
+            call SetDestructableLife(inUpLever, GetDestructableMaxLife(inUpLever))
+            call SetDestructableLife(outUpLever, GetDestructableMaxLife(outUpLever))
             return false
         endmethod
         
@@ -487,12 +493,14 @@ library Glue initializer init /* v0.0.1 by Xandria
             
             call SetDestructableInvulnerable(gate, true)
             
-            call TriggerAddAction(trigGateOpen, Filter(function thistype.open) )
-            call TriggerAddAction(trigGateClose, Filter(function thistype.close) )
+            call TriggerAddCondition(trigGateOpen, Filter(function thistype.open) )
+            call TriggerAddCondition(trigGateClose, Filter(function thistype.close) )
             call TriggerRegisterDeathEvent(trigGateOpen, inUpLever)
             call TriggerRegisterDeathEvent(trigGateOpen, outUpLever)
             call TriggerRegisterDeathEvent(trigGateClose, inDownLever)
             call TriggerRegisterDeathEvent(trigGateClose, outDownLever)
+            
+            call thistype.open()
         endmethod
     endstruct
     
