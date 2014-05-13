@@ -40,6 +40,7 @@
 //! import "scripts\GameManager.j"
 //! import "scripts\TimeManager.j"
 //! import "scripts\Params.j"
+//! import "scripts\Messages.j"
 
 // HVF i18n
 //! import "scripts\i18n\Messages_CN.j"

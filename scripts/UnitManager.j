@@ -36,7 +36,7 @@ GetOwningPlayer
         
         // Create neutral aggresive units at beginning
         // This function can't be condition or filter
-        static method createBeiginNeutralAggrUnits takes nothing returns boolean
+        static method createBeginNeutralAggrUnits takes nothing returns boolean
             local integer i = 0
             local unit u
             

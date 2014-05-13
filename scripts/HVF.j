@@ -744,6 +744,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         method deleteFarmerVars takes nothing returns nothing
+            // Kill/Remove all units
+            call iterateUnits(Filter(function thistype.filterKillAllUnits))
+            call RemoveUnit(this.hero)
+            
         endmethod
         
     endmodule
@@ -1267,8 +1271,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endloop
         
         debug call BJDebugMsg("Shuffling finished! Number of Farmer:" + I2S(iNbrFarmers) + ", Number of Hunter:" +I2S(iNbrHunters))
-        call BJDebugMsg(Farmer.info(false))
-        call BJDebugMsg(Hunter.info(false))
+        //call BJDebugMsg(Farmer.info(false))
+        //call BJDebugMsg(Hunter.info(false))
+        call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Beaware, Farmer.info(false))
+        call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Beaware, Hunter.info(false))
         // Re-assemble team and alliance after shuffling
         call SetupTeam()
         call SetupAlly()

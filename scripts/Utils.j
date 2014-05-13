@@ -97,20 +97,20 @@ library Utils/*
     
     // Show messages at different level at mid-bottom of screen
     function ShowErrorToPlayer takes player p, string str returns nothing
-        local string msg = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + str
+        local string msg = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n[*" +ARGB(CST_COLOR_Important).str(MSG_Important)+ "*]" + ARGB(CST_COLOR_Important).str(str)
         if GetLocalPlayer() == p then
             call ClearTextMessages()
-            call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Normal, ARGB(CST_COLOR_Important).str(msg))
+            call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Beaware, msg)
             // !!!Buggy StartSound!!! which will cause jass skip next statement
             //call StartSound (errorSound)
         endif
     endfunction
     
     function ShowNoticeToPlayer takes player p, string str returns nothing
-        local string msg = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + str
+        local string msg = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n[*" +ARGB(CST_COLOR_Beaware).str(MSG_Beaware)+ "*]" + ARGB(CST_COLOR_Beaware).str(str)
         if GetLocalPlayer() == p then
             call ClearTextMessages()
-            call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Normal, ARGB(CST_COLOR_Beaware).str(msg))
+            call DisplayTimedTextToPlayer(p, 0.52, 0.96, CST_MSGDUR_Beaware, msg)
             //call StartSound (hintSound)
         endif
     endfunction
@@ -137,7 +137,7 @@ library Utils/*
     function ShowMsgToAll takes string str returns nothing
         local integer i = 0
         loop
-            call DisplayTimedTextToPlayer(Player(i), 0.52, 0.96, CST_MSGDUR_Normal, str)
+            call DisplayTimedTextToPlayer(Player(i), 0, 0, CST_MSGDUR_Normal, str)
             set i = i + 1
             exitwhen i == 12
         endloop

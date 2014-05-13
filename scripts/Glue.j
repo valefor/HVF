@@ -314,7 +314,7 @@ library Glue initializer init /* v0.0.1 by Xandria
             local real maxY
             local group dummyGroup = CreateGroup()
             local rect r = Rect(mapCenterXs[3]-boundBase, mapCenterYs[3]-boundBase, mapCenterXs[3]+boundBase, mapCenterYs[3]+boundBase)
-            call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
+            debug call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
             set mapSize = n
             
             // Rebuild trees/units...
@@ -371,7 +371,7 @@ library Glue initializer init /* v0.0.1 by Xandria
             set regionWaterLand1=Rect(3840.0 + mapCenterXs[mapSize], 4640.0 + mapCenterYs[mapSize], 6848.0 + mapCenterXs[mapSize], 6944.0 + mapCenterYs[mapSize])
             set regionWaterLand2=Rect(5376.0 + mapCenterXs[mapSize], 1408.0 + mapCenterYs[mapSize], 6560.0 + mapCenterXs[mapSize], 3584.0 + mapCenterYs[mapSize])
             set regionWaterLand3=Rect(- 7712.0 + mapCenterXs[mapSize], - 1600.0 + mapCenterYs[mapSize], - 7232.0 + mapCenterXs[mapSize], - 1248.0 + mapCenterYs[mapSize])
-            set heroReviveLoc=Location(GetRectCenterX(regionHeroRevive) + mapCenterXs[mapSize], GetRectCenterY(regionHeroRevive) + mapCenterYs[mapSize])
+            set heroReviveLoc=Location(GetRectCenterX(regionHeroRevive), GetRectCenterY(regionHeroRevive))
             
             set itemBoxXs[0] = - 6976.0 + mapCenterXs[mapSize]
             set itemBoxXs[1] = - 6720.0 + mapCenterXs[mapSize]

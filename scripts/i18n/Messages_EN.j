@@ -55,6 +55,11 @@ globals
     ***************************************************************************/
     constant string MSG_GameInitializing    = "Initializing game..."
     constant string MSG_GameInitializingDone= "Initializing finished..."
+    // *** Base
+    constant string MSG_Important   = "Important"
+    constant string MSG_Beaware     = "Beaware"
+    constant string MSG_Notice      = "Notice"
+    constant string MSG_Tips        = "Tips"
     
     // *** Kick player
     constant string MSG_KickPlayerClaim = "声明：\n你正在使用|cffff0000踢人（-kick）|r命令，作者赋予你这项权利是为了提供给大家一个良好的游戏环境，素质游戏从我做起。\n"
@@ -74,4 +79,8 @@ globals
     constant string MSG_PlsSelectGameMode  = "Please select game mode in 10 seconds"
     constant string MSG_CantSelectGameMode  = "Game has started, can't select game mode"
     constant string MSG_WaitHostSelectGameMode  = "Please wait host for choosing game mode..."
+    
+    // *** Notice
+    constant string MSG_NoticeHunterCantTakeTowerBase = "Hunter can't take tower base"
+    constant string MSG_NoticeFarmerKilledByAlly = "Farmer was killed by ally"
 endglobals

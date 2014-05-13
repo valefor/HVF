@@ -32,12 +32,15 @@ globals
     constant string CST_STR_EnemyInfo= "敌方情报"
     
     constant string CST_STR_GameInfo= "游戏信息"
+    constant string CST_STR_GameModeNm= "普通模式（默认）"
     constant string CST_STR_GameModeSp= "洗牌模式"
     constant string CST_STR_GameModeSpIntro= "所有玩家将会被重新洗牌，，随机分配为农民或猎人"
-    constant string CST_STR_GameModeNv= "禁止投票模式"
-    constant string CST_STR_GameModeNvIntro= "不对游戏时间进行投票，使用默认游戏时间（50分钟）进行游戏"
-    constant string CST_STR_GameModeNi= "禁止内斗模式"
-    constant string CST_STR_GameModeNiIntro= "禁止内斗，盟友单位之间无法强制攻击"
+    
+    constant string CST_STR_GameParam  = "游戏参数:"
+    constant string CST_STR_GameParamNv= "禁止投票"
+    constant string CST_STR_GameParamNvIntro= "不对游戏时间进行投票，使用默认游戏时间（50分钟）进行游戏"
+    constant string CST_STR_GameParamNi= "禁止内斗"
+    constant string CST_STR_GameParamNiIntro= "禁止内斗，盟友单位之间无法强制攻击"
     
     constant string CST_STR_Killed= "杀死了"
     
@@ -53,7 +56,7 @@ globals
     
     /***************************************************************************
     * The messages delivered to players
-    *   Messages always be string, so name begins with 'MSG'
+    *   Messages are always string, so name begins with 'MSG'
     ***************************************************************************/
     constant string MSG_GameInitializing    = "游戏初始化..."
     constant string MSG_GameInitializingDone= "游戏初始化完毕..."
@@ -62,6 +65,12 @@ globals
     constant string MSG_GameStartTipsFarmer= "游戏开始！\n  |cFFFFFF00农民胜利条件|r:在倒计时结束前杀死所有猎人,或者所有猎人玩家退出游戏"
     
     constant string MSG_VoteForPlayTime="请投票选择游戏时间！"
+    
+    // *** Base
+    constant string MSG_Important   = "重要"
+    constant string MSG_Notice      = "注意"
+    constant string MSG_Beaware     = "留意"
+    constant string MSG_Tips        = "提示"
     
     // *** Kick player
     constant string MSG_KickPlayerClaim     = "声明：\n你正在使用|cffff0000踢人（-kick）|r命令，作者赋予你这项权利是为了提供给大家一个良好的游戏环境，素质游戏从我做起。\n"

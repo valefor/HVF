@@ -128,9 +128,10 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         readonly static constant string CHAT_COMMAND = "gi"
         static ChatCommand cmd
         static boolean valid = true
+        static string msg = ""
         
         static method onCommand takes nothing returns nothing
-            debug call BJDebugMsg("OnCommand('-sp') callback")
+            debug call BJDebugMsg("OnCommand('-gi') callback")
 
             // Only do shuffling when host player order this command
             if GetTriggerPlayer() == GetHostPlayer() then
@@ -196,8 +197,10 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                     return
                 endif
 
-                call BJDebugMsg(MSG_ShufflePlayerModeSelected)
+                //call BJDebugMsg(MSG_ShufflePlayerModeSelected)
+                call ShowMsgToAll(MSG_ShufflePlayerModeSelected)
                 
+                set Params.flagGameModeNm = false
                 set Params.flagGameModeSp = true
                 // this is a one shoot command, disable this command from now
                 call ChatCommand.eventCommand.enable(false)
@@ -220,7 +223,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                     call ChatCommand.eventCommand.enable(false)
                     return
                 endif
-                set Params.flagGameModeNv = true
+                set Params.flagGameParamNv = true
                 // this is a one shoot command, disable this command from now
                 call ChatCommand.eventCommand.enable(false)
             endif
@@ -244,7 +247,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                 endif
                 
                 call EventManager.forbidInfighting()
-                set Params.flagGameModeNi = true
+                set Params.flagGameParamNi = true
                 // this is a one shoot command, disable this command from now
                 call ChatCommand.eventCommand.enable(false)
             endif
