@@ -42,7 +42,9 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     /***************************************************************************
 	* Structs
 	***************************************************************************/
-    private struct KickPlayerCmd extends array
+    /* ==============================Host command============================ */
+	// *** Super Commands
+	private struct KickPlayerCmd extends array
         readonly static constant string CHAT_COMMAND = "kick"
         
         static method onCommand takes nothing returns nothing
@@ -95,6 +97,103 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     
         //implement ChatCommandModule
     endstruct
+    
+    // *** Game Mode Commands
+    struct ShufflePlayerCmd extends array
+        readonly static constant string CHAT_COMMAND = "sp"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-sp') callback")
+
+            // Only do shuffling when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+
+                //call BJDebugMsg(MSG_ShufflePlayerModeSelected)
+                call ShowMsgToAll(MSG_ShufflePlayerModeSelected)
+                
+                set Params.flagGameModeNm = false
+                set Params.flagGameModeSp = true
+                // this is a one shoot command, disable this command from now
+                call ChatCommand.eventCommand.enable(false)
+            endif
+        endmethod
+    endstruct
+
+    // *** Game Params Commands
+    struct NoAdjustCmd extends array
+        readonly static constant string CHAT_COMMAND = "na"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-na') callback")
+
+            // Only perform this command when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+                set Params.flagGameParamNa = true
+                // this is a one shoot command, disable this command from now
+                call ChatCommand.eventCommand.enable(false)
+            endif
+        endmethod
+    endstruct
+    
+    struct NoVotingCmd extends array
+        readonly static constant string CHAT_COMMAND = "nv"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-nv') callback")
+
+            // Only perform this command when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+                set Params.flagGameParamNv = true
+                // this is a one shoot command, disable this command from now
+                call ChatCommand.eventCommand.enable(false)
+            endif
+        endmethod
+    endstruct
+    
+    struct NoInfightCmd extends array
+        readonly static constant string CHAT_COMMAND = "ni"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-ni') callback")
+
+            // Only perform this command when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+                
+                call EventManager.forbidInfighting()
+                set Params.flagGameParamNi = true
+                // this is a one shoot command, disable this command from now
+                call ChatCommand.eventCommand.enable(false)
+            endif
+        endmethod
+    endstruct
 
     private function CommandResponse takes nothing returns nothing
         //with function 
@@ -124,6 +223,8 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         // implement ChatCommandModule
     endstruct
     
+    /* =============================Normal command=========================== */
+    // *** Utils command(every one)
     struct GameInfoCmd extends array
         readonly static constant string CHAT_COMMAND = "gi"
         static ChatCommand cmd
@@ -181,78 +282,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         endmethod
     endstruct
     
-    struct ShufflePlayerCmd extends array
-        readonly static constant string CHAT_COMMAND = "sp"
-        static ChatCommand cmd
-        static boolean valid = true
-        
-        static method onCommand takes nothing returns nothing
-            debug call BJDebugMsg("OnCommand('-sp') callback")
-
-            // Only do shuffling when host player order this command
-            if GetTriggerPlayer() == GetHostPlayer() then
-                if not thistype.valid then
-                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
-                    call ChatCommand.eventCommand.enable(false)
-                    return
-                endif
-
-                //call BJDebugMsg(MSG_ShufflePlayerModeSelected)
-                call ShowMsgToAll(MSG_ShufflePlayerModeSelected)
-                
-                set Params.flagGameModeNm = false
-                set Params.flagGameModeSp = true
-                // this is a one shoot command, disable this command from now
-                call ChatCommand.eventCommand.enable(false)
-            endif
-        endmethod
-    endstruct
-
-    struct NoVotingCmd extends array
-        readonly static constant string CHAT_COMMAND = "nv"
-        static ChatCommand cmd
-        static boolean valid = true
-        
-        static method onCommand takes nothing returns nothing
-            debug call BJDebugMsg("OnCommand('-nv') callback")
-
-            // Only do shuffling when host player order this command
-            if GetTriggerPlayer() == GetHostPlayer() then
-                if not thistype.valid then
-                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
-                    call ChatCommand.eventCommand.enable(false)
-                    return
-                endif
-                set Params.flagGameParamNv = true
-                // this is a one shoot command, disable this command from now
-                call ChatCommand.eventCommand.enable(false)
-            endif
-        endmethod
-    endstruct
     
-    struct NoInfightCmd extends array
-        readonly static constant string CHAT_COMMAND = "ni"
-        static ChatCommand cmd
-        static boolean valid = true
-        
-        static method onCommand takes nothing returns nothing
-            debug call BJDebugMsg("OnCommand('-ni') callback")
-
-            // Only do shuffling when host player order this command
-            if GetTriggerPlayer() == GetHostPlayer() then
-                if not thistype.valid then
-                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
-                    call ChatCommand.eventCommand.enable(false)
-                    return
-                endif
-                
-                call EventManager.forbidInfighting()
-                set Params.flagGameParamNi = true
-                // this is a one shoot command, disable this command from now
-                call ChatCommand.eventCommand.enable(false)
-            endif
-        endmethod
-    endstruct
     
     // Call this function to enable game command
     function InstallCommand takes nothing returns nothing
@@ -269,6 +299,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 	    set ShufflePlayerCmd.valid = false
 	    set NoVotingCmd.valid = false
 	    set NoInfightCmd.valid = false
+	    set NoAdjustCmd.valid = false
 	endfunction
 	
 	function EnableGameUtilCommands takes nothing returns nothing
@@ -287,6 +318,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
         set NoVotingCmd.cmd = ChatCommand.create(NoVotingCmd.CHAT_COMMAND,function NoVotingCmd.onCommand)
         set NoInfightCmd.cmd = ChatCommand.create(NoInfightCmd.CHAT_COMMAND,function NoInfightCmd.onCommand)
+        set NoAdjustCmd.cmd = ChatCommand.create(NoAdjustCmd.CHAT_COMMAND,function NoAdjustCmd.onCommand)
     endfunction
     
 endlibrary

@@ -164,6 +164,7 @@ struct Params extends array
     static boolean flagGameModeSp   = false
     
     // Game params
+    static boolean flagGameParamNa  = false
     static boolean flagGameParamNv  = false
     static boolean flagGameParamNi  = false
     
