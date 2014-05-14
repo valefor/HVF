@@ -3,6 +3,7 @@ library GameManager initializer init /*
 * 	Library for game control
 *       Currently supported game mode:
 *           -sp : shuffle player
+*           -dr : death race
 *           -nv : no voting
 *           -ni : no infighting
 *
@@ -60,7 +61,7 @@ library GameManager initializer init /*
 		    
 		    set msg = msg + "\n\n"
 		    // Save mode msg for later use
-		    set GameInfoCmd.msg = msg
+		    set ShowGameInfoCmd.msg = msg
 		    
 		    call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Beaware, msg)
 		    // Shuffle players
@@ -68,11 +69,28 @@ library GameManager initializer init /*
 		        call ShufflePlayer()
 		    endif
 		    
+		    // Last perform game parameters
+		    call performGameParam()
+		    
 		endmethod
 		
-		private static method adjustMapSize takes nothing returns nothing
+		// Perform action accoding to selected game parameters    
+		private static method performGameParam takes nothing returns nothing
+		    // Adjust map size, put it here since it relies on numbers of hunters
+		    if Params.flagGameParamNa then
+		        call thistype.adjustMapSize(Map.mapSize)
+		    else
+		        call thistype.adjustMapSize(Hunter.count - 1)
+		    endif
+		endmethod
+		
+		// Show welcome to every players
+		private static method showWelcome takes nothing returns nothing
+		    call ShowDurMsgToAll(CST_STR_HVFAdv, CST_MSGDUR_Important)
+		endmethod
+		
+		private static method adjustMapSize takes integer size returns nothing
 		    local ActivePlayer ap = ActivePlayer[ActivePlayer.first]
-	        local integer mapSize = Hunter.count - 1
 		    /*
 	        if Hunter.count < 1 then
 	            Farmer.win()
@@ -82,15 +100,15 @@ library GameManager initializer init /*
 	            Hunter.win()
 	        endif
 	        */
-	        if mapSize < 0 then
-	            set mapSize = 0
+	        if size < 0 then
+	            set size = 0
 	        endif
 	        
 	        // Resize map
 	        loop
 	            exitwhen ap.end
 	            // Adjust map size upon hunters number
-	            call Map.resize(ap.get,mapSize)
+	            call Map.resize(ap.get,size)
 	            set ap = ap.next
 	        endloop
 	        
@@ -132,9 +150,6 @@ library GameManager initializer init /*
 		    endif
 		    */
 		    
-		    // Adjust map size, put it here since it relies on numbers of hunters
-		    call thistype.adjustMapSize()
-		    
 		    // For better performance, generate begin items/neutral unit at beginning
 	        // Do this after map adjustion since these funcions need to know playerable
 	        // bound
@@ -146,6 +161,9 @@ library GameManager initializer init /*
 		    
 		    // Start event listener
 		    call EventManager.listen()
+		    
+		    // Game start, show welcome msg
+		    call thistype.showWelcome()
 
 		endmethod
 	    

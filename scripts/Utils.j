@@ -143,6 +143,16 @@ library Utils/*
         endloop
     endfunction
     
+    // Show normal message to all player with specific duration
+    function ShowDurMsgToAll takes string str, real dur returns nothing
+        local integer i = 0
+        loop
+            call DisplayTimedTextToPlayer(Player(i), 0, 0, dur, str)
+            set i = i + 1
+            exitwhen i == 12
+        endloop
+    endfunction
+    
     private function init takes nothing returns nothing
         set errorSound=CreateSoundFromLabel("InterfaceError",false,false,false,10,10)
         set hintSound=CreateSoundFromLabel("Hint", false, false, false, 10, 10)

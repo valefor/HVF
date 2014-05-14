@@ -108,6 +108,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         unit hero
         // specific attributes
         integer killCount
+        boolean isRandomHero
         
         // Instance method
         /***********************************************************************
@@ -194,6 +195,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             debug call BJDebugMsg("Create random hero for " + GetPlayerName(this.get))
             
             set this.hero = CreateUnitAtLoc(this.get, GetRandomHeroUti(), loc, 0)
+            set this.isRandomHero = true
             // Give random hunter hero extra bonus such as life(+2000) agi(+3) int(+2)... 
             set Bonus_Life[hero]=CST_INT_RandomBonusLife
             set Bonus_Armor[hero]=CST_INT_RandomBonusArmor
@@ -217,9 +219,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
         endmethod
         
+        public method heroInfo takes nothing returns string
+            return ""
+        endmethod
+        
         method initHunterVars takes nothing returns nothing
             set this.killCount = 0
             set this.hero = null
+            set this.isRandomHero = false
             
             call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, this.get)
             call AdjustPlayerStateBJ(CST_INT_HunterBeginGold, this.get, PLAYER_STATE_RESOURCE_GOLD)
@@ -254,6 +261,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         integer deathCount
         integer role
+        string heroIntro
         
         // Instance method
         /***********************************************************************
@@ -486,6 +494,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         // Kill all units except farmer hero
         public method killAllUnits takes nothing returns nothing
+            // Master will do butcher before at its death
+            if this.role == CST_INT_FarmerRoleMaster then
+                call butcherAllAnimal()
+            endif
             call iterateUnits(Filter(function thistype.filterKillAllUnits))
         endmethod
         public method allAnimalSpawnOn takes nothing returns nothing
@@ -541,24 +553,32 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // Set role at first attach
             if properName == CST_STR_FarmerProperNamePlague then
                 set this.role = CST_INT_FarmerRolePlague
+                set this.heroIntro = CST_STR_FarmerIntroPlague
                 call SetPlayerTechResearched(this.get, CST_TCI_Plague, 5)
             elseif properName == CST_STR_FarmerProperNameGreedy then
                 set this.role = CST_INT_FarmerRoleGreedy
+                set this.heroIntro = CST_STR_FarmerIntroGreedy
             elseif properName == CST_STR_FarmerProperNameKiller then
                 set this.role = CST_INT_FarmerRoleKiller
+                set this.heroIntro = CST_STR_FarmerIntroKiller
                 call SetPlayerTechResearched(this.get, CST_TCI_Level1Upgrade, 1)
             elseif properName == CST_STR_FarmerProperNameNomader then
                 set this.role = CST_INT_FarmerRoleNomader
+                set this.heroIntro = CST_STR_FarmerIntroNomader
             elseif properName == CST_STR_FarmerProperNameCoward then
                 set this.role = CST_INT_FarmerRoleCoward
+                set this.heroIntro = CST_STR_FarmerIntroCoward
                 call UnitAddAbility(this.hero, CST_ABI_NightVision)
                 call SetPlayerTechResearched(this.get, CST_TCI_HeroLifeUp, 2)
             elseif properName == CST_STR_FarmerProperNameWoody then
                 set this.role = CST_INT_FarmerRoleWoody
+                set this.heroIntro = CST_STR_FarmerIntroWoody
             elseif properName == CST_STR_FarmerProperNameMaster then
                 set this.role = CST_INT_FarmerRoleMaster
+                set this.heroIntro = CST_STR_FarmerIntroMaster
             elseif properName == CST_STR_FarmerProperNameDefender then
                 set this.role = CST_INT_FarmerRoleDefender
+                set this.heroIntro = CST_STR_FarmerIntroDefender
                 call SetPlayerTechResearched(this.get, CST_TCI_TowerLifeUp, 1)
                 call SetPlayerTechResearched(this.get, CST_TCI_TowerHealing, 1)
                 call SetPlayerTechResearched(this.get, CST_TCI_TowerVisionUp, 1)
@@ -785,7 +805,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                     set ac = ARGB.fromPlayer(p.get)
                     set str = str + "  " + I2S(GetPlayerId(p.get)+1) + " - " + ac.str(GetPlayerName(p.get))
                     if showHeroInfo then
-                        set str = str + "[" + ARGB(COLOR_ARGB_ORANGE).str(GetHeroProperName(p.hero)) + ", "+CST_STR_Level+ARGB(COLOR_ARGB_GREEN).str(I2S(GetHeroLevel(p.hero)))+"]"
+                        set str = str + "[" + ARGB(COLOR_ARGB_ORANGE).str(GetUnitName(p.hero)) + ", "+CST_STR_Level+ARGB(COLOR_ARGB_GREEN).str(I2S(GetHeroLevel(p.hero)))+"]"
                     endif
                     set str = str + "\n"
                     set p = p.next

@@ -141,10 +141,10 @@ globals
     constant integer CST_BDCOL_DF=9   // DEBUG FLAG
     
     // *** Message display duration
-    constant integer CST_MSGDUR_Important=15
-    constant integer CST_MSGDUR_Beaware =10
-    constant integer CST_MSGDUR_Normal  =5
-    constant integer CST_MSGDUR_Tips    =2
+    constant integer CST_MSGDUR_Important=30
+    constant integer CST_MSGDUR_Beaware =15
+    constant integer CST_MSGDUR_Normal  =10
+    constant integer CST_MSGDUR_Tips    =5
     
     // *** Message display color
     constant integer CST_COLOR_Important=COLOR_ARGB_RED

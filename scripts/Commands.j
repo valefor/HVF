@@ -116,7 +116,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                 endif
 
                 //call BJDebugMsg(MSG_ShufflePlayerModeSelected)
-                call ShowMsgToAll(MSG_ShufflePlayerModeSelected)
+                call ShowMsgToAll(MSG_HostSelected+ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameModeSp)+", "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameModeSpIntro))
                 
                 set Params.flagGameModeNm = false
                 set Params.flagGameModeSp = true
@@ -225,7 +225,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     
     /* =============================Normal command=========================== */
     // *** Utils command(every one)
-    struct GameInfoCmd extends array
+    struct ShowGameInfoCmd extends array
         readonly static constant string CHAT_COMMAND = "gi"
         static ChatCommand cmd
         static boolean valid = true
@@ -234,18 +234,16 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         static method onCommand takes nothing returns nothing
             debug call BJDebugMsg("OnCommand('-gi') callback")
 
-            // Only do shuffling when host player order this command
-            if GetTriggerPlayer() == GetHostPlayer() then
-                if not thistype.valid then
-                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
-                    call ChatCommand.eventCommand.enable(false)
-                    return
-                endif
+            call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_HostIs + ARGB(COLOR_ARGB_RED).str(GetPlayerName(GetHostPlayer())) + "\n")
+            call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, msg)
+            if Hunter.contain(GetTriggerPlayer()) then
                 
-                call ShufflePlayer()
-                set Params.flagGameModeSp = true
-                // this is a one shoot command, disable this command from now
-                call ChatCommand.eventCommand.enable(false)
+                if Hunter[GetPlayerId(GetTriggerPlayer())].isRandomHero then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, CST_STR_HunterRandomBonus+CST_STR_HunterRandomBonusContent+"\n")
+                endif
+            else
+                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, ARGB(COLOR_ARGB_PURPLE).str(CST_STR_HeroChar))
+                call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, Farmer[GetPlayerId(GetTriggerPlayer())].heroIntro+"\n\n")
             endif
         endmethod
     endstruct
@@ -307,6 +305,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         call ChatCommand.create(KickPlayerCmd.CHAT_COMMAND,function KickPlayerCmd.onCommand)
         call ChatCommand.create(ShowAllyInfoCmd.CHAT_COMMAND,function ShowAllyInfoCmd.onCommand)
         call ChatCommand.create(ShowEnemyInfoCmd.CHAT_COMMAND,function ShowEnemyInfoCmd.onCommand)
+        call ChatCommand.create(ShowGameInfoCmd.CHAT_COMMAND,function ShowGameInfoCmd.onCommand)
 	endfunction
 	
     /***************************************************************************

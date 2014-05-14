@@ -7,6 +7,9 @@ globals
     /***************************************************************************
     * Literalization
     ***************************************************************************/
+    // HVF Advertisement
+    constant string CST_STR_HVFAdv = "请尽情享受|cff008000《猎人VS农民》|r带给您的快乐，有任何问题和建议请联系|cffcc99ffQQ2872618576|r，或者E-mail：|cffcc99ffhvfdev@qq.com|r"
+    
     // For game time voting
     constant string CST_STR_PlayTimeTitle= "请选择游戏时间"
     constant string CST_STR_PlayTime40m="40分钟游戏时间(对猎人有利)"
@@ -34,7 +37,7 @@ globals
     constant string CST_STR_GameInfo= "游戏信息"
     constant string CST_STR_GameModeNm= "普通模式（默认）"
     constant string CST_STR_GameModeSp= "洗牌模式"
-    constant string CST_STR_GameModeSpIntro= "所有玩家将会被重新洗牌，，随机分配为农民或猎人"
+    constant string CST_STR_GameModeSpIntro= "所有玩家将会被随机分配为农民或猎人"
     
     constant string CST_STR_GameParam  = "游戏参数:"
     constant string CST_STR_GameParamNv= "禁止投票"
@@ -44,7 +47,10 @@ globals
     
     constant string CST_STR_Killed= "杀死了"
     
+    constant string CST_STR_HeroChar= "英雄特性："
+    
     // The following nick name must be identical with that in propername list
+    // *** Farmers
     constant string CST_STR_FarmerProperNameGreedy= "敛财者"
     constant string CST_STR_FarmerProperNameKiller= "杀狼者"
     constant string CST_STR_FarmerProperNameNomader= "游牧者"
@@ -53,6 +59,20 @@ globals
     constant string CST_STR_FarmerProperNameMaster= "老农民"
     constant string CST_STR_FarmerProperNameDefender= "炮塔狂"
     constant string CST_STR_FarmerProperNamePlague= "瘟疫农"
+    
+    constant string CST_STR_FarmerIntroGreedy= "屠宰所得的钱额外+30%"
+    constant string CST_STR_FarmerIntroKiller= "军队初始就具有一级单兵升级系统。"
+    constant string CST_STR_FarmerIntroNomader= "牲口的产钱能力额外+50%"
+    constant string CST_STR_FarmerIntroCoward= "农民有夜视能力，而且初始就具备2级的农民HP升级研究（即初始就比其他农民多了20点HP）。"
+    constant string CST_STR_FarmerIntroWoody= "根据牲口棚数量和种类每分钟会补助额外木材(每次金钱收入的15%)。。"
+    constant string CST_STR_FarmerIntroMaster= "被杀时如果拥有屠宰场所有牲口自动屠宰。"
+    constant string CST_STR_FarmerIntroDefender= "塔初始就具备1级防御1级恢复和1级视野。"
+    constant string CST_STR_FarmerIntroPlague= "初始具备5级瘟疫。"
+    
+    // *** Hunters
+    constant string CST_STR_HunterRandomBonus= "随机奖励："
+    constant string CST_STR_HunterRandomNone= "无"
+    constant string CST_STR_HunterRandomBonusContent= "HP+2000, 护甲+1, 敏捷+3, 智力+2"
     
     /***************************************************************************
     * The messages delivered to players
