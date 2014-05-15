@@ -99,7 +99,7 @@ globals
     constant integer CST_INT_MAXPT = 5
     
     // *** Extra bonus for random hero
-    constant integer CST_INT_RandomBonusLife=20
+    constant integer CST_INT_RandomBonusLife=10
     constant integer CST_INT_RandomBonusArmor=1
     constant integer CST_INT_RandomBonusStr=0
     constant integer CST_INT_RandomBonusAgi=3
