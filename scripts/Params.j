@@ -64,7 +64,9 @@ globals
     constant integer CST_INT_MaxHeros=1
     constant integer CST_INT_MaxHunters=4
     constant integer CST_INT_MaxFarmers=8
-    constant integer CST_INT_MaxAnimals=550
+    constant integer CST_INT_MaxAnimals=600
+    // In Death Race mode, farmers has limited revive times
+    constant integer CST_INT_MaxLifePoints=5  
     
     // *** Begin resource
     constant integer CST_INT_FarmerBeginGold=43
@@ -162,6 +164,7 @@ struct Params extends array
     // Game mode
     static boolean flagGameModeNm   = true
     static boolean flagGameModeSp   = false
+    static boolean flagGameModeDr   = false
     
     // Game params
     static boolean flagGameParamNa  = false

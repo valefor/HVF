@@ -1063,7 +1063,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         private static method aquireFreeExp takes nothing returns nothing
             local thistype f = thistype[thistype.first]
-            local integer iGold = 0
             
             debug call BJDebugMsg("Give free exp to farmers")
             
