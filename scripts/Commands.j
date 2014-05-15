@@ -249,7 +249,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     endstruct
     
     struct ShowAllyInfoCmd extends array
-        readonly static constant string CHAT_COMMAND = "ma"
+        readonly static constant string CHAT_COMMAND = "sa"
         static ChatCommand cmd
         static boolean valid = true
         
@@ -265,7 +265,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     endstruct
     
     struct ShowEnemyInfoCmd extends array
-        readonly static constant string CHAT_COMMAND = "me"
+        readonly static constant string CHAT_COMMAND = "se"
         static ChatCommand cmd
         static boolean valid = true
         
