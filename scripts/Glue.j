@@ -525,6 +525,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         call UnitAddItemToSlotById(u, 'dust', 4)
         call UnitAddItemToSlotById(u, 'I000', 5)
         call CreateUnit(p, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(Map.regionHeroRevive), GetRectMaxX(Map.regionHeroRevive)), GetRandomReal(GetRectMinY(Map.regionHeroRevive), GetRectMaxY(Map.regionHeroRevive)), CST_Facing_Unit)
+        call PanCameraToTimedLocForPlayer(this.get, Map.heroReviveLoc, 0.50)
         set u = null
     endfunction
     

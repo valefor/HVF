@@ -204,6 +204,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call this.initHero()
             
             call RemoveLocation(loc)
+            
+            //call PanCameraToTimedForPlayer(this.get, GetLocationX(Map.heroReviveLoc), GetLocationY(Map.heroReviveLoc), 0.50)
             set loc = null
         endmethod
         
