@@ -50,6 +50,7 @@ globals
     constant integer COLOR_ARGB_BROWN   = 0xFF4E2A04
     constant integer COLOR_ARGB_LIGHT_GRAY   = 0xFF959697
     constant integer COLOR_ARGB_LIGHT_BLUE   = 0xFF7EBFF1
+    constant integer COLOR_ARGB_LIGHT_PURPLE = 0xFFCC99FF
     
     /***************************************************************************
     * I18N

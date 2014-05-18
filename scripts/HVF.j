@@ -165,16 +165,17 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // If it's first blood, that means hunter hero die
             // Notice, now skeleton is a unit not a hero, we can not use ReviveHero
             if IsUnitHunterHero(this.hero) then
-                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, Map.heroReviveLoc, CST_Facing_Unit)
+                //set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, Map.heroReviveLoc, CST_Facing_Unit)
                 // If all hunter hero die, farmer win
                 if thistype.isAllHerosDie() then
                     call Farmer.win()
                     call Hunter.lose()
                 endif
-            else
-                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, Map.heroReviveLoc, CST_Facing_Unit)
             endif
-            call PanCameraToTimedLocForPlayer(this.get, Map.heroReviveLoc, 0.50)
+            if not Params.flagGameModeDr then
+                set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, Map.heroReviveLoc, CST_Facing_Unit)
+                call PanCameraToTimedLocForPlayer(this.get, Map.heroReviveLoc, 0.50)
+            endif
         endmethod
         
         private method initHero takes nothing returns nothing
@@ -263,6 +264,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         integer deathCount
         integer role
+        integer lifes
         string heroIntro
         
         // Instance method
@@ -337,6 +339,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             if GetUnitTypeId(GetFilterUnit()) == CST_UTI_FarmerHero then
                 call f.setHero(GetFilterUnit())
+                // Init hero
+                call f.initHero()
             endif
             return false
         endmethod
@@ -531,20 +535,27 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         private method initHero takes nothing returns nothing
-            local item retrainBook
+            local item tempItem
             
             if this.hero != null then
-                set retrainBook = CreateItem(CST_ITI_RetrainBook, GetUnitX(this.hero), GetUnitY(this.hero)) //GetUnitX
+                set tempItem = CreateItem(CST_ITI_RetrainBook, GetUnitX(this.hero), GetUnitY(this.hero)) //GetUnitX
                 call SetUnitState(this.hero, UNIT_STATE_MANA, GetUnitState(this.hero, UNIT_STATE_MAX_MANA) * 1)
                 call UnitResetCooldown(this.hero)
-                // call UnitAddItem(this.hero, retrainBook)
-                call UnitUseItem(this.hero, retrainBook)
+                call UnitUseItem(this.hero, tempItem)
                 call SetHeroLevelBJ(this.hero, 1, false)
                 call UnitModifySkillPoints(this.hero, CST_INT_InitFarmerSkillPoints - GetHeroSkillPoints(this.hero))
-                call RemoveItem(retrainBook)
+                call RemoveItem(tempItem)
+                // In death race mode, bless Stealth/Invincible to newly revived hero
+                if Params.flagGameModeDr then
+                    set tempItem = CreateItem(CST_ITI_Invincible, GetUnitX(this.hero), GetUnitY(this.hero))
+                    call UnitAddItem(this.hero, tempItem)
+                    call UnitUseItem(this.hero, UnitItemInSlot(this.hero, 0) )
+                    call RemoveItem(tempItem)
+                endif
             endif
             
-            set retrainBook = null
+            set tempItem = null
+            call PanCameraToTimedForPlayer(this.get, GetUnitX(this.hero), GetUnitY(this.hero), 0.50)
         endmethod
         
         public method setHero takes unit u returns nothing
@@ -585,8 +596,20 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call SetPlayerTechResearched(this.get, CST_TCI_TowerHealing, 1)
                 call SetPlayerTechResearched(this.get, CST_TCI_TowerVisionUp, 1)
             endif
+        endmethod
+        
+        // Farmers Hero burn up their lifes
+        private static method isAllHerosDie takes nothing returns boolean
+            local thistype f = thistype[thistype.first]
             
-            call initHero()
+            loop
+                exitwhen f.end
+                if f.lifes > 0 then
+                    return false
+                endif
+                set f=f.next
+            endloop
+            return true
         endmethod
         
         // Revive hero at random location
@@ -598,14 +621,29 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             if this.hero == null then
                 call this.setHero( CreateUnit(this.get, CST_UTI_FarmerHero, x, y, 0) )
             elseif IsUnitType(this.hero, UNIT_TYPE_DEAD) then
+                if Params.flagGameModeDr then
+                    if this.lifes == 0 then
+                        // If all farmers hero burn up their lifes, hunter win
+                        if thistype.isAllHerosDie() then
+                            call Farmer.lose()
+                            call Hunter.win()
+                        endif
+                        call ShowErrorToAllPlayer(CST_STR_Player+": '"+GetPlayerName(this.get)+"' "+MSG_HasExhaustAllLifes)
+                        return
+                    else
+                        set this.lifes = this.lifes - 1
+                        call ShowNoticeToPlayer(this.get,MSG_YouHave+I2S(this.lifes)+MSG_ChancesToReive)
+                    endif
+                endif
                 // Hero die, revive it
                 call ReviveHero(this.hero, x, y, false)
             else
                 return
             endif
             
+            // Init hero
             call initHero()
-            call PanCameraToTimedForPlayer(this.get, x, y, 0.50)
+            
         endmethod
         
         // Add a farming building to group
@@ -752,6 +790,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set chickenCount    = 0
             
             set deathCount      = 0
+            set lifes           = CST_INT_MaxLifePoints
             set role            = CST_INT_FarmerRoleInvalid
             
             // Bind predefined hero to farmer
@@ -958,7 +997,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         implement FarmerVars
         
         private static integer exp = 0
-        private static integer expTick
+        private static integer expTick=0
         
         private method initInstance takes nothing returns nothing
             call this.initFarmerVars()
@@ -1070,7 +1109,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             set thistype.expTick = thistype.expTick + 1
             
-            if (thistype.expTick - R2I(thistype.expTick/CST_INT_ExpTickStep)*CST_INT_ExpTickStep) != 0 then
+            if not IsIntDividableBy(thistype.expTick, CST_INT_ExpTickStep) then
                 return
             endif
             set thistype.exp = thistype.exp + CST_INT_ExpAddForTick

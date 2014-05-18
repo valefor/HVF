@@ -32,19 +32,29 @@ library GameManager initializer init /*
 	* Structs
 	***************************************************************************/
 	struct Game extends array
-		    //private static method gameInfo
+		//private static method gameInfo
 		// Perform action accoding to selected game mode    
 		private static method performGameMode takes nothing returns nothing
-		    local string msg = ""
+		    local string msg = MSG_HostSelected
 		    local boolean b = false
 		    if Params.flagGameModeNm then
-		        set msg = msg + MSG_HostSelected + " " + ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameModeNm)
+		        set msg = msg + " " + ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameModeNm)
 		    endif
 		    
 		    if Params.flagGameModeSp then
-		        set msg = msg + MSG_HostSelected + " " + ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameModeSp)
+		        set msg = msg + " " + ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameModeSp)
+		        set b = true
 		    endif
 		    
+		    if Params.flagGameModeDr then
+		        if b then
+		            set msg = msg + "/"
+		        endif
+		        set msg = msg + ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameModeDr)
+		        set b = true
+		    endif
+		    
+		    set b = false
 		    set msg = msg + ", " + CST_STR_GameParam + " "
 		    if Params.flagGameParamNv then
 		        set msg = msg + ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameParamNv)
@@ -82,6 +92,17 @@ library GameManager initializer init /*
 		    else
 		        call thistype.adjustMapSize(Hunter.count - 1)
 		    endif
+		    
+		    // Setup game time, start game 
+		    if not Params.flagGameParamNv then
+                // Vote for play time
+                call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Tips, MSG_VoteForPlayTime)
+                call PlayTime.vote()
+            else
+                // No need to vote for play time, start game
+                call PlayTime.setTime(CST_OT_PlayTime)
+                call PlayTime.countdownStart()
+            endif
 		endmethod
 		
 		// Show welcome to every players
@@ -131,6 +152,9 @@ library GameManager initializer init /*
 	        if GetHostPlayer() == GetLocalPlayer() then
 	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_YouAreHost)
 	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_PlsSelectGameMode)
+	            call ShowModeCmd.onCommand()
+	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, ShowModeCmd.msg)
+	            
 	        else
 	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_HostIs + COLOR_YELLOW + GetPlayerName(GetHostPlayer())+ "|r")
 	            call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Normal, MSG_WaitHostSelectGameMode)
@@ -172,17 +196,9 @@ library GameManager initializer init /*
 	        call FogMaskEnable(true)
 
 	        call TriggerSleepAction(2.0)
-	        if not Params.flagGameParamNv then
-                // Vote for play time
-                call DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, CST_MSGDUR_Tips, MSG_VoteForPlayTime)
-                call PlayTime.vote()
-            else
-                // No need to vote for play time, start game
-                call PlayTime.setTime(CST_OT_PlayTime)
-                call PlayTime.countdownStart()
-            endif
 	        
-            // Init Farmer/Hunter units
+	        // Last perform game parameters
+		    // call performGameParam()
 	    endmethod
 	endstruct
 	/***************************************************************************

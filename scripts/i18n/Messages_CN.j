@@ -35,15 +35,29 @@ globals
     constant string CST_STR_EnemyInfo= "敌方情报"
     
     constant string CST_STR_GameInfo= "游戏信息"
+    constant string CST_STR_GameModeInfo= "游戏模式信息:"
     constant string CST_STR_GameModeNm= "普通模式（默认）"
     constant string CST_STR_GameModeSp= "洗牌模式"
     constant string CST_STR_GameModeSpIntro= "所有玩家将会被随机分配为农民或猎人"
+    constant string CST_STR_GameModeDr= "死亡竞赛模式"
+    constant string CST_STR_GameModeDrIntro= "猎人无法复活为骷髅，农民只有5次重生机会。"
+    
     
     constant string CST_STR_GameParam  = "游戏参数:"
+    constant string CST_STR_GameParamInfo  = "游戏参数信息:"
+    constant string CST_STR_GameParamNa= "禁止调整"
+    constant string CST_STR_GameParamNaIntro= "禁止自动调整地图大小，使用最大地图进行游戏"
     constant string CST_STR_GameParamNv= "禁止投票"
     constant string CST_STR_GameParamNvIntro= "不对游戏时间进行投票，使用默认游戏时间（50分钟）进行游戏"
     constant string CST_STR_GameParamNi= "禁止内斗"
     constant string CST_STR_GameParamNiIntro= "禁止内斗，盟友单位之间无法强制攻击"
+    
+    constant string CST_STR_GameUtil    = "游戏辅助命令:"
+    constant string CST_STR_GameUtilHIntro  = "显示帮助信息"
+    constant string CST_STR_GameUtilGiIntro = "显示基本游戏信息"
+    constant string CST_STR_GameUtilSaIntro = "显示盟友基本信息"
+    constant string CST_STR_GameUtilSeIntro = "显示敌方基本信息"
+    constant string CST_STR_GameUtilSmIntro = "显示游戏模式信息"
     
     constant string CST_STR_Killed= "杀死了"
     
@@ -72,7 +86,7 @@ globals
     // *** Hunters
     constant string CST_STR_HunterRandomBonus= "随机奖励："
     constant string CST_STR_HunterRandomNone= "无"
-    constant string CST_STR_HunterRandomBonusContent= "HP+2000, 护甲+1, 敏捷+3, 智力+2"
+    constant string CST_STR_HunterRandomBonusContent= "HP+1000, 护甲+1, 敏捷+3, 智力+2"
     
     /***************************************************************************
     * The messages delivered to players
@@ -103,6 +117,11 @@ globals
     constant string MSG_ShufflePlayerModeSelected= "主机已经选择了洗牌模式，玩家将会被随机分配阵营..."
     constant string MSG_ShufflePlayerTo= "你已经被随机分配为："
     constant string MSG_ShufflePlayerDone= "洗牌结束！"
+    
+    // *** Death Race
+    constant string MSG_YouHave = "你还剩下<"
+    constant string MSG_ChancesToReive = ">次重生机会！"
+    constant string MSG_HasExhaustAllLifes = "已经耗尽重生次数，彻底死亡！"
     
     // *** Select game mode
     constant string MSG_HostSelected = "主机选择了"

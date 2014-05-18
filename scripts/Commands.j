@@ -116,10 +116,38 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                 endif
 
                 //call BJDebugMsg(MSG_ShufflePlayerModeSelected)
-                call ShowMsgToAll(MSG_HostSelected+ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameModeSp)+", "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameModeSpIntro))
+                call ShowMsgToAll(MSG_HostSelected+ARGB(COLOR_ARGB_LIGHT_BLUE).str(CST_STR_GameModeSp)+", "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameModeSpIntro))
                 
                 set Params.flagGameModeNm = false
                 set Params.flagGameModeSp = true
+                // this is a one shoot command, disable this command from now
+                call ChatCommand.eventCommand.enable(false)
+            endif
+        endmethod
+    endstruct
+    
+    // *** Game Mode Commands
+    struct DeathRaceCmd extends array
+        readonly static constant string CHAT_COMMAND = "dr"
+        static ChatCommand cmd
+        static boolean valid = true
+        
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-dr') callback")
+
+            // Only do shuffling when host player order this command
+            if GetTriggerPlayer() == GetHostPlayer() then
+                if not thistype.valid then
+                    call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantSelectGameMode)
+                    call ChatCommand.eventCommand.enable(false)
+                    return
+                endif
+
+                //call BJDebugMsg(MSG_ShufflePlayerModeSelected)
+                call ShowMsgToAll(MSG_HostSelected+ARGB(COLOR_ARGB_LIGHT_BLUE).str(CST_STR_GameModeDr)+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameModeDrIntro))
+                
+                set Params.flagGameModeNm = false
+                set Params.flagGameModeDr = true
                 // this is a one shoot command, disable this command from now
                 call ChatCommand.eventCommand.enable(false)
             endif
@@ -227,8 +255,6 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     // *** Utils command(every one)
     struct ShowGameInfoCmd extends array
         readonly static constant string CHAT_COMMAND = "gi"
-        static ChatCommand cmd
-        static boolean valid = true
         static string msg = ""
         
         static method onCommand takes nothing returns nothing
@@ -248,10 +274,58 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
         endmethod
     endstruct
     
+    struct ShowModeCmd extends array
+        readonly static constant string CHAT_COMMAND = "sm"
+        static string msg = CST_STR_GameModeInfo
+        private static boolean isMsgInited = false
+                                                                                          
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-sm') callback")
+            if not isMsgInited then
+                call initMsg()
+            endif
+            call DisplayTimedTextToPlayer(GetTriggerPlayer(), 0, 0, CST_MSGDUR_Normal, thistype.msg)
+        endmethod
+        
+        private static method initMsg takes nothing returns nothing
+            set msg = msg + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-sp")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameModeSpIntro) + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-dr")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameModeDrIntro) + "\n"
+            set msg = msg + "\n\n" + CST_STR_GameParamInfo + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-na")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameParamNaIntro) + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-nv")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameParamNvIntro) + "\n"
+            
+            set isMsgInited = true
+        endmethod
+    endstruct
+    
+    struct ShowHelpCmd extends array
+        readonly static constant string CHAT_COMMAND = "help"
+        static string msg = CST_STR_GameUtil
+        private static boolean isMsgInited = false
+
+        static method onCommand takes nothing returns nothing
+            debug call BJDebugMsg("OnCommand('-help') callback")
+            if not isMsgInited then
+                call initMsg()
+            endif
+            call DisplayTimedTextToPlayer(GetTriggerPlayer(), 0, 0, CST_MSGDUR_Normal, thistype.msg)
+        endmethod
+        
+        private static method initMsg takes nothing returns nothing
+            set msg = msg + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-help")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameUtilHIntro) + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-gi")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameUtilGiIntro) + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-sa")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameUtilSaIntro) + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-se")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameUtilSeIntro) + "\n"
+            set msg = msg + "    " + ARGB(COLOR_ARGB_LIGHT_BLUE).str("-sm")+": "+ARGB(COLOR_ARGB_GREEN).str(CST_STR_GameUtilSmIntro) + "\n"
+
+            set isMsgInited = true
+        endmethod
+    endstruct
+    
     struct ShowAllyInfoCmd extends array
         readonly static constant string CHAT_COMMAND = "sa"
-        static ChatCommand cmd
-        static boolean valid = true
         
         static method onCommand takes nothing returns nothing
             debug call BJDebugMsg("OnCommand('-ma') callback")
@@ -266,8 +340,6 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     
     struct ShowEnemyInfoCmd extends array
         readonly static constant string CHAT_COMMAND = "se"
-        static ChatCommand cmd
-        static boolean valid = true
         
         static method onCommand takes nothing returns nothing
             debug call BJDebugMsg("OnCommand('-me') callback")
@@ -279,8 +351,6 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
             endif
         endmethod
     endstruct
-    
-    
     
     // Call this function to enable game command
     function InstallCommand takes nothing returns nothing
@@ -295,17 +365,19 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 	***************************************************************************/
 	function InvalidGameModeCommands takes nothing returns nothing
 	    set ShufflePlayerCmd.valid = false
+	    set DeathRaceCmd.valid = false
 	    set NoVotingCmd.valid = false
 	    set NoInfightCmd.valid = false
 	    set NoAdjustCmd.valid = false
 	endfunction
 	
 	function EnableGameUtilCommands takes nothing returns nothing
-	    // command "-kick" created
         call ChatCommand.create(KickPlayerCmd.CHAT_COMMAND,function KickPlayerCmd.onCommand)
+        call ChatCommand.create(ShowHelpCmd.CHAT_COMMAND,function ShowHelpCmd.onCommand)
         call ChatCommand.create(ShowAllyInfoCmd.CHAT_COMMAND,function ShowAllyInfoCmd.onCommand)
         call ChatCommand.create(ShowEnemyInfoCmd.CHAT_COMMAND,function ShowEnemyInfoCmd.onCommand)
         call ChatCommand.create(ShowGameInfoCmd.CHAT_COMMAND,function ShowGameInfoCmd.onCommand)
+        call ChatCommand.create(ShowModeCmd.CHAT_COMMAND,function ShowModeCmd.onCommand)
 	endfunction
 	
     /***************************************************************************
@@ -313,8 +385,9 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 	***************************************************************************/
     private function init takes nothing returns nothing
         // The following command need to be set up before game starts
-        // Add 'sp' command to host player at beginning
+        // Add 'sp' command to host player at beginning 
         set ShufflePlayerCmd.cmd = ChatCommand.create(ShufflePlayerCmd.CHAT_COMMAND,function ShufflePlayerCmd.onCommand)
+        set DeathRaceCmd.cmd = ChatCommand.create(DeathRaceCmd.CHAT_COMMAND,function DeathRaceCmd.onCommand)
         set NoVotingCmd.cmd = ChatCommand.create(NoVotingCmd.CHAT_COMMAND,function NoVotingCmd.onCommand)
         set NoInfightCmd.cmd = ChatCommand.create(NoInfightCmd.CHAT_COMMAND,function NoInfightCmd.onCommand)
         set NoAdjustCmd.cmd = ChatCommand.create(NoAdjustCmd.CHAT_COMMAND,function NoAdjustCmd.onCommand)
