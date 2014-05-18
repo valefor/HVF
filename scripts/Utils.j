@@ -153,6 +153,11 @@ library Utils/*
         endloop
     endfunction
     
+    function FlyEnable takes unit u returns nothing
+        call UnitAddAbility(u,'Amrf')
+        call UnitRemoveAbility(u,'Amrf')
+    endfunction
+    
     private function init takes nothing returns nothing
         set errorSound=CreateSoundFromLabel("InterfaceError",false,false,false,10,10)
         set hintSound=CreateSoundFromLabel("Hint", false, false, false, 10, 10)
