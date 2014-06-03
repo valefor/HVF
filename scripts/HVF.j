@@ -292,7 +292,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             // Nomader has more salary
             if this.role == CST_INT_FarmerRoleNomader then
-                set money = R2I(money * 1.5)
+                set money = R2I(money * CST_INT_GoldMagForNomader)
             endif
             return money
         endmethod
@@ -302,7 +302,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer money = (CST_INT_PriceOfSheep*sheepCount) + (CST_INT_PriceOfPig*pigCount) + (CST_INT_PriceOfSnake*snakeCount) + (CST_INT_PriceOfChicken*chickenCount)
             // Greedy has more money for butcher animal
             if this.role == CST_INT_FarmerRoleGreedy then
-                set money = R2I(money * 1.3)
+                set money = R2I(money * CST_INT_GoldMagForGreedy)
             endif
             return money
         endmethod
@@ -312,7 +312,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer money = (CST_INT_PriceOfSheep*sheepFoldCount) + (CST_INT_PriceOfPig*pigenCount) + (CST_INT_PriceOfSnake*snakeHoleCount) + (CST_INT_PriceOfChicken*cageCount)
             // Greedy has more money for butcher animal
             if this.role == CST_INT_FarmerRoleGreedy then
-                set money = R2I(money * 1.3)
+                set money = R2I(money * CST_INT_GoldMagForGreedy)
             endif
             return money
         endmethod
@@ -321,7 +321,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer money = (CST_INT_PriceOfSheep*sheepFoldNsCount) + (CST_INT_PriceOfPig*pigenNsCount) + (CST_INT_PriceOfSnake*snakeHoleNsCount) + (CST_INT_PriceOfChicken*cageNsCount)
             // Greedy has more money for butcher animal
             if this.role == CST_INT_FarmerRoleGreedy then
-                set money = R2I(money * 1.3)
+                set money = R2I(money * CST_INT_GoldMagForGreedy)
             endif
             return money
         endmethod
@@ -481,7 +481,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
             // Greedy has more money for butcher animal
             if this.role == CST_INT_FarmerRoleGreedy then
-                set money = R2I(money * 1.3)
+                set money = R2I(money * CST_INT_GoldMagForGreedy)
             endif                   
             call KillUnit(animal)
             call AdjustPlayerStateBJ(money, this.get, PLAYER_STATE_RESOURCE_GOLD)

@@ -106,10 +106,14 @@ globals
     constant integer CST_INT_RandomBonusAgi=3
     constant integer CST_INT_RandomBonusInt=2
     
-    // *** Magnification of resource bonus
+    // *** Magnification of resource bonus(Hunter)
     constant integer CST_INT_GoldMagForDeath=20
     constant integer CST_INT_GoldMagForKilling=10   
     constant integer CST_INT_LumberMagForKilling=1
+    // *** Magnification of resource bonus(Farmer)
+    constant real CST_INT_LumberMagForWoody=0.10
+    constant real CST_INT_GoldMagForGreedy=1.3
+    constant real CST_INT_GoldMagForNomader=1.5
     
     // *** Skill points of initial hero
     constant integer CST_INT_InitHunterSkillPoints=3
