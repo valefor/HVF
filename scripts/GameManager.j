@@ -61,11 +61,11 @@ library GameManager initializer init /*
 		        set b = true
 		    endif
 		    
-		    if Params.flagGameParamNi then
+		    if Params.flagGameParamNa then
 		        if b then
 		            set msg = msg + "/"
 		        endif
-		        set msg = msg + ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameParamNi)
+		        set msg = msg + ARGB(COLOR_ARGB_BLUE).str(CST_STR_GameParamNa)
 		        set b = true
 		    endif
 		    
@@ -108,6 +108,33 @@ library GameManager initializer init /*
 		// Show welcome to every players
 		private static method showWelcome takes nothing returns nothing
 		    call ShowDurMsgToAll(CST_STR_HVFAdv, CST_MSGDUR_Important)
+		    
+		    // Check If we are in 11 platform
+	        if YDWEPlatformIsInPlatform() then
+	            call ShowMsgToAll(ARGB(COLOR_ARGB_LIGHT_PURPLE).str(CST_STR_11Declaration))
+	        else
+	            call ShowMsgToAll(ARGB(COLOR_ARGB_RED).str(CST_STR_Non11Declaration))
+	        endif
+		endmethod
+		
+		// Show begin message to every players
+		private static method showBeginMsg takes nothing returns nothing
+		    local Hunter h = Hunter[Hunter.first]
+		    local Farmer f = Farmer[Farmer.first]
+		    local string tag = "[*" + ARGB(CST_COLOR_Beaware).str(MSG_Beaware) + "*]"
+		    loop
+                exitwhen f.end
+                call DisplayTimedTextToPlayer(f.get, 0, 0, CST_MSGDUR_Beaware, MSG_GameWinTipsFarmer)
+                call DisplayTimedTextToPlayer(f.get, 0, 0, CST_MSGDUR_Beaware, tag+MSG_GameStartTipsFarmer)
+                set f = f.next
+            endloop
+            
+            loop
+                exitwhen h.end
+                call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Beaware, MSG_GameWinTipsHunter)
+                call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Beaware, tag+MSG_GameStartTipsHunter)
+                set h = h.next
+            endloop
 		endmethod
 		
 		private static method adjustMapSize takes integer size returns nothing
@@ -195,8 +222,9 @@ library GameManager initializer init /*
 	        call FogEnable(true)
 	        call FogMaskEnable(true)
 
-	        call TriggerSleepAction(2.0)
+	        call TriggerSleepAction(10.0)
 	        
+	        call showBeginMsg()
 	        // Last perform game parameters
 		    // call performGameParam()
 	    endmethod

@@ -12,14 +12,16 @@ GetOwningPlayer
         private static method createRandomNeutralAggrUnits takes nothing returns boolean
             local integer i = 0
             local unit u
+            local integer maxFood = CST_INT_NeuMaxFood*(Map.mapSize + 1)
             
             debug call BJDebugMsg("Create random units")
             
-            if GetPlayerState(Player(PLAYER_NEUTRAL_AGGRESSIVE), PLAYER_STATE_RESOURCE_FOOD_USED) <= 100 then
+            if GetPlayerState(Player(PLAYER_NEUTRAL_AGGRESSIVE), PLAYER_STATE_RESOURCE_FOOD_USED) <= maxFood then
                 debug call BJDebugMsg("Create random units")
+                /* Fuck the rabbits up
                 set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_RabbitMeat, GetUnitX(u), GetUnitY(u)))
-                
+                */
                 set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_Venision, GetUnitX(u), GetUnitY(u)))
                 
@@ -39,9 +41,10 @@ GetOwningPlayer
         static method createBeginNeutralAggrUnits takes nothing returns boolean
             local integer i = 0
             local unit u
+            local integer maxLoop = (Map.mapSize+1)*3
             
             loop
-                exitwhen i >= 10
+                exitwhen i >= maxLoop
                 /*
                 call BJDebugMsg("X:" + R2S(GetLocationX(rndLoc))+ ", Y:"+ R2S(GetLocationY(rndLoc)) )
                 set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, GetLocationX(rndLoc), GetLocationY(rndLoc), bj_UNIT_FACING)
@@ -64,9 +67,11 @@ GetOwningPlayer
                 call RemoveLocation(rndLoc)
                 //call TriggerSleepAction(0.01)
                 set rndLoc = GetRandomLocInRect(playableRect)
-                */
+                
+                Fuck the rabbits up
                 set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Rabbit, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_RabbitMeat, GetUnitX(u), GetUnitY(u)))
+                */
                 
                 set u = CreateUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), CST_UTI_Deer, Map.randomX, Map.randomY, CST_Facing_Unit)
                 call UnitAddItem(u, CreateItem(CST_ITI_Venision, GetUnitX(u), GetUnitY(u)))

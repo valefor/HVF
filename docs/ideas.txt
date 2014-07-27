@@ -1,0 +1,6 @@
+
+#Abilities:
+
+    *Hunter spell
+    
+    Blind trap: When enemy hero enter trap, it gets blinded, reduce its vision greately

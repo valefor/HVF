@@ -120,6 +120,12 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_ABI_AnimalUnloadAll='A03N'
         constant integer CST_ABI_NightVision='A04B'
         
+        // Hunters Abilities
+        constant integer CST_ABI_PortableShop='A00X'
+        constant integer CST_ABI_Hide='AHid'
+        
+        // Farmers Abilities
+        
         /***********************************************************************
         * ItemTypeId (ITI)
         ***********************************************************************/
@@ -130,6 +136,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_ITI_TowerBase      ='I00Y'
         constant integer CST_ITI_RetrainBook    ='tret'
         constant integer CST_ITI_Invincible     ='pnvu'
+        constant integer CST_ITI_InvincibleNoCD ='I014'
         
         constant integer CST_ITI_RabbitMeat     ='I00H'
         constant integer CST_ITI_Venision       ='I00X'
@@ -316,13 +323,19 @@ library Glue initializer init /* v0.0.1 by Xandria
             local group dummyGroup = CreateGroup()
             local rect r = Rect(mapCenterXs[3]-boundBase, mapCenterYs[3]-boundBase, mapCenterXs[3]+boundBase, mapCenterYs[3]+boundBase)
             debug call BJDebugMsg("Map MinX:"+R2S(mapMinX)+", MinY:"+R2S(mapMinY)+", MaxX:"+R2S(mapMaxX)+", MaxY:"+R2S(mapMaxY))
-            set mapSize = n
             
-            // Rebuild trees/units...
-            call EnumDestructablesInRect(r, null, function thistype.enumMoveDest)
-            // Move preset unit/building to new position
-            call GroupEnumUnitsInRect(dummyGroup, r, Filter(function thistype.filterMoveUnit))
-            
+            // If n is the default mapSize(3), pls don't do map rebuild!
+            // Otherwise you will find that trees have no hight which means
+            // We can see anything behide tree!!
+            if n != mapSize then 
+                // Here we go
+                set mapSize = n
+                // Rebuild trees/units...
+                call EnumDestructablesInRect(r, null, function thistype.enumMoveDest)
+                // Move preset unit/building to new position
+                call GroupEnumUnitsInRect(dummyGroup, r, Filter(function thistype.filterMoveUnit))
+            endif
+
             if (GetLocalPlayer() == p) then
                 // The playerable area
                 set mapMinX = mapCenterXs[mapSize] - baseX

@@ -66,6 +66,7 @@ globals
     constant integer CST_INT_MaxHunters=4
     constant integer CST_INT_MaxFarmers=8
     constant integer CST_INT_MaxAnimals=600
+    constant integer CST_INT_NeuMaxFood=20
     // In Death Race mode, farmers has limited revive times
     constant integer CST_INT_MaxLifePoints=5  
     
@@ -133,7 +134,7 @@ globals
     constant integer CST_INT_PriceOfChicken=40
     
     // *** Items
-    constant integer CST_INT_MaxItemCount=77
+    constant integer CST_INT_MaxItemCount=30
     
     // *** Exp increace 100 for 3 tick(minutes)
     constant integer CST_INT_ExpAddForTick=100

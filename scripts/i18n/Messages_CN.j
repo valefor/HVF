@@ -10,6 +10,10 @@ globals
     // HVF Advertisement
     constant string CST_STR_HVFAdv = "请尽情享受|cff008000《猎人VS农民》|r带给您的快乐，有任何问题和建议请联系|cffcc99ffQQ2872618576|r，或者E-mail：|cffcc99ffhvfdev@qq.com|r"
     
+    // 11 Platform declaration
+    constant string CST_STR_11Declaration= "系统检测到您正在11平台建主游戏中，您的战绩和技术统计将被保存，请坚持到底！另：不图不挂，素质游戏从我做起！"
+    constant string CST_STR_Non11Declaration= "系统检测到您正在非11平台建主游戏中，您的战绩和技术统计将无法被保存"
+    
     // For game time voting
     constant string CST_STR_PlayTimeTitle= "请选择游戏时间"
     constant string CST_STR_PlayTime40m="40分钟游戏时间(对猎人有利)"
@@ -95,9 +99,10 @@ globals
     constant string MSG_GameInitializing    = "游戏初始化..."
     constant string MSG_GameInitializingDone= "游戏初始化完毕..."
     constant string MSG_GameWillStart= "游戏马上开始..."
-    constant string MSG_GameStartTipsHunter= "游戏开始！\n  |cFFFFFF00猎人胜利条件|r:在倒计时结束前没有全部阵亡,或者所有农民玩家退出游戏"
-    constant string MSG_GameStartTipsFarmer= "游戏开始！\n  |cFFFFFF00农民胜利条件|r:在倒计时结束前杀死所有猎人,或者所有猎人玩家退出游戏"
-    
+    constant string MSG_GameWinTipsHunter= "游戏开始！\n  |cFFFFFF00猎人胜利条件|r:在倒计时结束前没有全部阵亡,或者所有农民玩家退出游戏"
+    constant string MSG_GameWinTipsFarmer= "游戏开始！\n  |cFFFFFF00农民胜利条件|r:在倒计时结束前杀死所有猎人,或者所有猎人玩家退出游戏"
+    constant string MSG_GameStartTipsHunter= "现在你必须在基地里面的英雄商店选择一名猎人以进行游戏，随机猎人会有神秘奖励的哟！"
+    constant string MSG_GameStartTipsFarmer= "现在赶紧找个隐蔽的地方藏起来并且造些羊圈发展吧！"
     constant string MSG_VoteForPlayTime="请投票选择游戏时间！"
     
     // *** Base
@@ -134,4 +139,47 @@ globals
     // *** Notice
     constant string MSG_NoticeHunterCantTakeTowerBase = "猎人不能携带塔基,删除物品并给与猎人奖励(+10木材)！"
     constant string MSG_NoticeFarmerKilledByAlly = "农民被盟友杀死了，所有农民减少1/4金钱，凶手减少1/2金钱！"
+
+    // *** Help Msg
+    // Common
+    constant string HELP_C_1_xxx = ""
+    
+    // For Hunter
+    constant string HELP_H_1_HelpCommand = "使用|cffff0000-help|r命令来查看一些有用的游戏信息和命令"
+    constant string HELP_H_2_HellFire = "地狱火是不错的道具,可以用来杀死农民,击晕敌人.地狱火还可以攻击并挖掉树木"
+    constant string HELP_H_3_NeuAnimal= "购买一个野生动物巡视地图或者监视某个区域是很有效的。"
+    constant string HELP_H_4_RocketLauncher= "火箭筒是不错的远程射杀武器.两枚火箭可以杀死没有升级过HP的农民."
+    constant string HELP_H_5_MagicSeed= "商店里的魔法树种子是很有意思的东西，种在水里会结出很多的花草和种子。你可以卖掉或者使用它们。"
+    constant string HELP_H_6_TechResearch= "你可以在基地里的物品箱里面研究一些技能."
+    constant string HELP_H_7_MineInShop= "购买的地雷不可以伤害建筑.但可以对农民的部队造成极大的伤害."
+    constant string HELP_H_8_HowToDestoryTower= "遇到农民成群的塔了?不要硬冲,如果你的猎人有地雷技能,你可以充分利用地雷技能拆除塔群.你也可以用高级奇美拉拆除敌人箭塔。"
+    constant string HELP_H_9_Avantar= "瞬间强化技能是非常有用的技能,在战斗的时候效果非常好.在物品箱里面研究以获得使用."
+    constant string HELP_H_10_SkeletonFighter= "如果你死了,请你不要随便退出游戏.你还可以操纵一个骷髅.这个骷髅可以无限复活.在研究升级以后还可以变得更强大.精良的骷髅是农民塔群和士兵的噩梦."
+    constant string HELP_H_11_InvisiblePotion= "隐形药水是非常有用的东西,逃命和暗杀农民必备."
+    constant string HELP_H_12_StunMine= "你可以考虑使用晕眩地雷来拖延农民军队的进攻."
+    constant string HELP_H_13_TeleportAndEscape= "活用传送权杖和传送技能，配合队友能逃出农民部队的包围圈。"
+    constant string HELP_H_14_HideAndWin= "时间不多了！采取一切猥琐手段隐蔽自己，保护活着的队友，不要让农民部队找到并杀死所有猎人，坚持就是胜利！"
+    
+    // For Farmer
+    constant string HELP_F_1_HelpCommand = "使用|cffff0000-help|r命令来查看一些有用的游戏信息和命令"
+    constant string HELP_F_2_FarmerChar = "不同角色的农民拥有不同的优势！！请用|cffff0000-gi|r命令来查看农民特点"
+    constant string HELP_F_3_PigenUpgrade= "初期不要升级羊圈.过早升级羊圈其实是不划算的,先造多一些再升级效果会比较好."
+    constant string HELP_F_4_PunishInfighting= "注意：一个农民自杀或者被盟友杀死会减少所有农民1/3的金钱！！"
+    constant string HELP_F_5_HideYourBase= "你的基地不能造得太暴露,否则很容易被猎人发现."
+    constant string HELP_F_6_Slaughterhouse= "屠宰场是非常有用的,当你急需钱的时候可以屠宰牲口一次性获得大量的钱."
+    constant string HELP_F_7_TechResearch= "注意研究你的建筑物(在工程站研究),这对提升基地防御能力是非常重要的."
+    constant string HELP_F_8_ConscriptionStrategy= "有钱的时候不要急于出兵杀掉猎人,研究科技提升部队的战斗力是非常关键的.过早地把钱投入到生产部队上只会让你的部队白白葬送在猎人的屠刀下."
+    constant string HELP_F_9_FarmerShop= "商店是农民的关键建筑之一.商店里出售各种有用的物品."
+    constant string HELP_F_10_WoodingAxe= "商店里的斧子可以被使用来采集木材.采集到的木材会送回到农民的商店."
+    constant string HELP_F_11_Avatar= "农民的分身技能是相当有用的技能,可以帮助农民建造一些建筑.你也可以让分身携带斧子采集木材或者潜入猎人的基地以较便宜的价格购买一些东西."
+    constant string HELP_F_12_SuperTank= "超级坦克是农民部队的终极物理兵种，拥有超强的攻防，注意超级坦克需要特种兵来驾驶才能发挥威力！"
+    constant string HELP_F_13_ArchMage= "大法师是农民部队的终极魔法兵种，拥有超多实用的魔法技能，配合其他兵种能快速有效地追杀猎人！"
+    constant string HELP_F_14_SlaughterThemAll= "时间不多了，不惜一起代价杀光猎人！赢得胜利！"
+    
+    // *** Quest
+    constant string QST_H_TitleBasic = "猎人基础"
+    constant string QST_H_IntroBasic = "猎人主要是看个人的技巧：|n这里列出几个发现敌人的方法：|n1，利用岗哨守卫的技能（不可以反隐形）。|n2，购买猫头鹰、者侦查狼等雇用兵为你搜索地图。|n3，花一些木头进行大面积探测。|n4，如果农民用了隐身，可以用尘土之影来发现。|n|n砍树的方法：|n1，自己用技能手雷炸开。|n2，用物品砍树的斧头。|n3，用物品地狱火。|n4，用雇佣兵树木砍伐者。|n|n其他：猎人基地的门对于猎人可以轻易开关，对于农民自身则很难打开。 "
+    constant string QST_F_TitleBasic = "农民基础"
+    constant string QST_F_IntroBasic = "1、你会随机出生在地图的一个地方如果你在树林里，开始建造，如果不是，按A砍开树木找一个不会被猎人发现的地方开始建造。|n2、首先建造羊圈，然后等待钱增加，钱够了再造羊圈，或者升级为猪圈，蛇穴，鸡棚。等钱到了足够的钱就可以造屠宰场屠宰牲口以直接得到金币。|n3、你可以任意用箭塔，门和墙来防御猎人。|n4、当钱足够开始研究科技，并且造兵，足够强大了就可以去杀猎人了。|n5、只要你的农民死了，你的基地和所有单位就会毁灭(研究的科技不会丢失)。|n6、农民每2分钟提升等级，死亡以后级别从一重新开始。越到后来每2分钟得到的经验值越多。 "
+
 endglobals

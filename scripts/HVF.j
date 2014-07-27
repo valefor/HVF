@@ -2,7 +2,7 @@ library HVF initializer init/* v0.0.1 Xandria
 */  uses    Alloc           /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-alloc-alternative-221493/[/url]
 */          PlayerManager   /* [url]http://www.hiveworkshop.com/forums/jass-resources-412/snippet-error-message-239210/[/url]
 */          PlayerAlliance  /*  List
-*/          TimeManager     /*
+*/          StatsManager    /* -> TimeManager
 */          Board           /*
 */          ErrorMessage    /*
 */          ORDERID         /*
@@ -74,8 +74,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         static method win takes nothing returns boolean
             local thistype role = thistype[thistype.first]
+            // Must be set here, before quiting from game, 
+            // calculate some global stats like who is the MVP
+            call StatsManager.updateGlobalStats()
             loop
                 exitwhen role.end
+                // before win, update stats
+                call role.commitStats(true)
                 call CustomVictoryBJ(role.get, true, true)
                 set role= role.next
             endloop
@@ -86,6 +91,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local thistype role = thistype[thistype.first]
             loop
                 exitwhen role.end
+                // before lose, update stats
+                call role.commitStats(false)
                 call CustomDefeatBJ(role.get, "You lose! Game over...")
                 set role= role.next
             endloop
@@ -547,7 +554,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call RemoveItem(tempItem)
                 // In death race mode, bless Stealth/Invincible to newly revived hero
                 if Params.flagGameModeDr then
-                    set tempItem = CreateItem(CST_ITI_Invincible, GetUnitX(this.hero), GetUnitY(this.hero))
+                    set tempItem = CreateItem(CST_ITI_InvincibleNoCD, GetUnitX(this.hero), GetUnitY(this.hero))
                     call UnitAddItem(this.hero, tempItem)
                     call UnitUseItem(this.hero, UnitItemInSlot(this.hero, 0) )
                     call RemoveItem(tempItem)
@@ -620,7 +627,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // If hero hasn't been created
             if this.hero == null then
                 call this.setHero( CreateUnit(this.get, CST_UTI_FarmerHero, x, y, 0) )
-            elseif IsUnitType(this.hero, UNIT_TYPE_DEAD) then
+                // Don't check farmer hero is dead or not... since 
+                // IsUnitType(this.hero, UNIT_TYPE_DEAD) may return false
+                //elseif IsUnitType(this.hero, UNIT_TYPE_DEAD) then
+            else
                 if Params.flagGameModeDr then
                     if this.lifes == 0 then
                         // If all farmers hero burn up their lifes, hunter win
@@ -637,8 +647,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 endif
                 // Hero die, revive it
                 call ReviveHero(this.hero, x, y, false)
-            else
-                return
             endif
             
             // Init hero
@@ -824,13 +832,34 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Instance [Vars]
         implement HunterVars
         
+        // Statistics record 
+        StatsRecord sr
+        
         // Instance methods
         private method initInstance takes nothing returns nothing
             call this.initHunterVars()
+            set this.sr = StatsRecord.create(this.get)
+            // call BJDebugMsg("Debug>>>> "+ I2S(this.sr.Rounds))
+           
         endmethod
         
         private method deleteInstance takes nothing returns nothing
             call this.deleteHunterVars()
+        endmethod
+        
+        private method commitStats takes boolean win returns nothing
+           
+            set this.sr.HunterPlays = this.sr.HunterPlays + 1
+            
+            if win then
+                set this.sr.Wins = this.sr.Wins + 1
+                set this.sr.HunterWins = this.sr.HunterWins + 1
+            else
+            
+            endif
+            
+            // Last commit the stats record
+            call this.sr.save(this.get)
         endmethod
         
         // Static methods
@@ -858,8 +887,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local thistype h = thistype[GetPlayerId(p)]
 
             if statsBoard != -1 then
-                set thistype.statsBoard[CST_BDCOL_ST][h.rowIndex].text = "Left"
-                set Farmer.statsBoard[CST_BDCOL_ST][h.erowIndex].text = "Left"
+                set thistype.statsBoard[CST_BDCOL_ST][h.rowIndex].text = CST_STR_StatusHasLeft
+                set Farmer.statsBoard[CST_BDCOL_ST][h.erowIndex].text = CST_STR_StatusHasLeft
             else
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
@@ -996,17 +1025,35 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Instance [Vars]
         implement FarmerVars
         
+        // Statistics record 
+        StatsRecord sr
+        
         private static integer exp = 0
         private static integer expTick=0
         
         private method initInstance takes nothing returns nothing
             call this.initFarmerVars()
+            set this.sr = StatsRecord.create(this.get)
         endmethod
         
         private method deleteInstance takes nothing returns nothing
             call this.deleteFarmerVars()
         endmethod
 
+        private method commitStats takes boolean win returns nothing
+            set this.sr.FarmerPlays = this.sr.FarmerPlays + 1
+            
+            if win then
+                set this.sr.Wins = this.sr.Wins + 1
+                set this.sr.FarmerWins = this.sr.FarmerWins + 1
+            else
+            
+            endif
+            
+            // Last commit the stats record
+            call this.sr.save(this.get)
+        endmethod
+        
         // Static methods
         // Print force info
         static method info takes boolean showHeroInfo returns string
@@ -1220,7 +1267,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     
     /***************************************************************************
     * Common Use Functions
-    ***************************************************************************/    
+    ***************************************************************************/
     function InSameForce takes player p, player p2 returns boolean
         if Farmer.contain(p)  then
             if Farmer.contain(p2) then

@@ -115,6 +115,9 @@ struct EventManager
                 call ShowNoticeToPlayer(h.get, MSG_NoticeHunterCantTakeTowerBase)
                 //call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Beaware, ARGB(CST_COLOR_Beaware).str())
                 //call SetPlayerState(h.get, PLAYER_STATE_LUMBER_GATHERED, GetPlayerState(h.get, PLAYER_STATE_LUMBER_GATHERED) + 10)
+            else
+                set manItem = null
+                return true
             endif
             set manItem = null
             return false

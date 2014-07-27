@@ -174,6 +174,35 @@ endglobals
             set enabled = flag
         endmethod
         
+        // At here it must be in a valid command format 
+        private static method parseComboCommand takes string comboStr returns nothing
+            local string str = ""
+            local string char
+            local integer strlen = StringLength(comboStr)
+            local integer i = 0-1
+            local thistype cmd
+            
+            //call BJDebugMsg("Debug >>>> parseComboCommand")
+            //call BJDebugMsg("Debug >>>> comboStr:" + comboStr)
+            
+            loop
+                set i = i+1
+                set char = SubString(comboStr,i,i+1)
+                exitwhen i == strlen
+                set str = str + char
+                //call BJDebugMsg("Debug >>>> 1 str:" + str)
+                set cmd = ChatCommand[str]
+                if cmd != 0 then
+                    // Combo command dosen't support argument
+                    call cmd.fire(GetTriggerPlayer(),"")
+                    //call BJDebugMsg("Debug >>>> 2 str:" + str)
+                    // Reset str
+                    set str = ""
+                endif
+                
+            endloop
+        endmethod
+        
         private static method eventListener takes nothing returns boolean
             local string chat = StringStrip(GetEventPlayerChatString()," ")
             local string char
@@ -206,6 +235,8 @@ endglobals
                 endloop
                 
                 call cmd.fire(GetTriggerPlayer(),StringStrip(data, " "))
+            else
+                call thistype.parseComboCommand(str)
             endif
             return false
         endmethod

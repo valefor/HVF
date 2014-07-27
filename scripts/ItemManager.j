@@ -11,15 +11,23 @@ struct ItemManager extends array
     * Enumerators
     ***************************************************************************/
     private static method enumCreateRandomItem takes nothing returns nothing
-        call CreateItem(ChooseRandomItemEx(ITEM_TYPE_ANY, 8), GetDestructableX(GetEnumDestructable()), GetDestructableY(GetEnumDestructable()))
+        if ( (GetDestructableTypeId(GetEnumDestructable()) == CST_DTI_MagicTree) and (GetDestructableLife(GetEnumDestructable()) > 0) ) then
+            call CreateItem(ChooseRandomItemEx(ITEM_TYPE_ANY, 8), GetDestructableX(GetEnumDestructable()), GetDestructableY(GetEnumDestructable()))
+        endif
     endmethod
     
     static method createBeginMapItems takes nothing returns boolean
         local real x
         local real y
         local integer numberOfItem = 0
-        
+        local integer maxItems = CST_INT_MaxItemCount * (Map.mapSize + 1)
+        //local destructable mt
         debug call BJDebugMsg("Create begin items")
+        
+        // Create a magic three in secret garden
+        //set mt = CreateDeadDestructable(CST_DTI_MagicTree, GetRectMinX(Map.regionSecretGarden), GetRectMaxY(Map.regionSecretGarden), 39.000, 1.063, 0)
+        //call SetDestructableLife(mt, GetDestructableMaxLife(mt))
+        //set mt = null
         
         loop
             set x = Map.randomX
@@ -28,7 +36,7 @@ struct ItemManager extends array
             call CreateItem(CST_ITI_MythticGrass, x, y)
             call CreateItem(CST_ITI_MythticFlower, x, y)
             set numberOfItem = numberOfItem + 1
-            exitwhen numberOfItem > CST_INT_MaxItemCount
+            exitwhen numberOfItem > maxItems
         endloop
 
         return false
