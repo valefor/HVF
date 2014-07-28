@@ -12,15 +12,26 @@ globals
     constant integer QUESTTYPE_OPT_DISCOVERED   = 2
     constant integer QUESTTYPE_OPT_UNDISCOVERED = 3
     
-    constant string QUESTICON_Ambush = "ReplaceableTextures\\CommandButtons\\BTNAmbush.blp"
+    constant string QUESTICON_Hunter = "ReplaceableTextures\\CommandButtons\\BTNRaider.blp"
+    constant string QUESTICON_Farmer = "ReplaceableTextures\\CommandButtons\\BTNAmbush.blp"
+    constant string QUESTICON_Version= "ReplaceableTextures\\CommandButtons\\BTNSorceressMaster.blp"
+    constant string QUESTICON_Command= "ReplaceableTextures\\CommandButtons\\BTNGreaterRejuvScroll.blp"
+    constant string QUESTICON_JoinUs = "ReplaceableTextures\\CommandButtons\\BTNMortarTeam.blp"
     
 endglobals
 
 struct Quests extends array
 
     static method create takes nothing returns thistype
-        call CreateQuestBJ( QUESTTYPE_REQ_DISCOVERED, QST_H_TitleBasic, QST_H_IntroBasic, QUESTICON_Ambush )
-        call CreateQuestBJ( QUESTTYPE_REQ_DISCOVERED, QST_F_TitleBasic, QST_F_IntroBasic, QUESTICON_Ambush )
+        // Request
+        call CreateQuestBJ( QUESTTYPE_REQ_DISCOVERED, QST_Q_TitleHunterGameRule, QST_Q_IntroHunterGameRule, QUESTICON_Hunter )
+        call CreateQuestBJ( QUESTTYPE_REQ_DISCOVERED, QST_Q_TitleFarmerGameRule, QST_Q_IntroFarmerGameRule, QUESTICON_Farmer )
+        call CreateQuestBJ( QUESTTYPE_REQ_DISCOVERED, QST_Q_TitleHunterTips, QST_Q_IntroHunterTips, QUESTICON_Hunter )
+        call CreateQuestBJ( QUESTTYPE_REQ_DISCOVERED, QST_Q_TitleFarmerTips, QST_Q_IntroFarmerTips, QUESTICON_Farmer )
+        // Optional
+        call CreateQuestBJ( QUESTTYPE_OPT_DISCOVERED, QST_O_TitleVersion, QST_O_IntroVersion, QUESTICON_Version )
+        call CreateQuestBJ( QUESTTYPE_OPT_DISCOVERED, QST_O_TitleCommand, QST_O_IntroCommand, QUESTICON_Command )
+        call CreateQuestBJ( QUESTTYPE_OPT_DISCOVERED, QST_O_TitleJoinUs, QST_O_IntroJoinUs, QUESTICON_JoinUs )
         
         return -1
     endmethod
@@ -33,7 +44,7 @@ struct Helper
 
     // Init helper message
     private static method initMsgs takes nothing returns nothing
-        set HunterHelper[1] = HELP_H_1_HelpCommand
+        set HunterHelper[1] = HELP_H_1_ItemBox
         set HunterHelper[2] = HELP_H_2_HellFire
         set HunterHelper[3] = HELP_H_3_NeuAnimal
         set HunterHelper[4] = HELP_H_4_RocketLauncher
@@ -48,7 +59,7 @@ struct Helper
         set HunterHelper[13] = HELP_H_13_TeleportAndEscape
         set HunterHelper[14] = HELP_H_14_HideAndWin    
     
-        set FarmerHelper[1] = HELP_F_1_HelpCommand          // 1
+        set FarmerHelper[1] = HELP_F_1_HideAndFarming       // 1
         set FarmerHelper[2] = HELP_F_2_FarmerChar           // 3
         set FarmerHelper[3] = HELP_F_3_PigenUpgrade         // 5
         set FarmerHelper[4] = HELP_F_4_PunishInfighting     // 7
