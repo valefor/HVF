@@ -20,6 +20,9 @@ struct EventManager
     static trigger trigFarmerSpellCast
     static trigger trigFarmerUnitIssuedOrder
     
+    static TimerPointer tpReviveHunterHero
+    static TimerPointer tpReviveFarmerHero
+    
     /***************************************************************************
     * Bind selected Hunter Hero to Player
     ***************************************************************************/
@@ -136,24 +139,25 @@ struct EventManager
         return true
     endmethod
     private static method reviveHunterHero takes nothing returns nothing
-        local TimerPointer tp = TimerPool[GetExpiredTimer()]
-        local Hunter h = tp.count
+        local Hunter h = thistype.tpReviveHunterHero.count
         
         call h.reviveHero()
-        call tp.destroy()
     endmethod
     // Event Handler
-    private static method onHunterUnitDeath takes nothing returns boolean
+    private static method actHunterUnitDeath takes nothing returns boolean
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
         local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
-        local TimerPointer tp = TimerPointer.create()
         
         if IsUnitHunterHero(dyingUnit) or GetUnitTypeId(dyingUnit) == CST_UTI_HunterHeroSkeleton then
             // Hunter hero was killed, give a giant skeleton as hunter hero
-            set tp.count = h
+            // set thistype.tpReviveHunterHero.count = h
             // In order to display hero death anima, we need to postponed revive
-            call TimerStart(tp.timer, 1.25, false, function thistype.reviveHunterHero)
+            // call TimerStart(thistype.tpReviveHunterHero.timer, 1.25, false, function thistype.reviveHunterHero)
+            
+            // Since we are in action, we can use poll wait
+            call PolledWait(1.25)
+            call h.reviveHero()
         endif
         if Farmer.contain(GetOwningPlayer(killingUnit)) then
         endif
@@ -167,21 +171,21 @@ struct EventManager
     ***************************************************************************/
     // Event Filter
     private static method reviveFarmerHero takes nothing returns nothing
-        local TimerPointer tp = TimerPool[GetExpiredTimer()]
-        local Farmer f = tp.count
+        // Buggy here, GetExpiredTimer() may not be the timer point you want!!
+        // local TimerPointer tp = TimerPool[GetExpiredTimer()]
+        local Farmer f = thistype.tpReviveFarmerHero.count
         
         call f.reviveHero()
-        call tp.destroy()
     endmethod
+    
     // Event Handler
-    private static method onFarmerUnitDeath takes nothing returns boolean    
+    private static method actFarmerUnitDeath takes nothing returns boolean    
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
         local integer dyingUnitTypeId = GetUnitTypeId(dyingUnit)
         local integer killingUnitTypeId = GetUnitTypeId(killingUnit)
         local Farmer f = Farmer[GetPlayerId(GetOwningPlayer(dyingUnit))]
         local Hunter h = Hunter[GetPlayerId(GetOwningPlayer(killingUnit))]
-        local TimerPointer tp = TimerPointer.create()
 
         debug call BJDebugMsg(GetUnitName(GetTriggerUnit()) + " die") 
         // If farmer Hero die
@@ -210,9 +214,12 @@ struct EventManager
             else
                 //Farmer hero was killed by neutral, impossible
             endif
-            set tp.count = f
+            // set thistype.tpReviveFarmerHero.count = f
             // In order to display hero death anima, we need to postponed revive
-            call TimerStart(tp.timer, 1.25, false, function thistype.reviveFarmerHero)
+            // call TimerStart(thistype.tpReviveFarmerHero.timer, 1.25, false, function f.reviveHero)
+            // Since we are in action, we can use poll wait
+            call PolledWait(1.25)
+            call f.reviveHero()
         endif
         
         // If farmer farming animal die
@@ -450,17 +457,24 @@ struct EventManager
         set thistype.trigFarmerSpellCast = CreateTrigger()
         set thistype.trigFarmerUnitIssuedOrder = CreateTrigger()
         
+        set thistype.tpReviveHunterHero = TimerPointer.create()
+        set thistype.tpReviveFarmerHero = TimerPointer.create()
+        
         
         // Set up triggers handle function
         call TriggerAddCondition( trigSelectHero,Condition(function thistype.onSelectHero) )
         call TriggerAddCondition( trigPlantTree,Condition(function thistype.onPlantTree) )
         call TriggerAddCondition( trigPickupItem,Condition(function thistype.onPickupItem) )
-        call TriggerAddCondition( trigHunterUnitDeath,Condition(function thistype.onHunterUnitDeath) )
-        call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
+        // call TriggerAddCondition( trigHunterUnitDeath,Condition(function thistype.onHunterUnitDeath) )
+        // call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )
         call TriggerAddCondition( trigFarmerFarmingBuildingFinish,Condition(function thistype.onFarmerFarmingBuildingFinish) )
         call TriggerAddCondition( trigFarmerFarmingBuildingUpgrade,Condition(function thistype.onFarmerFarmingBuildingUpgrade) )
         call TriggerAddCondition( trigFarmerSpellCast,Condition(function thistype.onFarmerSpellCast) )
         call TriggerAddCondition( trigFarmerUnitIssuedOrder,Condition(function thistype.onFarmerUnitIssuedOrder) )
+        
+        // Postponed is really a troublesome issue, must use trigger action
+        call TriggerAddAction( trigHunterUnitDeath,function thistype.actHunterUnitDeath )
+        call TriggerAddAction( trigFarmerUnitDeath,function thistype.actFarmerUnitDeath )
     endmethod
     
 endstruct

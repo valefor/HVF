@@ -160,7 +160,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             loop
                 exitwhen h.end
-                if h.hero != null and IsUnitHunterHero(h.hero) then
+                if h.hero != null and IsUnitHunterHero(h.hero) and not IsUnitType(h.hero, UNIT_TYPE_DEAD) then
                     return false
                 endif
                 set h=h.next
@@ -241,6 +241,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, this.get)
             call AdjustPlayerStateBJ(CST_INT_HunterBeginGold, this.get, PLAYER_STATE_RESOURCE_GOLD)
             call AdjustPlayerStateBJ(CST_INT_HunterBeginLumber, this.get, PLAYER_STATE_RESOURCE_LUMBER)
+            
+            // Set camera to hunter base
+            call PanCameraToTimedLocForPlayer(this.get, Map.heroReviveLoc, 0.50)
         endmethod
         
         method deleteHunterVars takes nothing returns nothing
@@ -547,18 +550,25 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             if this.hero != null then
                 set tempItem = CreateItem(CST_ITI_RetrainBook, GetUnitX(this.hero), GetUnitY(this.hero)) //GetUnitX
                 call SetUnitState(this.hero, UNIT_STATE_MANA, GetUnitState(this.hero, UNIT_STATE_MAX_MANA) * 1)
-                call UnitResetCooldown(this.hero)
-                call UnitUseItem(this.hero, tempItem)
+                // Add one ability to make sure the success of
+                // using of retrain book ... 
+                call UnitAddAbility(this.hero, CST_ABI_FReveal)
+                call UnitAddItem(this.hero, tempItem)
+                call UnitUseItem(this.hero, UnitItemInSlot(this.hero, 0))
+                call UnitRemoveItem(this.hero, tempItem)
+                call RemoveItem(tempItem)
                 call SetHeroLevelBJ(this.hero, 1, false)
                 call UnitModifySkillPoints(this.hero, CST_INT_InitFarmerSkillPoints - GetHeroSkillPoints(this.hero))
-                call RemoveItem(tempItem)
                 // In death race mode, bless Stealth/Invincible to newly revived hero
                 if Params.flagGameModeDr then
                     set tempItem = CreateItem(CST_ITI_InvincibleNoCD, GetUnitX(this.hero), GetUnitY(this.hero))
                     call UnitAddItem(this.hero, tempItem)
                     call UnitUseItem(this.hero, UnitItemInSlot(this.hero, 0) )
+                    call UnitRemoveItem(this.hero, tempItem)
                     call RemoveItem(tempItem)
                 endif
+                // Reset cooldown of items and abilities
+                call UnitResetCooldown(this.hero)
             endif
             
             set tempItem = null
@@ -627,10 +637,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // If hero hasn't been created
             if this.hero == null then
                 call this.setHero( CreateUnit(this.get, CST_UTI_FarmerHero, x, y, 0) )
-                // Don't check farmer hero is dead or not... since 
-                // IsUnitType(this.hero, UNIT_TYPE_DEAD) may return false
-                //elseif IsUnitType(this.hero, UNIT_TYPE_DEAD) then
-            else
+                // x Don't check farmer hero is dead or not... since 
+                // x IsUnitType(this.hero, UNIT_TYPE_DEAD) may return false
+            elseif IsUnitType(this.hero, UNIT_TYPE_DEAD) then
                 if Params.flagGameModeDr then
                     if this.lifes == 0 then
                         // If all farmers hero burn up their lifes, hunter win
@@ -810,6 +819,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call AdjustPlayerStateBJ(CST_INT_FarmerBeginLumber, this.get, PLAYER_STATE_RESOURCE_LUMBER)
             call SetPlayerTechMaxAllowed(this.get, CST_BTI_Slaughterhouse, 1)
             call SetPlayerTechMaxAllowed(this.get, CST_BTI_ArmsRecycler, 1)
+            
+            // Set camera to farmer hero
+            // call PanCameraToTimedForPlayer(this.get, GetUnitX(this.hero), GetUnitY(this.hero), 0.50)
         endmethod
         
         method deleteFarmerVars takes nothing returns nothing

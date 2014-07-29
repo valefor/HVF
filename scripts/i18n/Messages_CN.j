@@ -23,6 +23,9 @@ globals
     constant string CST_STR_RemainedTime="剩余游戏时间"
     
     // Common str
+    constant string CST_STR_Version= "当前版本:"
+    constant string CST_STR_VersionTag= "v"
+    
     constant string CST_STR_Level= "等级"
     constant string CST_STR_Number= "玩家人数："
     

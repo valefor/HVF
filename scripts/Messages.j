@@ -1,19 +1,23 @@
 globals
 
+    // *** Version Info
+    constant string CST_STR_VersionMain = "7"
+    constant string CST_STR_VersionSub  = "0"
+    
     // *** Contact
     constant string CST_STR_ContactQQ   = "2872618576"
     constant string CST_STR_ContactEmail= "hvfdev@qq.com"
     
     // **** 11 Platform Profile
     // This 8 stats will be shown on 11 score board
-    constant string CST_STR_11ProfRounds= "����"
-    constant string CST_STR_11ProfWinRate  = "ʤ��"
-    constant string CST_STR_11ProfHunterScore= "���˷�"
-    constant string CST_STR_11ProfFarmerScore= "ũ���"
-    constant string CST_STR_11ProfWealth= "�Ƹ�"
-    constant string CST_STR_11ProfMerit= "��ѫ"
-    constant string CST_STR_11ProfFlees= "����"
-    constant string CST_STR_11ProfMVPs= "����"
+    constant string CST_STR_11ProfRounds= "局数"
+    constant string CST_STR_11ProfWinRate  = "胜率"
+    constant string CST_STR_11ProfHunterScore= "猎人分"
+    constant string CST_STR_11ProfFarmerScore= "农民分"
+    constant string CST_STR_11ProfWealth= "财富"
+    constant string CST_STR_11ProfMerit= "功勋"
+    constant string CST_STR_11ProfFlees= "逃跑"
+    constant string CST_STR_11ProfMVPs= "大腿"
     
     // other hide stats, since 11 platform only supply 1Kb to 
     // store the statistics records, using as simple name as possible

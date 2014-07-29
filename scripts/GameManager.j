@@ -166,13 +166,11 @@ library GameManager initializer init /*
 	    static method initialize takes nothing returns nothing
 	        call FogEnable(false)
 	        call FogMaskEnable(false)
-            //call BJDebugMsg(MSG_GameInitializing)
             call ShowMsgToAll(MSG_GameInitializing)
 	        call TriggerSleepAction(2.0)
-	        // For better performance, generate begin items/neutral unit at beginning
-	        //call UnitManager.createBeiginNeutralAggrUnits()
-	        //call ItemManager.createBeginMapItems()
-	        //call BJDebugMsg(MSG_GameInitializingDone)
+	        call ShowMsgToAll(CST_STR_Version+CST_STR_VersionTag+ARGB(CST_COLOR_Beaware).str(CST_STR_VersionMain+"."+CST_STR_VersionSub))
+	        call TriggerSleepAction(2.0)
+
 	        call ShowMsgToAll(MSG_GameInitializingDone)
 	        //debug call BJDebugMsg("Waiting host for chosing game mode...")
 	        
@@ -194,13 +192,6 @@ library GameManager initializer init /*
 	        // Disable game mode commands
 	        call InvalidGameModeCommands()
 	        
-	        // Shuffle players
-	        /*
-	        if Params.flagGameModeSp then
-		        call ShufflePlayer()
-		    endif
-		    */
-		    
 		    // For better performance, generate begin items/neutral unit at beginning
 	        // Do this after map adjustion since these funcions need to know playerable
 	        // bound

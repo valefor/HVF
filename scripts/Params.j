@@ -137,8 +137,8 @@ globals
     constant integer CST_INT_MaxItemCount=30
     
     // *** Exp increace 100 for 3 tick(minutes)
-    constant integer CST_INT_ExpAddForTick=100
-    constant integer CST_INT_ExpTickStep=3
+    constant integer CST_INT_ExpAddForTick=120
+    constant integer CST_INT_ExpTickStep=2
     
     // *** Board layout
     // Board Column

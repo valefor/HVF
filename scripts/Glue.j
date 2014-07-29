@@ -125,6 +125,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_ABI_Hide='AHid'
         
         // Farmers Abilities
+        constant integer CST_ABI_FReveal='A00R'
         
         /***********************************************************************
         * ItemTypeId (ITI)
