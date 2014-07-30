@@ -106,8 +106,25 @@ struct StatsRecord extends array
     */
 endstruct
 
-struct StatsManager extends array
+struct StatsBoard extends array
+    static Board bd = -1
     
+    static method createAndInit takes nothing returns nothing
+        local Farmer f = Farmer[Farmer.first]    
+        local Hunter h = Hunter[Hunter.first]
+        local integer i = 2
+        
+        set bd = Board.create()
+        call bd.clear()
+        
+        set bd.title = CST_STR_ScoreBoard
+        // set statsBoard.all.width = 0.02
+        call statsBoard.all.setDisplay(true, true)
+    endmethod
+endstruct
+
+struct StatsManager extends array   
+
     public static method isIn11Platform takes nothing returns boolean
         return YDWEPlatformIsInPlatform()
     endmethod
