@@ -544,6 +544,23 @@ library Glue initializer init /* v0.0.1 by Xandria
         set u = null
     endfunction
     
+    function GetHeroAvatar takes unit u returns string
+        local integer uti = GetUnitTypeId(u)
+        if uti == CST_UTI_FarmerHero then
+            return "ReplaceableTextures\\CommandButtons\\BTNKobold.blp"
+        elseif uti == CST_UTI_HunterHeroAssaulter or uti == CST_UTI_HunterHeroButcher then
+            return "ReplaceableTextures\\CommandButtons\\BTNBehemothRider.blp"
+        elseif uti == CST_UTI_HunterHeroDarter or uti == CST_UTI_HunterHeroDogger then
+            return "ReplaceableTextures\\CommandButtons\\BTNTroll.blp"
+        elseif uti == CST_UTI_HunterHeroPeeper or uti == CST_UTI_HunterHeroSneaker then
+            return "ReplaceableTextures\\CommandButtons\\BTNTrollBoarRiderVI.blp"
+        elseif uti == CST_UTI_HunterHeroPelter or uti == CST_UTI_HunterHeroMiner or uti == CST_UTI_HunterHeroBalancer then
+            return "ReplaceableTextures\\CommandButtons\\BTNRaider.blp"
+        else
+            return ""
+        endif
+    endfunction
+    
     function GetRandomHeroUti takes nothing returns integer
         local integer randomInt = GetRandomInt(1, CST_INT_MaxHunterHeroType)
         if randomInt == 1 then

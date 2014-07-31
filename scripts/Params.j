@@ -140,17 +140,6 @@ globals
     constant integer CST_INT_ExpAddForTick=120
     constant integer CST_INT_ExpTickStep=2
     
-    // *** Board layout
-    // Board Column
-    constant integer CST_BDCOL_PN=0   // Player name
-    constant integer CST_BDCOL_KL=1   // Kills
-    constant integer CST_BDCOL_DE=1   // Deaths
-    constant integer CST_BDCOL_ST=2   // Status
-    constant integer CST_BDCOL_TT=3   // Title
-    constant integer CST_BDCOL_MD=4   // Status
-    constant integer CST_BDCOL_ST=5   // Status
-    constant integer CST_BDCOL_DF=9   // DEBUG FLAG
-    
     // *** Message display duration
     constant integer CST_MSGDUR_Important=30
     constant integer CST_MSGDUR_Beaware =15

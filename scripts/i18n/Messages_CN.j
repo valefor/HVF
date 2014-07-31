@@ -28,14 +28,17 @@ globals
     
     constant string CST_STR_Level= "等级"
     constant string CST_STR_Number= "玩家人数："
-    
     constant string CST_STR_Hunter= "猎人"
     constant string CST_STR_Farmer= "农民"
+    
+    constant string CST_STR_Title= "称号"
+    constant string CST_STR_Rank= "勋章"
+    constant string CST_STR_ScoreBoard= "积分榜"
     constant string CST_STR_FarmerScoreBoard= "农民排行榜"
     constant string CST_STR_HunterScoreBoard= "猎人排行榜"
     constant string CST_STR_Player= "玩家"
-    constant string CST_STR_Kills= "击杀数"
-    constant string CST_STR_Deaths= "死亡数"
+    constant string CST_STR_Kills= "击杀"
+    constant string CST_STR_Deaths= "死亡"
     constant string CST_STR_Status= "在线状态"
     constant string CST_STR_StatusPlaying= "正在游戏"
     constant string CST_STR_StatusHasLeft= "已经离开"

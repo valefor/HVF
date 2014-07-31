@@ -115,6 +115,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         unit hero
         // specific attributes
         integer killCount
+        integer deathCount
         boolean isRandomHero
         
         // Instance method
@@ -235,6 +236,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         method initHunterVars takes nothing returns nothing
             set this.killCount = 0
+            set this.deathCount= 0
             set this.hero = null
             set this.isRandomHero = false
             
@@ -273,6 +275,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         integer chickenCount
         
         integer deathCount
+        integer killCount
         integer role
         integer lifes
         string heroIntro
@@ -807,6 +810,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set chickenCount    = 0
             
             set deathCount      = 0
+            set killCount       = 0
             set lifes           = CST_INT_MaxLifePoints
             set role            = CST_INT_FarmerRoleInvalid
             

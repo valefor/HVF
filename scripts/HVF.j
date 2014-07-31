@@ -17,17 +17,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     /***************************************************************************
     * Modules
     ***************************************************************************/
-    // Statistics
-    private module StatsBoard
-        static Board statsBoard = -1
-        integer rowIndex
-        integer erowIndex
-        
-        static method createStatsBoard takes nothing returns nothing
-            set statsBoard = Board.create()
-        endmethod
-    endmodule
-    
     // Force related utils    
     module Force
         implement DualLinkedList
@@ -128,8 +117,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public method operator kills= takes integer val returns nothing
             set this.killCount = val
             // fresh board
-            set thistype.statsBoard[CST_BDCOL_KL][rowIndex].text = I2S(this.killCount)
-            set Farmer.statsBoard[CST_BDCOL_KL][erowIndex].text = I2S(this.killCount)
+            set StatsBoard.hb[CST_BDCOL_KL][bIndex].text = I2S(this.killCount)
+            set StatsBoard.fb[CST_BDCOL_KL][bIndex].text = I2S(this.killCount)
         endmethod
         
         /***********************************************************************
@@ -189,6 +178,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // Give hunter hero 3 skill points at beginning
             call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
             // Give items
+            // Update boards
+            set StatsBoard.hb[CST_BDCOL_PN][this.bIndex].icon = GetHeroAvatar(this.hero)
+            set StatsBoard.fb[CST_BDCOL_PN][this.bIndex].icon = GetHeroAvatar(this.hero)
         endmethod
         
         public method createRandomHero takes location l returns nothing
@@ -218,14 +210,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         public method setHero takes unit u returns nothing
-            if u != null then
-                if GetUnitTypeId(u) == CST_UTI_HunterHeroRandom then
-                    call this.createRandomHero(GetUnitLoc(u))
-                    call RemoveUnit(u)
-                else
-                    set this.hero = u
-                    call this.initHero()
-                endif
+        
+            if u == null then
+                call this.createRandomHero(null)
+            elseif GetUnitTypeId(u) == CST_UTI_HunterHeroRandom then
+                call this.createRandomHero(GetUnitLoc(u))
+                call RemoveUnit(u)
+            else
+                set this.hero = u
+                call this.initHero()
             endif
         endmethod
         
@@ -288,8 +281,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public method operator deaths= takes integer val returns nothing
             set .deathCount = val
             // fresh board
-            set thistype.statsBoard[CST_BDCOL_DE][rowIndex].text = I2S(.deathCount)
-            set Hunter.statsBoard[CST_BDCOL_KL][erowIndex].text = I2S(.deathCount)
+            set StatsBoard.hb[CST_BDCOL_DE][bIndex].text = I2S(this.deathCount)
+            set StatsBoard.fb[CST_BDCOL_DE][bIndex].text = I2S(this.deathCount)
+            
         endmethod
         
         public method operator animalCount takes nothing returns integer
@@ -840,7 +834,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     struct Hunter extends array
         // Staitic [Module]
         implement Force
-        implement StatsBoard
+        implement StatsBoardModule
         // Instance [Vars]
         implement HunterVars
         
@@ -898,12 +892,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public static method removeLeaving takes player p returns nothing
             local thistype h = thistype[GetPlayerId(p)]
 
+            /*
             if statsBoard != -1 then
                 set thistype.statsBoard[CST_BDCOL_ST][h.rowIndex].text = CST_STR_StatusHasLeft
                 set Farmer.statsBoard[CST_BDCOL_ST][h.erowIndex].text = CST_STR_StatusHasLeft
             else
+            
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
+            */
             // remove unit of this player
             // or share control/vision of leaving player with other playing players?
             call h.deleteInstance()
@@ -938,60 +935,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 exitwhen h.end
                 if h.hero == null then
                     debug call BJDebugMsg(GetPlayerName(h.get)+" hasn't selected hero")
-                    call h.createRandomHero(null)
+                    call h.setHero(null)
                 endif
                 set h= h.next
             endloop
-            return false
-        endmethod
-        
-        static method initStatsBoard takes nothing returns boolean
-            local thistype h = thistype[thistype.first]
-            local Farmer f = Farmer[Farmer.first]
-            local integer i = 2
-            call thistype.createStatsBoard()
-            call thistype.statsBoard.clear()
-            set statsBoard.title = CST_STR_HunterScoreBoard
-            set statsBoard.all.width = 0.02
-            call statsBoard.all.setDisplay(true, false)
-            set statsBoard[0][0].text = CST_STR_Hunter
-            set statsBoard[0][0].color = COLOR_ARGB_RED
-            set statsBoard[CST_BDCOL_PN][1].text = CST_STR_Player
-            set statsBoard[CST_BDCOL_KL][1].text = CST_STR_Kills
-            set statsBoard[CST_BDCOL_ST][1].text = CST_STR_Status
-            debug set statsBoard[CST_BDCOL_DF][1].text = "Row"
-            loop
-                exitwhen h.end
-                set h.rowIndex = i
-                set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(h.get)
-                set statsBoard[CST_BDCOL_KL][i].text = I2S(h.killCount)
-                set statsBoard[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
-                debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
-                set i = i + 1
-                set h= h.next
-                
-            endloop
-            
-            // Enemy Stats
-            set statsBoard[0][i].text   = CST_STR_EnemyInfo
-            set statsBoard[0][i].width  = 0.04
-            set i = i + 1
-            set statsBoard[CST_BDCOL_PN][i].text = CST_STR_Player
-            set statsBoard[CST_BDCOL_DE][i].text = CST_STR_Deaths
-            set statsBoard[CST_BDCOL_ST][i].text = CST_STR_Status
-            set i = i + 1
-            loop
-                exitwhen f.end
-                set f.erowIndex = i
-                set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(f.get)
-                set statsBoard[CST_BDCOL_DE][i].text = I2S(f.deathCount)
-                set statsBoard[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
-                debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
-                set i = i + 1
-                set f= f.next
-            endloop
-            set statsBoard.col[CST_BDCOL_PN].width = 0.04
-            set statsBoard.col[CST_BDCOL_ST].width = 0.03
             return false
         endmethod
         
@@ -1000,7 +947,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local thistype h = thistype[thistype.first]
             local integer i = 0
             // Init statistics board
-            call thistype.initStatsBoard()
+            // call thistype.initStatsBoard()
             
             loop
                 exitwhen h.end
@@ -1010,7 +957,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 
                 // Display stats board
                 debug call BJDebugMsg("Display board to hunter:" + GetPlayerName(h.get))
-                set statsBoard.visible[h.get] = true
+                //set statsBoard.visible[h.get] = true
                 set i = i + 1
                 set h = h.next
             endloop
@@ -1033,7 +980,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     struct Farmer extends array
         // Staitic [Module]
         implement Force
-        implement StatsBoard
+        implement StatsBoardModule
         // Instance [Vars]
         implement FarmerVars
         
@@ -1091,12 +1038,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public static method removeLeaving takes player p returns nothing
             local thistype f = thistype[GetPlayerId(p)]
 
+            /*
             if statsBoard != -1 then
                 set thistype.statsBoard[CST_BDCOL_ST][f.rowIndex].text = CST_STR_StatusHasLeft
                 set Hunter.statsBoard[CST_BDCOL_ST][f.erowIndex].text = CST_STR_StatusHasLeft
             else
+            
                 debug call BJDebugMsg("Stats Board is uninitialized")
             endif
+            */
             // remove unit of this player
             // or share control/vision of leaving player with other playing players?
              call f.deleteInstance()
@@ -1182,63 +1132,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 set f= f.next
             endloop
         endmethod
-        
-        static method initStatsBoard takes nothing returns boolean
-            local thistype f = thistype[thistype.first]
-            local Hunter h = Hunter[Hunter.first]
-            local integer i = 2
-            call thistype.createStatsBoard()
-            call thistype.statsBoard.clear()
-            set statsBoard.title = CST_STR_FarmerScoreBoard
-            set statsBoard.all.width = 0.02
-            call statsBoard.all.setDisplay(true, false)
-            set statsBoard[0][0].text = CST_STR_Farmer
-            set statsBoard[0][0].color = COLOR_ARGB_RED
-            set statsBoard[CST_BDCOL_PN][1].text = CST_STR_Player
-            set statsBoard[CST_BDCOL_DE][1].text = CST_STR_Deaths
-            set statsBoard[CST_BDCOL_ST][1].text = CST_STR_Status
-            debug set statsBoard[CST_BDCOL_DF][1].text = "Row"
-
-            loop
-                exitwhen f.end
-                set f.rowIndex = i
-                set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(f.get)
-                set statsBoard[CST_BDCOL_DE][i].text = I2S(f.deathCount)
-                set statsBoard[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
-                debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
-                set i = i + 1
-                set f= f.next
-            endloop
             
-            // Enemy Stats
-            set statsBoard[0][i].text   = CST_STR_EnemyInfo
-            set statsBoard[0][i].width  = 0.04
-            set i = i + 1
-            set statsBoard[CST_BDCOL_PN][i].text = CST_STR_Player
-            set statsBoard[CST_BDCOL_KL][i].text = CST_STR_Kills
-            set statsBoard[CST_BDCOL_ST][i].text = CST_STR_Status
-            set i = i + 1
-            loop
-                exitwhen h.end
-                set h.erowIndex = i
-                set statsBoard[CST_BDCOL_PN][i].text = GetPlayerName(h.get)
-                set statsBoard[CST_BDCOL_KL][i].text = I2S(h.killCount)
-                set statsBoard[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
-                debug set statsBoard[CST_BDCOL_DF][i].text = I2S(i)
-                set i = i + 1
-                set h= h.next
-            endloop
-            set statsBoard.col[CST_BDCOL_PN].width = 0.04
-            set statsBoard.col[CST_BDCOL_ST].width = 0.03
-            return false
-        endmethod
-        
         // On game start
         private static method init takes nothing returns boolean
             local thistype f = thistype[thistype.first]
             local integer i = 0
             // Init statistics board
-            call thistype.initStatsBoard()
+            // call thistype.initStatsBoard()
             loop
                 exitwhen f.end
                 // Init instance vars
@@ -1249,7 +1149,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 
                 // Display stats board
                 debug call BJDebugMsg("Display board to farmer:" + GetPlayerName(f.get))
-                set statsBoard.visible[f.get] = true
+                // set statsBoard.visible[f.get] = true
                 
                 // Test
                 /*

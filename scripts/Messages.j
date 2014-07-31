@@ -20,6 +20,7 @@ globals
     constant string CST_STR_11ProfMVPs= "大腿"
     
     // *** Title
+    constant string CST_STR_TitleDiors          = "吊丝一枚"
     constant string CST_STR_TitleMillionaire    = "百万富翁"
     constant string CST_STR_TitleTowerDestroyer = "艹塔狂魔"
     constant string CST_STR_TitleTowerBuilder   = "造塔狂魔"
