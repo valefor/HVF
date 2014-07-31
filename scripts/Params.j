@@ -146,6 +146,9 @@ globals
     constant integer CST_BDCOL_KL=1   // Kills
     constant integer CST_BDCOL_DE=1   // Deaths
     constant integer CST_BDCOL_ST=2   // Status
+    constant integer CST_BDCOL_TT=3   // Title
+    constant integer CST_BDCOL_MD=4   // Status
+    constant integer CST_BDCOL_ST=5   // Status
     constant integer CST_BDCOL_DF=9   // DEBUG FLAG
     
     // *** Message display duration

@@ -335,8 +335,7 @@ struct EventManager
     /***************************************************************************
     * Do clean-up work for leaving player
     ***************************************************************************/
-    private static method onPlayerLeave takes nothing returns boolean
-        local player pLeave = GetTriggerPlayer()
+    public static method removeLeavingPlayer takes player pLeave returns boolean
         local boolean bIsHunter = Hunter.contain(pLeave)
         
         // remove player from group
@@ -357,6 +356,11 @@ struct EventManager
         endif
         
         set pLeave = null
+        return false
+    endmethod
+    
+    private static method onPlayerLeave takes nothing returns boolean
+        call thistype.removeLeavingPlayer(GetTriggerPlayer())
         return false
     endmethod
     

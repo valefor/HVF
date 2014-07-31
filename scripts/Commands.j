@@ -46,6 +46,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
 	// *** Super Commands
 	private struct KickPlayerCmd extends array
         readonly static constant string CHAT_COMMAND = "kick"
+        static integer quota = 2
         
         static method onCommand takes nothing returns nothing
             local string prompt = MSG_KickPlayerClaim
@@ -53,7 +54,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
             local Hunter h = Hunter[Hunter.first]
             local Farmer f = Farmer[Farmer.first]
             debug call BJDebugMsg("OnCommand('-kick') callback")
-            if GetTriggerPlayer() != GetHostPlayer() then
+            if GetTriggerPlayer() != GetHostPlayer() and quota < 0 then
                 return
             endif
             
@@ -87,6 +88,8 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                     call BJDebugMsg(COLOR_RED + GetPlayerName(Player(playerNo-1)) + "|r " + MSG_HasBeenKicked)
                     //call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hello "+ ChatCommand.eventData)
                     call CustomDefeatBJ(Player(playerNo-1), MSG_YouHaveBeenKicked)
+                    call EventManager.removeLeavingPlayer(Player(playerNo-1))
+                    set thistype.quota = thistype.quota - 1
                 else 
                     call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantKickYourself)
                 endif

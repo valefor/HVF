@@ -6,6 +6,25 @@ library StatsManager initializer init /* v0.0.1 by Xandria
 *   Statistic Manager: Manage statistics of player
 *******************************************************************************/
 
+globals
+    
+    constant string MEDALICON_Soldier   = "BTNMedalSoldier.blp"
+    constant string MEDALICON_Rider     = "BTNMedalRider.blp"
+    constant string MEDALICON_Guard     = "BTNMedalGuard.blp"
+    constant string MEDALICON_Ranger    = "BTNMedalRanger.blp"
+    constant string MEDALICON_General   = "BTNMedalGeneral.blp"
+    constant string MEDALICON_Captain   = "BTNMedalCaptain.blp"
+    constant string MEDALICON_Marshal   = "BTNMedalMarshal.blp"
+    
+    constant string EMBLEMICON_Lord     = "BTNEmblemLord.blp"
+    constant string EMBLEMICON_Wizard   = "BTNEmblemWizard.blp"
+    constant string EMBLEMICON_Witchcraft = "BTNEmblemWitchcraft.blp"
+    constant string EMBLEMICON_Warlock  = "BTNEmblemWarlock.blp"
+    constant string EMBLEMICON_Mage     = "BTNEmblemMage.blp"
+    constant string EMBLEMICON_Curse    = "BTNEmblemCurse.blp"
+    constant string EMBLEMICON_Sage     = "BTNEmblemSage.blp"
+endglobals
+
 // This struct is used for 11 platform record
 // Note: pls extends from array and implements Alloc, vJass compiler won't
 // manage allocation/deallocation for us, we do it by ourself
@@ -120,6 +139,8 @@ struct StatsBoard extends array
         set bd.title = CST_STR_ScoreBoard
         // set statsBoard.all.width = 0.02
         call statsBoard.all.setDisplay(true, true)
+        set statsBoard[0][0].text = CST_STR_Hunter
+        set statsBoard[0][0].color = COLOR_ARGB_RED
     endmethod
 endstruct
 
