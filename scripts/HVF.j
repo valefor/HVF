@@ -22,7 +22,94 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         implement DualLinkedList
         static force fc
         
+        boolean bLeave // Leave game?
+        public method delegateByOthers takes boolean shareControl nothing returns nothing
+            local thistype role = thistype[thistype.first]
+            local integer gold = GetPlayerState(this.get,PLAYER_STATE_RESOURCE_GOLD)
+            local integer lumber = GetPlayerState(this.get,PLAYER_STATE_RESOURCE_LUMBER)
+            local integer goldToD = R2I(gold/thistype.humanPlayerNumber)
+            local integer lumberToD = R2I(lumber/thistype.humanPlayerNumber)
+            loop
+                exitwhen role.end
+                if not role.leave and GetPlayerController(role.get) == MAP_CONTROL_USER then
+                    call AdjustPlayerStateBJ(0-gold, this.get, PLAYER_STATE_RESOURCE_GOLD)
+                    call AdjustPlayerStateBJ(goldToD, role.get, PLAYER_STATE_RESOURCE_GOLD)
+                    call AdjustPlayerStateBJ(0-lumber, this.get, PLAYER_STATE_RESOURCE_LUMBER)
+                    call AdjustPlayerStateBJ(lumberToD, role.get, PLAYER_STATE_RESOURCE_LUMBER)
+                    if shareControl then
+                        call Ally( this.get, role.get, ALLIANCE_ALLIED_ADVUNITS )
+                    endif
+                endif
+                set role= role.next
+            endloop
+        endmethod
+
+        public method operator leave takes nothing returns boolean
+            return .bLeave
+        endmethod
+        
+        public method operator leave= takes boolean val returns nothing
+            set .bLeave = val
+            if not .bLeave then
+                return
+            endif
+            // fresh board
+            set StatsBoard.hb[CST_BDCOL_ST][.bIndex].text = CST_STR_StatusHasLeft
+            set StatsBoard.fb[CST_BDCOL_ST][.bIndex].text = CST_STR_StatusHasLeft
+            // share control of this leaving player with other players who are in-game
+            call .delegateByOthers(true)
+        endmethod
+        
         // Static Methods
+        public static method operator isAllLeave takes nothing returns boolean
+            local thistype role = thistype[thistype.first]
+            loop
+                exitwhen role.end
+                if not role.leave then
+                    return false
+                endif
+                set role= role.next
+            endloop
+            return true
+        endmethod
+        
+        public static method operator humanPlayerNumber takes nothing returns integer
+            local thistype role = thistype[thistype.first]
+            local count = 0
+            loop
+                exitwhen role.end
+                if GetPlayerController(role.get) == MAP_CONTROL_USER then
+                    set count = count + 1
+                endif
+                set role= role.next
+            endloop
+            return count
+        endmethod
+        
+        public static method markAsLeave takes player p returns nothing
+            local thistype r = thistype[GetPlayerId(p)]
+            set r.leave = false
+        endmethod
+        
+        // If there is a human player in this group, we should delegate all robots
+        // players to human players
+        public static method delegateAllRobots takes nothing returns nothing
+            local thistype role = thistype[thistype.first]
+            
+            if not thistype.humanPlayerNumber > 0 then
+                return
+            endif
+            
+            loop
+                exitwhen role.end
+                if GetPlayerController(role.get) == MAP_CONTROL_COMPUTER then
+                    // Mark this computer as leave and delege it to other human player
+                    set role.leave = true
+                endif
+                set role= role.next
+            endloop
+        endmethod
+        
         public static method add takes player p returns nothing
             local integer playerId = GetPlayerId(p)
             set thistype.count_p = thistype.count_p + 1
@@ -105,7 +192,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // specific attributes
         integer killCount
         boolean isRandomHero
-        
+
         // Instance method
         /***********************************************************************
         * Operators
@@ -117,8 +204,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public method operator kills= takes integer val returns nothing
             set this.killCount = val
             // fresh board
-            set StatsBoard.hb[CST_BDCOL_KL][bIndex].text = I2S(this.killCount)
-            set StatsBoard.fb[CST_BDCOL_KL][bIndex].text = I2S(this.killCount)
+            set StatsBoard.hb[CST_BDCOL_KL][.bIndex].text = I2S(this.killCount)
+            set StatsBoard.fb[CST_BDCOL_KL][.bIndex].text = I2S(this.killCount)
         endmethod
         
         /***********************************************************************
@@ -179,8 +266,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
             // Give items
             // Update boards
-            set StatsBoard.hb[CST_BDCOL_PN][this.bIndex].icon = GetHeroAvatar(this.hero)
-            set StatsBoard.fb[CST_BDCOL_PN][this.bIndex].icon = GetHeroAvatar(this.hero)
+            set StatsBoard.hb[CST_BDCOL_PN][.bIndex].icon = GetHeroAvatar(this.hero)
+            set StatsBoard.fb[CST_BDCOL_PN][.bIndex].icon = GetHeroAvatar(this.hero)
         endmethod
         
         public method createRandomHero takes location l returns nothing
@@ -230,6 +317,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set this.killCount = 0
             set this.hero = null
             set this.isRandomHero = false
+            set this.bLeave = false
             
             call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, this.get)
             call AdjustPlayerStateBJ(CST_INT_HunterBeginGold, this.get, PLAYER_STATE_RESOURCE_GOLD)
@@ -281,8 +369,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public method operator deaths= takes integer val returns nothing
             set .deathCount = val
             // fresh board
-            set StatsBoard.hb[CST_BDCOL_DE][bIndex].text = I2S(this.deathCount)
-            set StatsBoard.fb[CST_BDCOL_DE][bIndex].text = I2S(this.deathCount)
+            set StatsBoard.hb[CST_BDCOL_DE][.bIndex].text = I2S(this.deathCount)
+            set StatsBoard.fb[CST_BDCOL_DE][.bIndex].text = I2S(this.deathCount)
             
         endmethod
         
@@ -803,6 +891,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set deathCount      = 0
             set lifes           = CST_INT_MaxLifePoints
             set role            = CST_INT_FarmerRoleInvalid
+            set .bLeave         = false
             
             // Bind predefined hero to farmer
             // call iterateUnits(Filter(function thistype.filterBindHero))
@@ -851,6 +940,21 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         private method deleteInstance takes nothing returns nothing
             call this.deleteHunterVars()
+        endmethod
+        
+        private method commitStats takes boolean win returns nothing
+           
+            set this.sr.HunterPlays = this.sr.HunterPlays + 1
+            
+            if win then
+                set this.sr.Wins = this.sr.Wins + 1
+                set this.sr.HunterWins = this.sr.HunterWins + 1
+            else
+            
+            endif
+            
+            // Last commit the stats record
+            call this.sr.save(this.get)
         endmethod
         
         private method commitStats takes boolean win returns nothing
@@ -945,9 +1049,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // On game start
         private static method init takes nothing returns boolean
             local thistype h = thistype[thistype.first]
-            local integer i = 0
-            // Init statistics board
-            // call thistype.initStatsBoard()
             
             loop
                 exitwhen h.end
@@ -957,11 +1058,10 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 
                 // Display stats board
                 debug call BJDebugMsg("Display board to hunter:" + GetPlayerName(h.get))
-                //set statsBoard.visible[h.get] = true
-                set i = i + 1
                 set h = h.next
             endloop
-            
+            // Delegate computer player
+            call thistype.delegateAllRobots()
             return false
         endmethod
 
@@ -1049,7 +1149,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             */
             // remove unit of this player
             // or share control/vision of leaving player with other playing players?
-             call f.deleteInstance()
+            call f.deleteInstance()
             call thistype.remove(p)
         endmethod
 
@@ -1161,6 +1261,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 */
                 set f = f.next
             endloop
+            
+            // Delegate computer player
+            call thistype.delegateAllRobots()
             return false
         endmethod
         

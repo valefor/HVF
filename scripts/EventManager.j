@@ -335,23 +335,23 @@ struct EventManager
     /***************************************************************************
     * Do clean-up work for leaving player
     ***************************************************************************/
-    public static method removeLeavingPlayer takes player pLeave returns boolean
+    public static method markLeavingPlayer takes player pLeave returns boolean
         local boolean bIsHunter = Hunter.contain(pLeave)
         
         // remove player from group
         if bIsHunter then
             debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Hunter")
-            call Hunter.removeLeaving(pLeave)
+            call Hunter.markAsLeave(pLeave)
         else
             debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmer")
-            call Farmer.removeLeaving(pLeave)
+            call Farmer.markAsLeave(pLeave)
         endif
 
-        if Hunter.count == 0 then
+        if Hunter.isAllLeave then
             call Farmer.win()
         endif
         
-        if Farmer.count == 0 then
+        if Farmer.isAllLeave then
             call Hunter.win()
         endif
         
@@ -360,7 +360,7 @@ struct EventManager
     endmethod
     
     private static method onPlayerLeave takes nothing returns boolean
-        call thistype.removeLeavingPlayer(GetTriggerPlayer())
+        call thistype.markLeavingPlayer(GetTriggerPlayer())
         return false
     endmethod
     

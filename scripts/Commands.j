@@ -88,7 +88,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
                     call BJDebugMsg(COLOR_RED + GetPlayerName(Player(playerNo-1)) + "|r " + MSG_HasBeenKicked)
                     //call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,60,"Hello "+ ChatCommand.eventData)
                     call CustomDefeatBJ(Player(playerNo-1), MSG_YouHaveBeenKicked)
-                    call EventManager.removeLeavingPlayer(Player(playerNo-1))
+                    call EventManager.markLeavingPlayer(Player(playerNo-1))
                     set thistype.quota = thistype.quota - 1
                 else 
                     call DisplayTimedTextToPlayer(ChatCommand.eventPlayer,0,0,CST_MSGDUR_Normal, MSG_CantKickYourself)

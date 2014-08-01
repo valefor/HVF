@@ -218,6 +218,7 @@ struct StatsBoard extends array
             set fb[CST_BDCOL_RK][i].text = CST_STR_FRankLord
             set fb[CST_BDCOL_RK][i].icon = ICON_EMBLEM_Lord
             call fb[CST_BDCOL_RK][i].setDisplay(true, true)
+            set fb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
             // Hunter
             set hb[CST_BDCOL_PN][i].text = GetPlayerName(f.get)
             set hb[CST_BDCOL_PN][i].icon = ICON_Farmer
@@ -233,7 +234,7 @@ struct StatsBoard extends array
             set hb[CST_BDCOL_RK][i].text = CST_STR_FRankLord
             set hb[CST_BDCOL_RK][i].icon = ICON_EMBLEM_Lord
             call hb[CST_BDCOL_RK][i].setDisplay(true, true)
-            
+            set hb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
             set i = i + 1
             set f = f.next
         endloop
@@ -261,6 +262,7 @@ struct StatsBoard extends array
             set fb[CST_BDCOL_RK][i].text = CST_STR_HRankSoldier
             set fb[CST_BDCOL_RK][i].icon = ICON_MEDAL_Soldier
             call fb[CST_BDCOL_RK][i].setDisplay(true, true)
+            set fb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
             // Hunter
             set hb[CST_BDCOL_PN][i].text = GetPlayerName(h.get)
             set hb[CST_BDCOL_PN][i].icon = ICON_Empty
@@ -276,6 +278,7 @@ struct StatsBoard extends array
             set hb[CST_BDCOL_RK][i].text = CST_STR_HRankSoldier
             set hb[CST_BDCOL_RK][i].icon = ICON_MEDAL_Soldier
             call hb[CST_BDCOL_RK][i].setDisplay(true, true)
+            set hb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
             set i = i + 1
             set h = h.next
         endloop
@@ -286,10 +289,12 @@ struct StatsBoard extends array
         set hb.col[CST_BDCOL_PN].width = 0.07
         set hb.col[CST_BDCOL_TT].width = 0.07
         set hb.col[CST_BDCOL_RK].width = 0.07
+        set hb.col[CST_BDCOL_ST].width = 0.04
         
         set fb.col[CST_BDCOL_PN].width = 0.07
         set fb.col[CST_BDCOL_TT].width = 0.07
         set fb.col[CST_BDCOL_RK].width = 0.07
+        set fb.col[CST_BDCOL_ST].width = 0.04
         
         // Set column color
         set hb.col[CST_BDCOL_KL].color = COLOR_ARGB_RED
@@ -324,8 +329,33 @@ struct StatsBoard extends array
         endloop
     endmethod
     
+    // Some stats on the board need to be refreshed timely 
+    private static method refresh takes nothing returns boolean
+        local Farmer f = Farmer[Farmer.first]    
+        local Hunter h = Hunter[Hunter.first]
+
+        loop
+            exitwhen f.end
+            // Not the PLAYER_STATE_GOLD_GATHERED/PLAYER_STATE_LUMBER_GATHERED
+            set fb[CST_BDCOL_GD][f.bIndex].text = GetPlayerState(f.get,PLAYER_STATE_RESOURCE_GOLD)
+            set fb[CST_BDCOL_LB][f.bIndex].text = GetPlayerState(f.get,PLAYER_STATE_RESOURCE_LUMBER)
+            set f = f.next
+        endloop
+        
+        loop
+            exitwhen h.end
+            set hb[CST_BDCOL_GD][h.bIndex].text = GetPlayerState(h.get,PLAYER_STATE_RESOURCE_GOLD)
+            set hb[CST_BDCOL_LB][h.bIndex].text = GetPlayerState(h.get,PLAYER_STATE_RESOURCE_LUMBER)
+            set h = h.next
+        endloop
+        return false
+    endmethod
+    
     private static method onInit takes nothing returns nothing
         call TimerManager.onGameStart.register(Filter(function thistype.createAndInit))
+        
+        // Refresh the board every 10 seconds
+        call TimerManager.pt10s.register(Filter(function thistype.refresh))
     endmethod
 endstruct
 

@@ -40,8 +40,8 @@ globals
     constant string CST_STR_Kills= "击杀"
     constant string CST_STR_Deaths= "死亡"
     constant string CST_STR_Status= "在线状态"
-    constant string CST_STR_StatusPlaying= "正在游戏"
-    constant string CST_STR_StatusHasLeft= "已经离开"
+    constant string CST_STR_StatusPlaying= "|cFF00FF00-------|r"
+    constant string CST_STR_StatusHasLeft= "|cFFFF0000---x---|r"
     constant string CST_STR_EnemyInfo= "敌方情报"
     
     constant string CST_STR_GameInfo= "游戏信息"
