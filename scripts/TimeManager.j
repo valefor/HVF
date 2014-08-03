@@ -92,6 +92,10 @@ In multiplayer however, this trigger should work.
             set tp.count = -1
         endmethod
         
+        static method getPlayedTime takes nothing returns integer
+            return ptTickCount
+        endmethod
+        
         private static method onPtExpired takes nothing returns nothing
             set ptTickCount = ptTickCount + 1
             

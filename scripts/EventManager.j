@@ -148,6 +148,7 @@ struct EventManager
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
         local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
+        local Farmer f
         
         if IsUnitHunterHero(dyingUnit) or GetUnitTypeId(dyingUnit) == CST_UTI_HunterHeroSkeleton then
             // Hunter hero was killed, give a giant skeleton as hunter hero
@@ -160,6 +161,8 @@ struct EventManager
             call h.reviveHero()
         endif
         if Farmer.contain(GetOwningPlayer(killingUnit)) then
+            set f = Farmer[GetPlayerId(GetOwningPlayer(killingUnit))]
+            set f.killCount = f.killCount + 1
         endif
         set dyingUnit = null
         set killingUnit = null
@@ -339,11 +342,12 @@ struct EventManager
         local boolean bIsHunter = Hunter.contain(pLeave)
         
         // remove player from group
+        call ShowMsgToAll(ARGB.fromPlayer(pLeave).str(GetPlayerName(pLeave)) + ARGB(COLOR_ARGB_RED).str(CST_STR_HasLeftGame))
         if bIsHunter then
-            debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Hunter")
+            call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Hunter")
             call Hunter.markAsLeave(pLeave)
         else
-            debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmer")
+            call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmer")
             call Farmer.markAsLeave(pLeave)
         endif
 
@@ -431,6 +435,7 @@ struct EventManager
         
         loop
             exitwhen h.end
+            call TriggerRegisterPlayerUnitEvent(trigSelectHero, h.get, EVENT_PLAYER_UNIT_SELL, null)
             call TriggerRegisterPlayerUnitEvent(trigHunterUnitDeath, h.get, EVENT_PLAYER_UNIT_DEATH, Filter(function thistype.filterHunterUnitDeath))
             call TriggerRegisterPlayerUnitEvent(trigPlantTree, h.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
             set h= h.next

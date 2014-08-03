@@ -8,6 +8,46 @@ library StatsManager initializer init /* v0.0.1 by Xandria
 
 globals     
 
+    // *** Title
+    constant string CST_STR_TitleDiors          = "吊丝一枚"
+    constant string CST_STR_TitleMillionaire    = "百万富翁"
+    constant string CST_STR_TitleTowerDestroyer = "艹塔狂魔"
+    constant string CST_STR_TitleTowerBuilder   = "造塔狂魔"
+    constant string CST_STR_TitleSlaughter      = "屠夫"
+    constant string CST_STR_TitleSafer          = "不破金身"
+    
+    // *** Merit Rank 
+    // Hunter
+    constant string CST_STR_HRankNeophyte= "新手猎人"
+    constant string CST_STR_HRankSoldier = "战士"
+    constant string CST_STR_HRankRider   = "骑士"
+    constant string CST_STR_HRankGuard   = "禁卫"
+    constant string CST_STR_HRankRanger  = "游侠"
+    constant string CST_STR_HRankGeneral = "将军"
+    constant string CST_STR_HRankCaptain = "统帅"
+    constant string CST_STR_HRankMarshal = "元帅"
+    
+    // Hunter Elite
+    constant string CST_STR_HRankEliteSoldier= "精英战士"
+    constant string CST_STR_HRankEliteRider  = "精英骑士"
+    constant string CST_STR_HRankEliteGuard  = "精英禁卫"
+    constant string CST_STR_HRankEliteRanger = "精英游侠"
+    constant string CST_STR_HRankGranGeneral = "大将军"
+    constant string CST_STR_HRankGranCaptain = "大统帅"
+    constant string CST_STR_HRankGranMarshal = "大元帅"
+    
+    // Farmer
+    constant string CST_STR_FRankNeophyte   = "新手农民"
+    constant string CST_STR_FRankLord       = "地主"
+    constant string CST_STR_FRankWizard     = "巫师"
+    constant string CST_STR_FRankWitchcraft = "妖术师"
+    constant string CST_STR_FRankWarlock    = "术士"
+    constant string CST_STR_FRankMage       = "法师"
+    constant string CST_STR_FRankCurse      = "禁咒法师"
+    constant string CST_STR_FRankSage       = "贤者"
+    
+    // Farmer Elite
+    
     // *** Board Icons
     // Common
     constant string ICON_Empty = "UI\\Widgets\\Console\\Undead\\undead-inventory-slotfiller.blp"
@@ -49,6 +89,30 @@ globals
     constant integer CST_BDCOL_ST=8   // Status
     constant integer CST_BDCOL_DF=9   // DEBUG FLAG
     
+    // Rank Level
+    constant integer CST_RL_Soldier =1
+    constant integer CST_RL_Rider   =2
+    constant integer CST_RL_Guard   =3
+    constant integer CST_RL_Ranger  =4
+    constant integer CST_RL_General =5
+    constant integer CST_RL_Captain =6
+    constant integer CST_RL_Marshal =7
+    
+    // Rank Level Score
+    constant integer CST_RLS_1      =100
+    constant integer CST_RLS_2      =500
+    constant integer CST_RLS_3      =1000
+    constant integer CST_RLS_4      =2000
+    constant integer CST_RLS_5      =4000
+    constant integer CST_RLS_6      =7000
+    constant integer CST_RLS_7      =10000
+    
+    // The Score Magnification
+    constant real   CST_MAG_1      =0.25
+    constant real   CST_MAG_2      =0.75
+    constant real   CST_MAG_3      =1.25
+    constant real   CST_MAG_4      =1.50
+    
 endglobals
 
 // This struct is used for 11 platform record
@@ -73,14 +137,16 @@ struct StatsRecord extends array
     integer FarmerPlays
     integer FarmerWins
     
+    // Put vars which should not be saved to 11 from here
     integer oldFlees
+    integer oldScore
     
     public static method create takes player p returns thistype
         local thistype this = thistype.allocate()
         
-        set .Rounds = YDWERecordGetI(p, CST_STR_11ProfRounds) + 1
+        set .Rounds = YDWERecordGetI(p, CST_STR_11ProfRounds)
         set .oldFlees= YDWERecordGetI(p, CST_STR_11ProfFlees)
-        set .Flees  = oldFlees + 1
+        set .Flees  = oldFlees
         
         set .WinRate     = YDWERecordGetI(p, CST_STR_11ProfWinRate)     
         set .HunterScore = YDWERecordGetI(p, CST_STR_11ProfHunterScore)
@@ -95,7 +161,7 @@ struct StatsRecord extends array
         set .FarmerPlays = YDWERecordGetI(p, CST_STR_11ProfFarmerPlays)
         set .FarmerWins  = YDWERecordGetI(p, CST_STR_11ProfFarmerWins)
         
-        call this.initSave(p)
+        // call this.initSave(p)
         
         return this
     endmethod
@@ -109,7 +175,7 @@ struct StatsRecord extends array
     
     // Update records
     public method update takes nothing returns nothing
-        set .WinRate = R2I(.Wins/.Rounds)
+        set .WinRate = R2I( .Wins/.Rounds )
     endmethod
     
     // Normal commit
@@ -215,8 +281,8 @@ struct StatsBoard extends array
             set fb[CST_BDCOL_TT][i].text = CST_STR_TitleDiors
             set fb[CST_BDCOL_TT][i].icon = ICON_TITLE_Diors
             call fb[CST_BDCOL_TT][i].setDisplay(true, true)
-            set fb[CST_BDCOL_RK][i].text = CST_STR_FRankLord
-            set fb[CST_BDCOL_RK][i].icon = ICON_EMBLEM_Lord
+            set fb[CST_BDCOL_RK][i].text = CST_STR_FRankNeophyte
+            set fb[CST_BDCOL_RK][i].icon = ICON_Empty
             call fb[CST_BDCOL_RK][i].setDisplay(true, true)
             set fb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
             // Hunter
@@ -231,8 +297,8 @@ struct StatsBoard extends array
             set hb[CST_BDCOL_TT][i].text = CST_STR_TitleDiors
             set hb[CST_BDCOL_TT][i].icon = ICON_TITLE_Diors
             call hb[CST_BDCOL_TT][i].setDisplay(true, true)
-            set hb[CST_BDCOL_RK][i].text = CST_STR_FRankLord
-            set hb[CST_BDCOL_RK][i].icon = ICON_EMBLEM_Lord
+            set hb[CST_BDCOL_RK][i].text = CST_STR_FRankNeophyte
+            set hb[CST_BDCOL_RK][i].icon = ICON_Empty
             call hb[CST_BDCOL_RK][i].setDisplay(true, true)
             set hb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
             set i = i + 1
@@ -259,8 +325,8 @@ struct StatsBoard extends array
             set fb[CST_BDCOL_TT][i].text = CST_STR_TitleDiors
             set fb[CST_BDCOL_TT][i].icon = ICON_TITLE_Diors
             call fb[CST_BDCOL_TT][i].setDisplay(true, true)
-            set fb[CST_BDCOL_RK][i].text = CST_STR_HRankSoldier
-            set fb[CST_BDCOL_RK][i].icon = ICON_MEDAL_Soldier
+            set fb[CST_BDCOL_RK][i].text = CST_STR_HRankNeophyte
+            set fb[CST_BDCOL_RK][i].icon = ICON_Empty
             call fb[CST_BDCOL_RK][i].setDisplay(true, true)
             set fb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
             // Hunter
@@ -275,8 +341,8 @@ struct StatsBoard extends array
             set hb[CST_BDCOL_TT][i].text = CST_STR_TitleDiors
             set hb[CST_BDCOL_TT][i].icon = ICON_TITLE_Diors
             call hb[CST_BDCOL_TT][i].setDisplay(true, true)
-            set hb[CST_BDCOL_RK][i].text = CST_STR_HRankSoldier
-            set hb[CST_BDCOL_RK][i].icon = ICON_MEDAL_Soldier
+            set hb[CST_BDCOL_RK][i].text = CST_STR_HRankNeophyte
+            set hb[CST_BDCOL_RK][i].icon = ICON_Empty
             call hb[CST_BDCOL_RK][i].setDisplay(true, true)
             set hb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
             set i = i + 1
@@ -294,7 +360,7 @@ struct StatsBoard extends array
         set fb.col[CST_BDCOL_PN].width = 0.07
         set fb.col[CST_BDCOL_TT].width = 0.07
         set fb.col[CST_BDCOL_RK].width = 0.07
-        set fb.col[CST_BDCOL_ST].width = 0.04
+        set fb.col[CST_BDCOL_ST].width = 0.03
         
         // Set column color
         set hb.col[CST_BDCOL_KL].color = COLOR_ARGB_RED
@@ -314,6 +380,16 @@ struct StatsBoard extends array
         set fb.col[CST_BDCOL_RK].color = COLOR_ARGB_ORANGE
         
         // Display the board
+        call thistype.redisplay()
+    endmethod
+    
+    // Hide All boards and show this board again 
+    static method redisplay takes nothing returns nothing
+        local Farmer f = Farmer[Farmer.first]    
+        local Hunter h = Hunter[Hunter.first]
+        
+        call MultiboardSuppressDisplay(true)
+        call MultiboardSuppressDisplay(false)
         set h = Hunter[Hunter.first]
         set f = Farmer[Farmer.first] 
         loop
@@ -330,22 +406,22 @@ struct StatsBoard extends array
     endmethod
     
     // Some stats on the board need to be refreshed timely 
-    private static method refresh takes nothing returns boolean
+    static method refresh takes nothing returns boolean
         local Farmer f = Farmer[Farmer.first]    
         local Hunter h = Hunter[Hunter.first]
 
         loop
             exitwhen f.end
             // Not the PLAYER_STATE_GOLD_GATHERED/PLAYER_STATE_LUMBER_GATHERED
-            set fb[CST_BDCOL_GD][f.bIndex].text = GetPlayerState(f.get,PLAYER_STATE_RESOURCE_GOLD)
-            set fb[CST_BDCOL_LB][f.bIndex].text = GetPlayerState(f.get,PLAYER_STATE_RESOURCE_LUMBER)
+            set fb[CST_BDCOL_GD][f.bIndex].text = I2S( GetPlayerState(f.get,PLAYER_STATE_RESOURCE_GOLD) )
+            set fb[CST_BDCOL_LB][f.bIndex].text = I2S( GetPlayerState(f.get,PLAYER_STATE_RESOURCE_LUMBER) )
             set f = f.next
         endloop
         
         loop
             exitwhen h.end
-            set hb[CST_BDCOL_GD][h.bIndex].text = GetPlayerState(h.get,PLAYER_STATE_RESOURCE_GOLD)
-            set hb[CST_BDCOL_LB][h.bIndex].text = GetPlayerState(h.get,PLAYER_STATE_RESOURCE_LUMBER)
+            set hb[CST_BDCOL_GD][h.bIndex].text = I2S( GetPlayerState(h.get,PLAYER_STATE_RESOURCE_GOLD) )
+            set hb[CST_BDCOL_LB][h.bIndex].text = I2S( GetPlayerState(h.get,PLAYER_STATE_RESOURCE_LUMBER) )
             set h = h.next
         endloop
         return false
@@ -361,8 +437,60 @@ endstruct
 
 struct StatsManager extends array   
 
+    static real scoreMag
+    
     public static method isIn11Platform takes nothing returns boolean
         return YDWEPlatformIsInPlatform()
+    endmethod
+    
+    // Evaluate the rank level of given score
+    static method evalRankLevel takes integer score returns integer
+        if score < CST_RLS_1 then
+            return 0
+        elseif score < CST_RLS_2 then
+            return 1
+        elseif score < CST_RLS_3 then
+            return 2
+        elseif score < CST_RLS_4 then
+            return 3
+        elseif score < CST_RLS_5 then
+            return 4
+        elseif score < CST_RLS_6 then
+            return 5
+        elseif score < CST_RLS_7 then
+            return 6
+        else
+            return 7
+        endif
+    endmethod
+    
+    static method isElite takes StatsRecord sr returns boolean
+        return true
+    endmethod
+    
+    // Set magnification from player/role numbers
+    static method setMag takes nothing returns nothing
+        local integer fn = Farmer.humanPlayerNumber    
+        local integer hn = Hunter.humanPlayerNumber
+        local real mag = CST_MAG_4
+
+        if fn < 3 then
+            set mag = CST_MAG_1
+        elseif fn < 5 then
+            set mag = CST_MAG_2
+        elseif fn < 7 then
+            set mag = CST_MAG_3
+        endif
+        
+        if hn < 2 then
+            set mag = CST_MAG_1
+        elseif hn < 3 then
+            set mag = CST_MAG_2
+        elseif hn < 4 then
+            set mag = CST_MAG_3
+        endif
+        
+        set thistype.scoreMag = mag
     endmethod
     
     static method updateGlobalStats takes nothing returns boolean
@@ -370,6 +498,22 @@ struct StatsManager extends array
         local Hunter h = Hunter[Hunter.first]
 
         // Calculate who is the MVP
+        loop
+            exitwhen f.end
+            set f = f.next
+        endloop
+        
+        loop
+            exitwhen h.end
+            set h = h.next
+        endloop
+        return false
+    endmethod
+    
+    private static method updateScore takes nothing returns boolean
+        local Farmer f = Farmer[Farmer.first]    
+        local Hunter h = Hunter[Hunter.first]
+
         loop
             exitwhen f.end
             set f = f.next
@@ -390,12 +534,20 @@ struct StatsManager extends array
 
         loop
             exitwhen f.end
+            set f.sr.Rounds = f.sr.Rounds + 1
+            set f.sr.Flees = f.sr.Flees + 1
+            set f.sr.FarmerPlays = f.sr.FarmerPlays + 1
+            set f.sr.FarmerScore = f.sr.FarmerScore + 2
             call f.sr.save(f.get)
             set f = f.next
         endloop
         
         loop
             exitwhen h.end
+            set h.sr.Rounds = f.sr.Rounds + 1
+            set h.sr.Flees = f.sr.Flees + 1
+            set h.sr.HunterPlays = h.sr.HunterPlays + 1
+            set h.sr.HunterScore = h.sr.HunterScore + 2
             call h.sr.save(h.get)
             set h = h.next
         endloop
@@ -409,6 +561,12 @@ struct StatsManager extends array
         local Farmer f = Farmer[Farmer.first]    
         local Hunter h = Hunter[Hunter.first]
 
+        // Here set the magnification
+        call thistype.setMag()
+        
+        // From now, update scores every minitue
+        call TimerManager.pt60s.register(Filter(function thistype.updateScore))
+        
         loop
             exitwhen f.end
             set f.sr.Flees = f.sr.oldFlees

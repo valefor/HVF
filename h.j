@@ -12,6 +12,11 @@
 //! import "scripts\lib\ORDERID.j"
 //! import "scripts\lib\RecipeSYS.j"
 
+// Spell Lib
+//! import "scripts\lib\xe\xebasic.j"
+//! import "scripts\lib\xe\xecast.j"
+//! import "scripts\lib\xe\xedummy.j"
+
 // Plugin
 //! import "scripts\lib\ChatCommand.j"
 //! import "scripts\lib\Dialog.j"

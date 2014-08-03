@@ -25,7 +25,6 @@ globals
     // Common str
     constant string CST_STR_Version= "当前版本:"
     constant string CST_STR_VersionTag= "v"
-    
     constant string CST_STR_Level= "等级"
     constant string CST_STR_Number= "玩家人数："
     constant string CST_STR_Hunter= "猎人"
@@ -69,8 +68,8 @@ globals
     constant string CST_STR_GameUtilSeIntro = "显示敌方基本信息"
     constant string CST_STR_GameUtilSmIntro = "显示游戏模式信息"
     
+    constant string CST_STR_HasLeftGame= "已经离开了游戏"
     constant string CST_STR_Killed= "杀死了"
-    
     constant string CST_STR_HeroChar= "英雄特性："
     
     // The following nick name must be identical with that in propername list

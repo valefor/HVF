@@ -54,6 +54,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         /***********************************************************************
         * UnitTypeId (UTI)
         ***********************************************************************/
+        constant integer CST_UTI_SightDummy         ='e005'
         // *** Hunter
         constant integer CST_INT_MaxHunterHeroType  = 9
         constant integer CST_UTI_HunterHeroMiner    ='U003'
@@ -68,14 +69,27 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_UTI_HunterHeroRandom   ='U00C'
         constant integer CST_UTI_HunterHeroFirstcode='U002'// First Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroLastcode ='U00D'// Last Raw Code of Hunter Hero
-        
+        // Dead
+        constant integer CST_UTI_HunterLGDHeroSyl   ='UH17'// Sylvanas
+        // Legendary
         constant integer CST_UTI_HunterHeroSkeleton ='nskg'
+        
         // Itembox
         constant integer CST_UTI_HunterItemBox  ='h00I'
+        constant integer CST_UTI_HunterHeroBox  ='h01M'
         constant integer CST_UTI_HunterWorker   ='h00B'
         
         // *** Farmer
         constant integer CST_UTI_FarmerHero ='H00P'
+        // Farmer army
+        constant integer CST_UTI_ArmySuperTank  ='h006'
+        constant integer CST_UTI_ArmyArchMage   ='n00H'
+        constant integer CST_UTI_ArmyGnoll      ='n00S'
+        constant integer CST_UTI_ArmyKnight     ='n003'
+        constant integer CST_UTI_ArmyTank       ='h00N'
+        constant integer CST_UTI_ArmyAxe        ='h007'
+        constant integer CST_UTI_ArmySpear      ='n002'
+        constant integer CST_UTI_ArmyDog        ='n00L'
         
         // *** Farming Animal
         constant integer CST_UTI_Sheep      ='nshe'
@@ -111,6 +125,8 @@ library Glue initializer init /* v0.0.1 by Xandria
         /***********************************************************************
         * AbilityId (ABI)
         ***********************************************************************/
+        constant integer CST_ABI_Invulnerable ='Avul'
+        
         constant integer CST_ABI_ButcherAll ='A011'
         constant integer CST_ABI_ButcherOne ='A00N'
         constant integer CST_ABI_AllAnimalSpawnOff ='A024'
@@ -165,6 +181,26 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_TCI_TowerHealing   ='R00L'
         constant integer CST_TCI_TowerVisionUp  ='R00R'
         
+        // Hunters Tech
+        constant integer CST_TCI_BodyGen    ='Ruex'
+        constant integer CST_TCI_BackPack   ='Ropm'
+        constant integer CST_TCI_BodyBomb   ='R00B'
+        constant integer CST_TCI_HuntNet    ='Ruwb'
+        constant integer CST_TCI_Vigor      ='R009'
+        
+        // Hunters Tech for locking legend hero
+        constant integer CST_TCI_RankFirst      ='RH00'
+        constant integer CST_TCI_RankGuard      ='RH03'
+        constant integer CST_TCI_RankRanger     ='RH04'
+        constant integer CST_TCI_RankGeneral    ='RH05'
+        constant integer CST_TCI_RankCaptain    ='RH06'
+        constant integer CST_TCI_RankMarshal    ='RH07'
+        constant integer CST_TCI_RankEliteFirst ='RH10'
+        constant integer CST_TCI_RankEliteGuard ='RH13'
+        constant integer CST_TCI_RankEliteRanger='RH14'
+        constant integer CST_TCI_RankGranGeneral='RH15'
+        constant integer CST_TCI_RankGranCaptain='RH16'
+        constant integer CST_TCI_RankGranMarshal='RH17'
         
         /***********************************************************************
         * Others
@@ -531,34 +567,65 @@ library Glue initializer init /* v0.0.1 by Xandria
         return GetUnitTypeId(u)==CST_BTI_SheepFold or GetUnitTypeId(u)==CST_BTI_Pigen or GetUnitTypeId(u)==CST_BTI_SnakeHole or GetUnitTypeId(u)==CST_BTI_Cage
     endfunction
     
+    function CreateHunterBeginItems takes unit hero returns nothing
+        call UnitAddItemToSlotById(hero, 'I005', 0)
+        call UnitAddItemToSlotById(hero, 'shrs', 1)
+        call UnitAddItemToSlotById(hero, 'pman', 2)
+        call UnitAddItemToSlotById(hero, 'moon', 3)
+        call UnitAddItemToSlotById(hero, 'dust', 4)
+        call UnitAddItemToSlotById(hero, 'I000', 5)
+    endfunction
+    
     function CreateHunterBeginUnits takes player p, integer i returns nothing
         local unit u = CreateUnit(p, CST_UTI_HunterItemBox, Map.itemBoxXs[i], Map.itemBoxYs[i], CST_Facing_Building)
-        call UnitAddItemToSlotById(u, 'I005', 0)
-        call UnitAddItemToSlotById(u, 'shrs', 1)
-        call UnitAddItemToSlotById(u, 'pman', 2)
-        call UnitAddItemToSlotById(u, 'moon', 3)
-        call UnitAddItemToSlotById(u, 'dust', 4)
-        call UnitAddItemToSlotById(u, 'I000', 5)
+        //call UnitAddItemToSlotById(u, 'I005', 0)
+        //call UnitAddItemToSlotById(u, 'shrs', 1)
+        //call UnitAddItemToSlotById(u, 'pman', 2)
+        //call UnitAddItemToSlotById(u, 'moon', 3)
+        //call UnitAddItemToSlotById(u, 'dust', 4)
+        //call UnitAddItemToSlotById(u, 'I000', 5)
         call CreateUnit(p, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(Map.regionHeroRevive), GetRectMaxX(Map.regionHeroRevive)), GetRandomReal(GetRectMinY(Map.regionHeroRevive), GetRectMaxY(Map.regionHeroRevive)), CST_Facing_Unit)
-        call PanCameraToTimedLocForPlayer(p, Map.heroReviveLoc, 0.50)
+        // call PanCameraToTimedLocForPlayer(p, Map.heroReviveLoc, 0.50)
         set u = null
     endfunction
     
     function GetHeroAvatar takes unit u returns string
         local integer uti = GetUnitTypeId(u)
-        if uti == CST_UTI_FarmerHero then
-            return "ReplaceableTextures\\CommandButtons\\BTNKobold.blp"
-        elseif uti == CST_UTI_HunterHeroAssaulter or uti == CST_UTI_HunterHeroButcher then
-            return "ReplaceableTextures\\CommandButtons\\BTNBehemothRider.blp"
-        elseif uti == CST_UTI_HunterHeroDarter or uti == CST_UTI_HunterHeroDogger then
-            return "ReplaceableTextures\\CommandButtons\\BTNTroll.blp"
-        elseif uti == CST_UTI_HunterHeroPeeper or uti == CST_UTI_HunterHeroSneaker then
-            return "ReplaceableTextures\\CommandButtons\\BTNTrollBoarRiderVI.blp"
-        elseif uti == CST_UTI_HunterHeroPelter or uti == CST_UTI_HunterHeroMiner or uti == CST_UTI_HunterHeroBalancer then
-            return "ReplaceableTextures\\CommandButtons\\BTNRaider.blp"
+        if IsUnitType(u, UNIT_TYPE_DEAD) then
+            if uti == CST_UTI_FarmerHero then
+                return "Replaceabletextures\\Commandbuttonsdisabled\\DISBTNKobold.blp"
+            elseif uti == CST_UTI_HunterHeroAssaulter or uti == CST_UTI_HunterHeroButcher then
+                return "Replaceabletextures\\Commandbuttonsdisabled\\DISBTNBehemothRider.blp"
+            elseif uti == CST_UTI_HunterHeroDarter or uti == CST_UTI_HunterHeroDogger then
+                return "Replaceabletextures\\Commandbuttonsdisabled\\DISBTNTroll.blp"
+            elseif uti == CST_UTI_HunterHeroPeeper or uti == CST_UTI_HunterHeroSneaker then
+                return "Replaceabletextures\\Commandbuttonsdisabled\\DISBTNTrollBoarRiderVI.blp"
+            elseif uti == CST_UTI_HunterHeroPelter or uti == CST_UTI_HunterHeroMiner or uti == CST_UTI_HunterHeroBalancer then
+                return "Replaceabletextures\\Commandbuttonsdisabled\\DISBTNRaider.blp"
+            elseif uti == CST_UTI_HunterLGDHeroSyl then
+                return "ReplaceableTextures\\CommandButtonsDisabled\\DISBTNDarkSylvanas.blp"
+            else
+                
+                return ""
+            endif
         else
-            return ""
+            if uti == CST_UTI_FarmerHero then
+                return "ReplaceableTextures\\CommandButtons\\BTNKobold.blp"
+            elseif uti == CST_UTI_HunterHeroAssaulter or uti == CST_UTI_HunterHeroButcher then
+                return "ReplaceableTextures\\CommandButtons\\BTNBehemothRider.blp"
+            elseif uti == CST_UTI_HunterHeroDarter or uti == CST_UTI_HunterHeroDogger then
+                return "ReplaceableTextures\\CommandButtons\\BTNTroll.blp"
+            elseif uti == CST_UTI_HunterHeroPeeper or uti == CST_UTI_HunterHeroSneaker then
+                return "ReplaceableTextures\\CommandButtons\\BTNTrollBoarRiderVI.blp"
+            elseif uti == CST_UTI_HunterHeroPelter or uti == CST_UTI_HunterHeroMiner or uti == CST_UTI_HunterHeroBalancer then
+                return "ReplaceableTextures\\CommandButtons\\BTNRaider.blp"
+            elseif uti == CST_UTI_HunterLGDHeroSyl then
+                return "ReplaceableTextures\\CommandButtons\\BTNDarkSylvanas.blp"
+            else
+                return ""
+            endif
         endif
+        
     endfunction
     
     function GetRandomHeroUti takes nothing returns integer

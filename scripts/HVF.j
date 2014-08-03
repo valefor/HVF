@@ -22,8 +22,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         implement DualLinkedList
         static force fc
         
-        boolean bLeave // Leave game?
-        public method delegateByOthers takes boolean shareControl nothing returns nothing
+        boolean bLeave
+        
+        public method delegateByOthers takes boolean shareControl returns boolean
             local thistype role = thistype[thistype.first]
             local integer gold = GetPlayerState(this.get,PLAYER_STATE_RESOURCE_GOLD)
             local integer lumber = GetPlayerState(this.get,PLAYER_STATE_RESOURCE_LUMBER)
@@ -37,11 +38,19 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                     call AdjustPlayerStateBJ(0-lumber, this.get, PLAYER_STATE_RESOURCE_LUMBER)
                     call AdjustPlayerStateBJ(lumberToD, role.get, PLAYER_STATE_RESOURCE_LUMBER)
                     if shareControl then
+                        // DO NOT USE full control, otherwise w r fucked up by
+                        // the bullshit 'Team resource bar'
                         call Ally( this.get, role.get, ALLIANCE_ALLIED_ADVUNITS )
                     endif
                 endif
                 set role= role.next
             endloop
+            
+            // We may be fucked up by the 'Team resource bar', re-display our board
+            call StatsBoard.redisplay()
+            // refresh board
+            call StatsBoard.refresh()
+            return false
         endmethod
 
         public method operator leave takes nothing returns boolean
@@ -75,7 +84,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         public static method operator humanPlayerNumber takes nothing returns integer
             local thistype role = thistype[thistype.first]
-            local count = 0
+            local integer count = 0
             loop
                 exitwhen role.end
                 if GetPlayerController(role.get) == MAP_CONTROL_USER then
@@ -88,7 +97,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         public static method markAsLeave takes player p returns nothing
             local thistype r = thistype[GetPlayerId(p)]
-            set r.leave = false
+            set r.leave = true
         endmethod
         
         // If there is a human player in this group, we should delegate all robots
@@ -96,7 +105,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         public static method delegateAllRobots takes nothing returns nothing
             local thistype role = thistype[thistype.first]
             
-            if not thistype.humanPlayerNumber > 0 then
+            if thistype.humanPlayerNumber <= 0 then
                 return
             endif
             
@@ -110,6 +119,21 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endloop
         endmethod
         
+        // Distribute the resoures of leaving player to the players in-game
+        public static method distributeResources takes nothing returns nothing
+            local thistype role = thistype[thistype.first]
+            
+            loop
+                exitwhen role.end
+                if role.leave then
+                    call role.delegateByOthers(false)
+                endif
+                set role= role.next
+            endloop
+        endmethod
+        /***********************************************************************
+        * Players Management
+        ***********************************************************************/
         public static method add takes player p returns nothing
             local integer playerId = GetPlayerId(p)
             set thistype.count_p = thistype.count_p + 1
@@ -193,6 +217,12 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         integer killCount
         boolean isRandomHero
 
+        integer heroMaxLevel
+        integer heroSurviveTime
+        
+        unit heroBox    // The hunter hero box
+        unit dummy      // The dummy unit
+        
         // Instance method
         /***********************************************************************
         * Operators
@@ -250,6 +280,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             if IsUnitHunterHero(this.hero) then
                 //set this.hero = CreateUnitAtLoc(this.get, CST_UTI_HunterHeroSkeleton, Map.heroReviveLoc, CST_Facing_Unit)
                 // If all hunter hero die, farmer win
+                // Update boards
+                set .heroSurviveTime= TimerManager.getPlayedTime()
+                set .heroMaxLevel   = GetHeroLevel(.hero)
+                set StatsBoard.hb[CST_BDCOL_PN][.bIndex].icon = GetHeroAvatar(this.hero)
+                set StatsBoard.fb[CST_BDCOL_PN][.bIndex].icon = GetHeroAvatar(this.hero)
                 if thistype.isAllHerosDie() then
                     call Farmer.win()
                     call Hunter.lose()
@@ -262,12 +297,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         private method initHero takes nothing returns nothing
+            local real x = GetUnitX(.heroBox)
+            local real y = GetUnitY(.heroBox)
             // Give hunter hero 3 skill points at beginning
             call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
             // Give items
+            call CreateHunterBeginItems(this.hero)
             // Update boards
             set StatsBoard.hb[CST_BDCOL_PN][.bIndex].icon = GetHeroAvatar(this.hero)
             set StatsBoard.fb[CST_BDCOL_PN][.bIndex].icon = GetHeroAvatar(this.hero)
+            // Now we are settle down, remember to remove Invulnerable
+            call UnitRemoveAbility(.dummy, CST_ABI_Invulnerable)
+            set .dummy = null
+            // Add replace the heroBox with itemBox
+            call RemoveUnit(.heroBox)
+            call CreateUnit(this.get, CST_UTI_HunterItemBox, x, y, CST_Facing_Building)
+            set .heroBox = null
         endmethod
         
         public method createRandomHero takes location l returns nothing
@@ -314,10 +359,12 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         endmethod
         
         method initHunterVars takes nothing returns nothing
-            set this.killCount = 0
-            set this.hero = null
-            set this.isRandomHero = false
-            set this.bLeave = false
+            set .killCount = 0
+            set .hero = null
+            set .isRandomHero = false
+            set .bLeave = false
+            set .heroMaxLevel   = 0
+            set .heroSurviveTime= 0
             
             call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, this.get)
             call AdjustPlayerStateBJ(CST_INT_HunterBeginGold, this.get, PLAYER_STATE_RESOURCE_GOLD)
@@ -353,6 +400,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         integer snakeCount
         integer chickenCount
         
+        integer killCount
         integer deathCount
         integer role
         integer lifes
@@ -584,7 +632,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer gold = this.allAnimalIncome
             
             call iterateUnits(Filter(function thistype.filterButcherAllAnimal))
-            
+            call this.resetAnimalCounts()
             call AdjustPlayerStateBJ(gold, this.get, PLAYER_STATE_RESOURCE_GOLD)
             
             // Animal count should be set to 0
@@ -597,6 +645,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call butcherAllAnimal()
             endif
             call iterateUnits(Filter(function thistype.filterKillAllUnits))
+            call this.resetFarmingCounts()
         endmethod
         public method allAnimalSpawnOn takes nothing returns nothing
             call iterateUnits(Filter(function thistype.filterAllAnimalSpawnOn))
@@ -723,7 +772,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 // x IsUnitType(this.hero, UNIT_TYPE_DEAD) may return false
             elseif IsUnitType(this.hero, UNIT_TYPE_DEAD) then
                 if Params.flagGameModeDr then
-                    if this.lifes == 0 then
+                    set this.lifes = this.lifes - 1
+                    call ShowNoticeToPlayer(this.get,MSG_YouHave+I2S(this.lifes)+MSG_ChancesToReive)
+                    if this.lifes <= 0 then
                         // If all farmers hero burn up their lifes, hunter win
                         if thistype.isAllHerosDie() then
                             call Farmer.lose()
@@ -731,9 +782,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                         endif
                         call ShowErrorToAllPlayer(CST_STR_Player+": '"+GetPlayerName(this.get)+"' "+MSG_HasExhaustAllLifes)
                         return
-                    else
-                        set this.lifes = this.lifes - 1
-                        call ShowNoticeToPlayer(this.get,MSG_YouHave+I2S(this.lifes)+MSG_ChancesToReive)
                     endif
                 endif
                 // Hero die, revive it
@@ -866,18 +914,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
         endmethod
         
-        method initFarmerVars takes nothing returns nothing
-            // *** Desyncs here!
-            //set sheepFolds  = CreateGroup()
-            //set pigens      = CreateGroup()
-            //set snakeHoles  = CreateGroup()
-            //set cages       = CreateGroup()
-            
-            set sheepFoldCount  = 0
-            set pigenCount      = 0
-            set snakeHoleCount  = 0
-            set cageCount       = 0
-            
+        private method resetAnimalCounts takes nothing returns nothing
+            set sheepCount      = 0
+            set pigCount        = 0
+            set snakeCount      = 0
+            set chickenCount    = 0
+        endmethod
+        
+        private method resetFarmingCounts takes nothing returns nothing
+            call this.resetAnimalCounts()
             set sheepFoldNsCount= 0
             set pigenNsCount    = 0
             set snakeHoleNsCount= 0
@@ -887,11 +932,22 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set pigCount        = 0
             set snakeCount      = 0
             set chickenCount    = 0
+        endmethod
+        
+        method initFarmerVars takes nothing returns nothing
+            // *** Desyncs here!
+            //set sheepFolds  = CreateGroup()
+            //set pigens      = CreateGroup()
+            //set snakeHoles  = CreateGroup()
+            //set cages       = CreateGroup()
+            
+            call this.resetFarmingCounts()
             
             set deathCount      = 0
             set lifes           = CST_INT_MaxLifePoints
             set role            = CST_INT_FarmerRoleInvalid
             set .bLeave         = false
+            set .killCount      = 0
             
             // Bind predefined hero to farmer
             // call iterateUnits(Filter(function thistype.filterBindHero))
@@ -919,6 +975,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     /***************************************************************************
     * Structs
     ***************************************************************************/
+    /***************************************************************************
+    **** Hunter
+    ***************************************************************************/
     // Associate players with their force , units, data.
     struct Hunter extends array
         // Staitic [Module]
@@ -927,13 +986,170 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Instance [Vars]
         implement HunterVars
         
-        // Statistics record 
-        StatsRecord sr
+        StatsRecord sr      // Statistics record
         
         // Instance methods
+        method calculateScore takes boolean last returns nothing
+            local integer score = 0
+            local integer gold = GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED)
+            local integer surviveTime
+            local integer maxLevel
+            
+            // Check if hero is still survive 
+            if GetUnitTypeId(.hero) != CST_UTI_HunterHeroSkeleton then
+                set surviveTime = TimerManager.getPlayedTime()
+                set maxLevel = GetHeroLevel(.hero)
+            else
+                set surviveTime = .heroSurviveTime
+                set maxLevel = .heroMaxLevel
+            endif
+            
+            if .killCount < 1 then 
+            elseif .killCount < 5 then
+                set score = score + 1
+            elseif .killCount < 10 then
+                set score = score + 2
+            elseif .killCount < 20 then
+                set score = score + 3
+            elseif .killCount < 30 then
+                set score = score + 4
+            else
+                set score = score + 5
+            endif
+            
+            if gold < 500 then
+            
+            elseif gold < 1000 then
+                set score = score + 1
+            elseif gold < 1500 then
+                set score = score + 2
+            elseif gold < 2500 then
+                set score = score + 3
+            elseif gold < 4000 then
+                set score = score + 4
+            else
+                set score = score + 5
+            endif
+            
+            if maxLevel < 5 then 
+            elseif maxLevel < 10 then
+                set score = score + 1
+            elseif maxLevel < 15 then
+                set score = score + 2
+            elseif maxLevel < 20 then
+                set score = score + 3
+            elseif maxLevel < 25 then
+                set score = score + 4
+            else
+                set score = score + 5
+            endif
+            
+            if surviveTime < 20 then 
+            elseif surviveTime < 30 then
+                set score = score + 1
+            elseif surviveTime < 35 then
+                set score = score + 2
+            elseif surviveTime < 40 then
+                set score = score + 3
+            elseif last then
+                set score = score + 5
+            endif
+        
+        endmethod
+        
+        private method createBeginUnits takes integer i returns nothing
+            local real x = GetLocationX(Map.heroReviveLoc)
+            local real y = GetLocationY(Map.heroReviveLoc)
+            set .heroBox = CreateUnit(this.get, CST_UTI_HunterHeroBox, Map.itemBoxXs[i], Map.itemBoxYs[i], CST_Facing_Building)
+            set .dummy = CreateUnit(this.get, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(Map.regionHeroRevive), GetRectMaxX(Map.regionHeroRevive)), GetRandomReal(GetRectMinY(Map.regionHeroRevive), GetRectMaxY(Map.regionHeroRevive)), CST_Facing_Unit)
+            call UnitAddAbility(.dummy,CST_ABI_Invulnerable)
+        endmethod
+        
+        private method updateRankAndTitle takes nothing returns nothing
+            local integer rl = StatsManager.evalRankLevel(.sr.HunterScore)
+            local integer tci = CST_TCI_RankFirst + rl
+            local boolean isE = StatsManager.isElite(.sr)
+            local string rText
+            local string rIcon
+            
+            if rl == CST_RL_Soldier then
+                set rText = CST_STR_HRankSoldier
+                set rIcon = ICON_MEDAL_Soldier
+            elseif rl == CST_RL_Rider then
+                set rText = CST_STR_HRankRider
+                set rIcon = ICON_MEDAL_Rider
+            elseif rl == CST_RL_Guard then
+                set rText = CST_STR_HRankGuard
+                set rIcon = ICON_MEDAL_Guard
+                
+                call SetPlayerTechResearched(this.get, CST_TCI_RankGuard, 1)
+                if isE then
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
+                endif
+            elseif rl == CST_RL_Ranger then
+                set rText = CST_STR_HRankRanger
+                set rIcon = ICON_MEDAL_Ranger
+                
+                call SetPlayerTechResearched(this.get, CST_TCI_RankGuard, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankRanger, 1)
+                if isE then
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteRanger, 1)
+                endif
+            elseif rl == CST_RL_General then
+                set rText = CST_STR_HRankGeneral
+                set rIcon = ICON_MEDAL_General
+                
+                call SetPlayerTechResearched(this.get, CST_TCI_RankGuard, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankRanger, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankGeneral, 1)
+                if isE then
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteRanger, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankGranGeneral, 1)
+                endif
+            elseif rl == CST_RL_Captain then
+                set rText = CST_STR_HRankCaptain
+                set rIcon = ICON_MEDAL_Captain
+                
+                call SetPlayerTechResearched(this.get, CST_TCI_RankGuard, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankRanger, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankGeneral, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankCaptain, 1)
+                if isE then
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteRanger, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankGranGeneral, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankGranCaptain, 1)
+                endif
+            elseif rl == CST_RL_Marshal then
+                set rText = CST_STR_HRankMarshal
+                set rIcon = ICON_MEDAL_Marshal
+                
+                call SetPlayerTechResearched(this.get, CST_TCI_RankGuard, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankRanger, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankGeneral, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankCaptain, 1)
+                call SetPlayerTechResearched(this.get, CST_TCI_RankMarshal, 1)
+                if isE then
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankEliteRanger, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankGranGeneral, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankGranCaptain, 1)
+                    call SetPlayerTechResearched(this.get, CST_TCI_RankGranMarshal, 1)
+                endif
+            endif
+            
+            // Update board
+            set StatsBoard.hb[CST_BDCOL_RK][.bIndex].text = rText
+            set StatsBoard.hb[CST_BDCOL_RK][.bIndex].icon = rIcon
+        endmethod
+        
         private method initInstance takes nothing returns nothing
             call this.initHunterVars()
             set this.sr = StatsRecord.create(this.get)
+            // After stats record being read, update rank and title
+            call this.updateRankAndTitle()
             // call BJDebugMsg("Debug>>>> "+ I2S(this.sr.Rounds))
            
         endmethod
@@ -941,22 +1157,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         private method deleteInstance takes nothing returns nothing
             call this.deleteHunterVars()
         endmethod
-        
-        private method commitStats takes boolean win returns nothing
-           
-            set this.sr.HunterPlays = this.sr.HunterPlays + 1
-            
-            if win then
-                set this.sr.Wins = this.sr.Wins + 1
-                set this.sr.HunterWins = this.sr.HunterWins + 1
-            else
-            
-            endif
-            
-            // Last commit the stats record
-            call this.sr.save(this.get)
-        endmethod
-        
+
         private method commitStats takes boolean win returns nothing
            
             set this.sr.HunterPlays = this.sr.HunterPlays + 1
@@ -1049,15 +1250,14 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // On game start
         private static method init takes nothing returns boolean
             local thistype h = thistype[thistype.first]
+            local integer i = 0
             
             loop
                 exitwhen h.end
                 // Init instance vars
                 call h.initInstance()
-                call CreateHunterBeginUnits(h.get,i)
-                
-                // Display stats board
-                debug call BJDebugMsg("Display board to hunter:" + GetPlayerName(h.get))
+                call h.createBeginUnits(i)
+                set i = i + 1
                 set h = h.next
             endloop
             // Delegate computer player
@@ -1069,6 +1269,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call TimerManager.onGameStart.register(Filter(function thistype.init))
             
             call TimerManager.pt60s.register(Filter(function thistype.goldBonusForKilling))
+            call TimerManager.pt60s.register(Filter(function thistype.distributeResources))
             call TimerManager.otSelectHero.register(Filter(function thistype.onSelectHeroExpire))
             // Play time is over, hunters win
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.win))
@@ -1076,7 +1277,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
     endstruct
     
-    // *** Farmer
+    /***************************************************************************
+    **** Farmer
+    ***************************************************************************/
     struct Farmer extends array
         // Staitic [Module]
         implement Force
@@ -1274,6 +1477,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call TimerManager.pt15s.register(Filter(function thistype.salarySettlement))
             call TimerManager.pt60s.register(Filter(function thistype.incomeSettlement))
             call TimerManager.pt60s.register(Filter(function thistype.aquireFreeExp))
+            call TimerManager.pt60s.register(Filter(function thistype.distributeResources))
             
             // Play time is over, farmers lose
             call TimerManager.otPlayTimeOver.register(Filter(function thistype.lose))
