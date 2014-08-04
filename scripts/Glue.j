@@ -118,7 +118,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         
         constant integer CST_BTI_SmallTree  ='h00O'
         constant integer CST_BTI_MagicTree  ='h00T'
-        
+        constant integer CST_BTI_TowerBase  ='xxxx'
         constant integer CST_BTI_Slaughterhouse = 'h00K'
         constant integer CST_BTI_ArmsRecycler   = 'h014'
         
@@ -162,6 +162,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         
         constant integer CST_ITI_HunterMiniShop ='I000'
         constant integer CST_ITI_HewAxe         ='I005'
+        constant integer CST_ITI_HunterWood     ='xxxx'
         
         /***********************************************************************
         * DestructableTypeId (DTI)

@@ -12,6 +12,7 @@ library EventManager initializer init/* v0.0.1 Xandria
 struct EventManager
     static trigger trigSelectHero
     static trigger trigPlantTree
+    static trigger trigFinishBuild
     static trigger trigHunterUnitDeath
     static trigger trigPickupItem
     static trigger trigFarmerUnitDeath
@@ -48,6 +49,23 @@ struct EventManager
     endmethod
     
     /***************************************************************************
+    * Item sold,update counter
+    ***************************************************************************/
+    private static method onSellItem takes nothing returns boolean
+        local item i = GetSoldItem()
+        local unit u = GetBuyingUnit()
+        local Farmer f
+        
+        // If farmer steal wood from shop in hunter base
+        if GetItemTypeId(i) == CST_ITI_HunterWood and Farmer.contain(GetOwningPlayer(u)) then
+            set f = Farmer[GetPlayerId(GetOwningPlayer(u))]
+            set f.woodCount = f.woodCount + 1
+        endif
+        
+        return false
+    endmethod
+    
+    /***************************************************************************
     * When unit enter map, update counters
     ***************************************************************************/
     private static method filterUnitEnterMap takes nothing returns boolean
@@ -65,9 +83,7 @@ struct EventManager
         return false
     endmethod
     
-    /***************************************************************************
-    * When hunter/farmer plant a tree
-    ***************************************************************************/
+    private static method onPlantTree takes nothing returns boolean
     // Event Filter
     private static method filterPlantTree takes nothing returns boolean
         return true
@@ -75,10 +91,18 @@ struct EventManager
     endmethod
     // Event Handler
     private static method onPlantTree takes nothing returns boolean
+        local unit u = GetTriggerUnit()
+        local Farmer f 
+        local Hunter h
+        
         debug call BJDebugMsg("Start to build " + GetUnitName(GetTriggerUnit()))
         if GetUnitTypeId(GetTriggerUnit()) == CST_BTI_SmallTree then
             call RemoveUnit(GetTriggerUnit())
             call CreateDestructable(CST_DTI_SummerTree, GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), GetRandomDirectionDeg(), 1, 0)
+            if Farmer.contain(GetOwningPlayer(u)) then
+                set f = Farmer[GetPlayerId(GetOwningPlayer(u))]
+                set f.treeCount = f.treeCount + 1
+            endif
         elseif GetUnitTypeId(GetTriggerUnit()) == CST_BTI_MagicTree then
             call RemoveUnit(GetTriggerUnit())
             call CreateDestructable(CST_DTI_MagicTree, GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), GetRandomDirectionDeg(), 1, 0)
@@ -89,6 +113,25 @@ struct EventManager
             call CreateDestructable(CST_DTI_SummerTree, GetUnitX(GetTriggerUnit()), GetUnitY(GetTriggerUnit()), GetRandomDirectionDeg(), 1, 0)
         */
         endif
+        set u = null
+        return false
+    endmethod
+    
+    /***************************************************************************
+    * When build is finished, update counter
+    ***************************************************************************/
+    // Event Filter
+    private static method onFinishBuild takes nothing returns boolean
+        local unit u = GetTriggerUnit()
+        local Farmer f 
+        local Hunter h
+        if Farmer.contain(GetOwningPlayer(u)) then
+            set f = Farmer[GetPlayerId(GetOwningPlayer(u))]
+            if GetUnitTypeId(u) == CST_BTI_TowerBase then
+                set f.towerCount = f.towerCount + 1
+            endif
+        endif
+        set u = null
         return false
     endmethod
     
@@ -432,6 +475,7 @@ struct EventManager
         
         // Hero Tavern belongs to 'Neutral Passive Player'
         call TriggerRegisterPlayerUnitEvent(trigSelectHero, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL, null)
+        call TriggerRegisterPlayerUnitEvent(trigSellItem, Player(PLAYER_NEUTRAL_PASSIVE), EVENT_PLAYER_UNIT_SELL_ITEM, null)
         
         loop
             exitwhen h.end
@@ -444,6 +488,7 @@ struct EventManager
         loop
             exitwhen f.end
             call TriggerRegisterPlayerUnitEvent(trigPlantTree, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
+            call TriggerRegisterPlayerUnitEvent(trigFinishBuild, h.get, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH, null)
             call TriggerRegisterPlayerUnitEvent(trigFarmerUnitDeath, f.get, EVENT_PLAYER_UNIT_DEATH, null)
             call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingFinish, f.get, EVENT_PLAYER_UNIT_CONSTRUCT_FINISH, Filter(function thistype.filterFarmerFarmingBuildingFinish))
             call TriggerRegisterPlayerUnitEvent(trigFarmerFarmingBuildingUpgrade, f.get, EVENT_PLAYER_UNIT_UPGRADE_FINISH, Filter(function thistype.filterFarmerFarmingBuildingUpgrade))
@@ -456,8 +501,10 @@ struct EventManager
     
     private static method onInit takes nothing returns nothing
         // Init triggers
+        set thistype.trigSellItem = CreateTrigger()
         set thistype.trigSelectHero = CreateTrigger()
         set thistype.trigPlantTree = CreateTrigger()
+        set thistype.trigFinishBuild = CreateTrigger()
         set thistype.trigHunterUnitDeath = CreateTrigger()
         set thistype.trigPickupItem = CreateTrigger()
         set thistype.trigFarmerUnitDeath = CreateTrigger()
@@ -466,13 +513,14 @@ struct EventManager
         set thistype.trigFarmerSpellCast = CreateTrigger()
         set thistype.trigFarmerUnitIssuedOrder = CreateTrigger()
         
-        set thistype.tpReviveHunterHero = TimerPointer.create()
-        set thistype.tpReviveFarmerHero = TimerPointer.create()
-        
+        //set thistype.tpReviveHunterHero = TimerPointer.create()
+        //set thistype.tpReviveFarmerHero = TimerPointer.create()
         
         // Set up triggers handle function
+        call TriggerAddCondition( trigSellItem,Condition(function thistype.onSellItem) )
         call TriggerAddCondition( trigSelectHero,Condition(function thistype.onSelectHero) )
         call TriggerAddCondition( trigPlantTree,Condition(function thistype.onPlantTree) )
+        call TriggerAddCondition( trigFinishBuild,Condition(function thistype.onFinishBuild) )
         call TriggerAddCondition( trigPickupItem,Condition(function thistype.onPickupItem) )
         // call TriggerAddCondition( trigHunterUnitDeath,Condition(function thistype.onHunterUnitDeath) )
         // call TriggerAddCondition( trigFarmerUnitDeath,Condition(function thistype.onFarmerUnitDeath) )

@@ -538,6 +538,7 @@ struct StatsManager extends array
             set f.sr.Flees = f.sr.Flees + 1
             set f.sr.FarmerPlays = f.sr.FarmerPlays + 1
             set f.sr.FarmerScore = f.sr.FarmerScore + 2
+            set f.sr.oldScore = f.sr.oldScore + 2
             call f.sr.save(f.get)
             set f = f.next
         endloop
@@ -548,6 +549,7 @@ struct StatsManager extends array
             set h.sr.Flees = f.sr.Flees + 1
             set h.sr.HunterPlays = h.sr.HunterPlays + 1
             set h.sr.HunterScore = h.sr.HunterScore + 2
+            set h.sr.oldScore = h.sr.oldScore + 2
             call h.sr.save(h.get)
             set h = h.next
         endloop

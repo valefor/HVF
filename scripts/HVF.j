@@ -402,6 +402,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         integer killCount
         integer deathCount
+        integer towerCount
+        integer treeCount
+        integer woodCount
         integer role
         integer lifes
         string heroIntro
@@ -943,12 +946,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             
             call this.resetFarmingCounts()
             
-            set deathCount      = 0
-            set lifes           = CST_INT_MaxLifePoints
-            set role            = CST_INT_FarmerRoleInvalid
+            set .lifes          = CST_INT_MaxLifePoints
+            set .role           = CST_INT_FarmerRoleInvalid
             set .bLeave         = false
             set .killCount      = 0
-            
+            set .towerCount     = 0
+            set .treeCount      = 0
+            set .woodCount      = 0
+            set .deathCount     = 0
+
             // Bind predefined hero to farmer
             // call iterateUnits(Filter(function thistype.filterBindHero))
             // Set begin resource, limitations
@@ -989,7 +995,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         StatsRecord sr      // Statistics record
         
         // Instance methods
-        method calculateScore takes boolean last returns nothing
+        method calculateScore takes boolean last returns integer
             local integer score = 0
             local integer gold = GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED)
             local integer surviveTime
@@ -1017,11 +1023,11 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 set score = score + 5
             endif
             
-            if gold < 500 then
+            if gold < 200 then
             
-            elseif gold < 1000 then
+            elseif gold < 500 then
                 set score = score + 1
-            elseif gold < 1500 then
+            elseif gold < 1000 then
                 set score = score + 2
             elseif gold < 2500 then
                 set score = score + 3
@@ -1055,6 +1061,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 set score = score + 5
             endif
         
+            return score
         endmethod
         
         private method createBeginUnits takes integer i returns nothing
@@ -1292,6 +1299,72 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         private static integer exp = 0
         private static integer expTick=0
+        
+        // Instance methods
+        method calculateScore takes boolean last returns integer
+            local integer score = 0
+            local integer gold = GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED)
+            
+            set score = score + .killCount * 3
+            if gold < 5000 then
+            
+            elseif gold < 20000 then
+                set score = score + 1
+            elseif gold < 50000 then
+                set score = score + 2
+            elseif gold < 100000 then
+                set score = score + 3
+            elseif gold < 200000 then
+                set score = score + 4
+            else
+                set score = score + 5
+            endif
+            
+            if gold < 20000 then
+                if .woodCount < 1 then 
+                elseif .woodCount < 5 then
+                    set score = score + 1
+                elseif .woodCount < 10 then
+                    set score = score + 2
+                elseif .woodCount < 20 then
+                    set score = score + 3
+                else
+                    set score = score + 4
+                endif
+                
+                if .towerCount < 20 then 
+                elseif .towerCount < 30 then
+                    set score = score + 1
+                elseif .towerCount < 50 then
+                    set score = score + 2
+                elseif .towerCount < 80 then
+                    set score = score + 3
+                else
+                    set score = score + 5
+                endif
+                
+                if .treeCount < 20 then 
+                elseif .treeCount < 30 then
+                    set score = score + 1
+                else
+                    set score = score + 2
+                endif
+            elseif last then
+                if .deathCount > 8 then 
+                elseif .deathCount > 5 then
+                    set score = score + 1
+                elseif .deathCount > 3 then
+                    set score = score + 2
+                elseif .deathCount > 1 then
+                    set score = score + 3
+                else
+                    set score = score + 6
+                endif
+            endif
+            
+            return score
+        
+        endmethod
         
         private method initInstance takes nothing returns nothing
             call this.initFarmerVars()
