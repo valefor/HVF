@@ -14,6 +14,35 @@ library HVF initializer init/* v0.0.1 Xandria
 CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 *******************************************************************************/
+    function FarmerWin takes nothing returns boolean
+        // Must be set here, before quiting from game, 
+        // calculate some stats
+        call StatsManager.updateStats(true)
+        
+        /*
+        if TimeManager.getPlayedTime() > 10 then
+            set temp = temp + 2
+        endif
+        */
+        
+        call ShowMsgToAll(MSG_GameWillEnd)
+        call TimerStart(CreateTimer(), 10, false, function Farmer.win)
+        call TimerStart(CreateTimer(), 10, false, function Hunter.lose)
+        call PauseAllUnitsBJ(true)
+        return false
+    endfunction
+    
+    function HunterWin takes nothing returns boolean
+        // Must be set here, before quiting from game, 
+        // calculate some stats
+        call StatsManager.updateStats(false)
+        call ShowMsgToAll(MSG_GameWillEnd)
+        call TimerStart(CreateTimer(), 10, false, function Farmer.lose)
+        call TimerStart(CreateTimer(), 10, false, function Hunter.win)
+        call PauseAllUnitsBJ(true)
+        return false
+    endfunction
+    
     /***************************************************************************
     * Modules
     ***************************************************************************/
@@ -279,8 +308,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 set StatsBoard.hb[CST_BDCOL_PN][.bIndex].icon = GetHeroAvatar(this.hero)
                 set StatsBoard.fb[CST_BDCOL_PN][.bIndex].icon = GetHeroAvatar(this.hero)
                 if thistype.isAllHerosDie() then
-                    call Farmer.win()
-                    call Hunter.lose()
+                    call ShowMsgToAll(ARGB(COLOR_ARGB_RED).str(MSG_AllHuntersBeingKilled))
+                    call FarmerWin()
                 endif
             endif
             if not Params.flagGameModeDr then
@@ -988,6 +1017,20 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         StatsRecord sr      // Statistics record
         
         // Instance methods
+        
+        // When these 2 hunters have same score, we must distinguish who is better 
+        method isBetterThan takes thistype h returns boolean
+            if .killCount < h.killCount then
+                return false
+            elseif .killCount == h.killCount then
+                if GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED) < GetPlayerState(h.get,PLAYER_STATE_GOLD_GATHERED) then
+                    return false
+                endif
+            endif
+            
+            return true
+        endmethod
+        
         method calculateScore takes boolean last returns integer
             local integer score = 0
             local integer gold = GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED)
@@ -1272,7 +1315,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call TimerManager.pt60s.register(Filter(function thistype.distributeResources))
             call TimerManager.otSelectHero.register(Filter(function thistype.onSelectHeroExpire))
             // Play time is over, hunters win
-            call TimerManager.otPlayTimeOver.register(Filter(function thistype.win))
+            // call TimerManager.otPlayTimeOver.register(Filter(function thistype.win))
         endmethod
         
     endstruct
@@ -1294,6 +1337,20 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         private static integer expTick=0
         
         // Instance methods
+        
+        // When these 2 hunters have same score, we must distinguish who is better 
+        method isBetterThan takes thistype f returns boolean
+            if .killCount < f.killCount then
+                return false
+            elseif .killCount == f.killCount then
+                if GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED) < GetPlayerState(f.get,PLAYER_STATE_GOLD_GATHERED) then
+                    return false
+                endif
+            endif
+            
+            return true
+        endmethod
+        
         method calculateScore takes boolean last returns integer
             local integer score = 0
             local integer gold = GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED)
@@ -1546,37 +1603,13 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             call TimerManager.pt60s.register(Filter(function thistype.distributeResources))
             
             // Play time is over, farmers lose
-            call TimerManager.otPlayTimeOver.register(Filter(function thistype.lose))
+            // call TimerManager.otPlayTimeOver.register(Filter(function thistype.lose))
         endmethod
     endstruct
     
     /***************************************************************************
     * Common Use Functions
     ***************************************************************************/
-    function FarmerWin takes nothing returns boolean
-        local Farmer f = Farmer[Farmer.first]    
-        local Hunter h = Hunter[Hunter.first]
-
-        // Must be set here, before quiting from game, 
-        // calculate some stats like who is the MVP
-        call StatsManager.updateGlobalStats()
-
-        // Calculate who is the MVP
-        loop
-            exitwhen f.end
-            set f = f.next
-        endloop
-        
-        loop
-            exitwhen h.end
-            set h = h.next
-        endloop
-        return false
-    endfunction
-    
-    function HunterWin takes nothing returns boolean
-        
-    endfunction
     
     function InSameForce takes player p, player p2 returns boolean
         if Farmer.contain(p)  then
@@ -1723,5 +1756,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     private function init takes nothing returns nothing
         // Grouping players to Hunter/Farmer force by default
         call LoadDefaultSetting()
+        // Play time is over, hunters win
+        call TimerManager.otPlayTimeOver.register(Filter(function HunterWin))
     endfunction
 endlibrary

@@ -11,9 +11,10 @@ library EventManager initializer init/* v0.0.1 Xandria
 
 struct EventManager
     static trigger trigSelectHero
-    static trigger trigPlantTree
+    static trigger trigPlantTree 
     static trigger trigFinishBuild
     static trigger trigHunterUnitDeath
+    static trigger trigSellItem
     static trigger trigPickupItem
     static trigger trigFarmerUnitDeath
     static trigger trigFarmerFarmingBuildingFinish
@@ -83,7 +84,6 @@ struct EventManager
         return false
     endmethod
     
-    private static method onPlantTree takes nothing returns boolean
     // Event Filter
     private static method filterPlantTree takes nothing returns boolean
         return true
@@ -266,14 +266,14 @@ struct EventManager
             // Since we are in action, we can use poll wait
             call PolledWait(1.25)
             call f.reviveHero()
+        else
+            // If farmer farming animal die
+            call f.removeFarmingAminal(dyingUnit)
+            
+            // If farmer farming building is destroyed/canceled
+            call f.removeFarmingBuilding(dyingUnit, false)
         endif
         
-        // If farmer farming animal die
-        call f.removeFarmingAminal(dyingUnit)
-        
-        // If farmer farming building is destroyed/canceled
-        call f.removeFarmingBuilding(dyingUnit, false)
-
         set dyingUnit = null
         set killingUnit = null
         return false
@@ -395,11 +395,13 @@ struct EventManager
         endif
 
         if Hunter.isAllLeave then
-            call Farmer.win()
+            call ShowMsgToAll(ARGB(COLOR_ARGB_GREEN).str(MSG_AllHuntersFleed))
+            call FarmerWin()
         endif
         
         if Farmer.isAllLeave then
-            call Hunter.win()
+            call ShowMsgToAll(ARGB(COLOR_ARGB_GREEN).str(MSG_AllFarmersFleed))
+            call HunterWin()
         endif
         
         set pLeave = null

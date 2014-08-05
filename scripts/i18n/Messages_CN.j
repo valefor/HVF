@@ -110,6 +110,15 @@ globals
     constant string MSG_GameStartTipsFarmer= "现在赶紧找个隐蔽的地方藏起来并且造些羊圈发展吧！"
     constant string MSG_VoteForPlayTime="请投票选择游戏时间！"
     
+    // GameOver
+    constant string MSG_AllHuntersFleed="所有猎人都逃跑了！"
+    constant string MSG_AllFarmersFleed="所有农民都逃跑了！"
+    constant string MSG_AllHuntersBeingKilled="所有猎人被杀死！"
+    constant string MSG_TimeIsOver="倒计时结束，仍然有猎人存活！"
+    constant string MSG_YouWin="恭喜，你胜利了！"
+    constant string MSG_YouLose="遗憾，你失败了！"
+    constant string MSG_GameWillEnd="游戏将在10秒后结束..."
+    
     // *** Base
     constant string MSG_Important   = "重要"
     constant string MSG_Notice      = "注意"
