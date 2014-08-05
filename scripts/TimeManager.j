@@ -370,7 +370,7 @@ In multiplayer however, this trigger should work.
         endmethod
         
         static method vote takes nothing returns nothing
-            // dialogs can't be displayed on init and the scope's init-func is run during init
+            // dialogs can't be displayed on init and the scope's init-func running during init
             // so we need to use TimerStart to call functions which need to show dialog
             debug call BJDebugMsg("Play.vote")
             call TimerStart(CreateTimer(), 0, false, function thistype.startVote)

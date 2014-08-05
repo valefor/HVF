@@ -174,13 +174,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         static method win takes nothing returns boolean
             local thistype role = thistype[thistype.first]
-            // Must be set here, before quiting from game, 
-            // calculate some global stats like who is the MVP
-            call StatsManager.updateGlobalStats()
             loop
                 exitwhen role.end
-                // before win, update stats
-                call role.commitStats(true)
                 call CustomVictoryBJ(role.get, true, true)
                 set role= role.next
             endloop
@@ -191,8 +186,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local thistype role = thistype[thistype.first]
             loop
                 exitwhen role.end
-                // before lose, update stats
-                call role.commitStats(false)
                 call CustomDefeatBJ(role.get, "You lose! Game over...")
                 set role= role.next
             endloop
@@ -1560,6 +1553,31 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     /***************************************************************************
     * Common Use Functions
     ***************************************************************************/
+    function FarmerWin takes nothing returns boolean
+        local Farmer f = Farmer[Farmer.first]    
+        local Hunter h = Hunter[Hunter.first]
+
+        // Must be set here, before quiting from game, 
+        // calculate some stats like who is the MVP
+        call StatsManager.updateGlobalStats()
+
+        // Calculate who is the MVP
+        loop
+            exitwhen f.end
+            set f = f.next
+        endloop
+        
+        loop
+            exitwhen h.end
+            set h = h.next
+        endloop
+        return false
+    endfunction
+    
+    function HunterWin takes nothing returns boolean
+        
+    endfunction
+    
     function InSameForce takes player p, player p2 returns boolean
         if Farmer.contain(p)  then
             if Farmer.contain(p2) then

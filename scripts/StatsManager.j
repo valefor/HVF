@@ -139,7 +139,7 @@ struct StatsRecord extends array
     
     // Put vars which should not be saved to 11 from here
     integer oldFlees
-    integer oldScore
+    integer score
     
     public static method create takes player p returns thistype
         local thistype this = thistype.allocate()
@@ -147,6 +147,7 @@ struct StatsRecord extends array
         set .Rounds = YDWERecordGetI(p, CST_STR_11ProfRounds)
         set .oldFlees= YDWERecordGetI(p, CST_STR_11ProfFlees)
         set .Flees  = oldFlees
+        set .score  = 0
         
         set .WinRate     = YDWERecordGetI(p, CST_STR_11ProfWinRate)     
         set .HunterScore = YDWERecordGetI(p, CST_STR_11ProfHunterScore)
@@ -438,6 +439,7 @@ endstruct
 struct StatsManager extends array   
 
     static real scoreMag
+    static boolean farmerWin = false
     
     public static method isIn11Platform takes nothing returns boolean
         return YDWEPlatformIsInPlatform()
