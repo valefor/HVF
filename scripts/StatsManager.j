@@ -28,6 +28,7 @@ globals
     constant string CST_STR_HRankMarshal = "元帅"
     
     // Hunter Elite
+    constant string CST_STR_HRankEliteHunter = "精英猎人"
     constant string CST_STR_HRankEliteSoldier= "精英战士"
     constant string CST_STR_HRankEliteRider  = "精英骑士"
     constant string CST_STR_HRankEliteGuard  = "精英禁卫"
@@ -50,11 +51,12 @@ globals
     
     // *** Board Icons
     // Common
-    constant string ICON_Empty = "UI\\Widgets\\Console\\Undead\\undead-inventory-slotfiller.blp"
+    constant string ICON_Empty  = "UI\\Widgets\\Console\\Undead\\undead-inventory-slotfiller.blp"
     constant string ICON_Farmer = "ReplaceableTextures\\CommandButtons\\BTNKobold.blp"
-    constant string ICON_Gold = "UI\\Feedback\\Resources\\ResourceGold.blp"
+    constant string ICON_Gold   = "UI\\Feedback\\Resources\\ResourceGold.blp"
     constant string ICON_Lumber = "UI\\Feedback\\Resources\\ResourceLumber.blp"
-    constant string ICON_Crown = "ReplaceableTextures\\CommandButtons\\BTNCrownGold.blp"
+    constant string ICON_GoldCrown  = "ReplaceableTextures\\CommandButtons\\BTNCrownGold.blp"
+    constant string ICON_MVPCrown   = "ReplaceableTextures\\CommandButtons\\BTNCrownGold.blp"
     // Medals
     constant string ICON_MEDAL_Soldier   = "ReplaceableTextures\\CommandButtons\\BTNMedalSoldier.blp"
     constant string ICON_MEDAL_Rider     = "ReplaceableTextures\\CommandButtons\\BTNMedalRider.blp"
@@ -113,9 +115,16 @@ globals
     constant real   CST_MAG_3       =1.25
     constant real   CST_MAG_4       =1.50
     
-    // MVP
-    constant integer CST_MVP_Base   =17
+    // MVP, Wealth, Merit
+    constant integer CST_RND_Base   =10
+    constant integer CST_ELT_Base   =60
+    constant integer CST_MVP_Base   =20
     constant integer CST_MVP_Bonus  =10
+    constant integer CST_WEL_Max    =200
+    constant integer CST_WEL_Mag    =1000
+    constant integer CST_MRT_Max    =200
+    constant integer CST_WEL_Mag    =10
+    
     
 endglobals
 
@@ -144,20 +153,27 @@ struct StatsRecord extends array
     // Put vars which should not be saved to 11 from here
     boolean isMVP
     integer oldFlees
+    integer oldHunterScore
+    integer oldFarmerScore
     integer score
+    integer merit
+    integer wealth
     
     public static method create takes player p returns thistype
         local thistype this = thistype.allocate()
         
         set .Rounds = YDWERecordGetI(p, CST_STR_11ProfRounds)
         set .oldFlees= YDWERecordGetI(p, CST_STR_11ProfFlees)
+        set .oldHunterScore= YDWERecordGetI(p, CST_STR_11ProfHunterScore)
+        set .oldFarmerScore= YDWERecordGetI(p, CST_STR_11ProfFarmerScore)
         set .Flees  = oldFlees
+        set .HunterScore = oldHunterScore
+        set .FarmerScore = oldFarmerScore
         set .score  = 0
         set .isMVP  = false
         
         set .WinRate     = YDWERecordGetI(p, CST_STR_11ProfWinRate)     
-        set .HunterScore = YDWERecordGetI(p, CST_STR_11ProfHunterScore)
-        set .FarmerScore = YDWERecordGetI(p, CST_STR_11ProfFarmerScore)
+        
         set .Wealth      = YDWERecordGetI(p, CST_STR_11ProfWealth)
         set .Merit       = YDWERecordGetI(p, CST_STR_11ProfMerit)
         set .MVPs        = YDWERecordGetI(p, CST_STR_11ProfMVPs)
@@ -253,7 +269,7 @@ struct StatsBoard extends array
         call hb[CST_BDCOL_GD][0].setDisplay(false, true)
         set hb[CST_BDCOL_LB][0].icon = ICON_Lumber
         call hb[CST_BDCOL_LB][0].setDisplay(false, true)
-        set hb[CST_BDCOL_SC][0].icon = ICON_Crown
+        set hb[CST_BDCOL_SC][0].icon = ICON_GoldCrown
         call hb[CST_BDCOL_SC][0].setDisplay(false, true)
         set hb[CST_BDCOL_TT][0].text = CST_STR_Title
         set hb[CST_BDCOL_RK][0].text = CST_STR_Rank
@@ -267,7 +283,7 @@ struct StatsBoard extends array
         call fb[CST_BDCOL_GD][0].setDisplay(false, true)
         set fb[CST_BDCOL_LB][0].icon = ICON_Lumber
         call fb[CST_BDCOL_LB][0].setDisplay(false, true)
-        set fb[CST_BDCOL_SC][0].icon = ICON_Crown
+        set fb[CST_BDCOL_SC][0].icon = ICON_GoldCrown
         call fb[CST_BDCOL_SC][0].setDisplay(false, true)
         set fb[CST_BDCOL_TT][0].text = CST_STR_Title
         set fb[CST_BDCOL_RK][0].text = CST_STR_Rank
@@ -362,7 +378,7 @@ struct StatsBoard extends array
         set hb.col[CST_BDCOL_PN].width = 0.07
         set hb.col[CST_BDCOL_TT].width = 0.07
         set hb.col[CST_BDCOL_RK].width = 0.07
-        set hb.col[CST_BDCOL_ST].width = 0.04
+        set hb.col[CST_BDCOL_ST].width = 0.03
         
         set fb.col[CST_BDCOL_PN].width = 0.07
         set fb.col[CST_BDCOL_TT].width = 0.07
@@ -444,7 +460,7 @@ endstruct
 
 struct StatsManager extends array   
 
-    static real scoreMag
+    static real scoreMag = CST_MAG_1
     
     public static method isIn11Platform takes nothing returns boolean
         return YDWEPlatformIsInPlatform()
@@ -472,7 +488,7 @@ struct StatsManager extends array
     endmethod
     
     static method isElite takes StatsRecord sr returns boolean
-        return true
+        return sr.Rounds >= CST_RND_Base and  sr.WinRate >= CST_ELT_Base
     endmethod
     
     // Set magnification from player/role numbers
@@ -500,7 +516,7 @@ struct StatsManager extends array
         set thistype.scoreMag = mag
     endmethod
     
-    static method updateStats takes boolean farmerWin returns nothing
+    static method updateStats takes boolean farmerWin, boolean last returns nothing
         local Farmer f = Farmer[Farmer.first]    
         local Hunter h = Hunter[Hunter.first]
         local integer fMaxScoreIdx = Farmer.first
@@ -512,10 +528,19 @@ struct StatsManager extends array
         // Calculate scores and decide who is the MVP
         loop
             exitwhen f.end
-            if farmerWin then
+            if not f.leave then // <<
+            
+            if last and farmerWin then
                 set temp = temp + 4
+                set f.sr.Wins = f.sr.Wins + 1 
+                set f.sr.FarmerWins = f.sr.FarmerWins + 1
+                set f.sr.WinRate = R2I( (f.sr.Wins/f.sr.Rounds)*100 )
             endif
             set temp = temp + f.calculateScore(true)
+            set temp = R2I(temp*StatsManager.scoreMag)
+            if TimeManager.getPlayedTime() >= 10 then
+                set temp = temp + 2
+            endif
             if f.sr.score < temp then
                 set f.sr.score = temp
             endif
@@ -527,17 +552,30 @@ struct StatsManager extends array
                     set fMaxScoreIdx = GetPlayerId(f.get)
                 endif
             endif
+            
+            set f.sr.wealth = f.calculateWealth()
             call DisplayTimedTextToPlayer(f.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_RED).str(MSG_YouWin))
+            
+            endif       // >>
             set f = f.next
         endloop
         
         set temp = 0
         loop
             exitwhen h.end
-            if not farmerWin then
+            if not h.leave then // <<
+            
+            if last and not farmerWin then
                 set temp = temp + 4
+                set f.sr.Wins = f.sr.Wins + 1 
+                set f.sr.HunterWins = f.sr.HunterWins + 1
+                set f.sr.WinRate = R2I( (f.sr.Wins/f.sr.Rounds)*100 )
             endif
             set temp = temp + f.calculateScore(true)
+            set temp = R2I(temp*StatsManager.scoreMag)
+            if TimeManager.getPlayedTime() >= 10 then
+                set temp = temp + 2
+            endif
             if h.sr.score < temp then
                 set h.sr.score = temp
             endif
@@ -549,14 +587,20 @@ struct StatsManager extends array
                     set hMaxScoreIdx = GetPlayerId(h.get)
                 endif
             endif
+            
+            set f.sr.merit = f.calculateMerit()
             call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_GREEN).str(MSG_YouLose))
+            
+            endif               // >>
             set h = h.next
         endloop
         
         set f = Farmer[fMaxScoreIdx]
         set h = Farmer[hMaxScoreIdx]
         
-        // Chose MVP
+        // Choose MVP
+        if last then // <<
+        
         if fMaxScore >= CST_MVP_Base then
             if hMaxScore < CST_MVP_Base or hMaxScore < fMaxScore then
                 set f.sr.score = f.sr.score + CST_MVP_Bonus
@@ -566,7 +610,7 @@ struct StatsManager extends array
                 set f.sr.score = f.sr.score + CST_MVP_Bonus
                 set f.sr.MVPs = f.sr.MVPs + 1
                 set f.sr.isMVP = true
-            else// if hMaxScore >  fMaxScore then
+            else//if hMaxScore >  fMaxScore then
                 set h.sr.score = h.sr.score + CST_MVP_Bonus
                 set h.sr.MVPs = h.sr.MVPs + 1
                 set h.sr.isMVP = true
@@ -578,6 +622,8 @@ struct StatsManager extends array
                 set h.sr.isMVP = true
             endif
         endif
+        
+        endif // >>
         call thistype.showAndSaveStats()
         
     endmethod
@@ -586,14 +632,36 @@ struct StatsManager extends array
         local Farmer f = Farmer[Farmer.first]    
         local Hunter h = Hunter[Hunter.first]
 
-        // Calculate who is the MVP
+        // Save the score and re-display the score column
         loop
             exitwhen f.end
+            set f.sr.FarmerScore = f.sr.oldFarmerScore + f.sr.score
+            set f.sr.Wealth = f.sr.Wealth + f.sr.wealth
+            call f.sr.save(f.get)
+            set StatsBoard.fb[CST_BDCOL_SC][f.bIndex].text = I2S(f.sr.FarmerScore) + "(+" + I2S(f.sr.score) + ")"
+            set StatsBoard.hb[CST_BDCOL_SC][f.bIndex].text = I2S(f.sr.FarmerScore) + "(+" + I2S(f.sr.score) + ")"
+            if f.sr.isMVP then
+                set StatsBoard.fb[CST_BDCOL_SC][f.bIndex].icon = ICON_MVPCrown
+                set StatsBoard.hb[CST_BDCOL_SC][f.bIndex].icon = ICON_MVPCrown
+                call StatsBoard.fb[CST_BDCOL_SC][f.bIndex].setDisplay(true, true)
+                call StatsBoard.hb[CST_BDCOL_SC][f.bIndex].setDisplay(true, true)
+            endif
             set f = f.next
         endloop
-        
+        o
         loop
             exitwhen h.end
+            set h.sr.HunterScore = h.sr.oldHunterScore + h.sr.score
+            set h.sr.Merit = h.sr.Merit + h.sr.merit
+            call h.sr.save(f.get)
+            set StatsBoard.fb[CST_BDCOL_SC][h.bIndex].text = I2S(h.sr.HunterScore) + "(+" + I2S(h.sr.score) + ")"
+            set StatsBoard.hb[CST_BDCOL_SC][h.bIndex].text = I2S(h.sr.HunterScore) + "(+" + I2S(h.sr.score) + ")"
+            if h.sr.isMVP then
+                set StatsBoard.fb[CST_BDCOL_SC][h.bIndex].icon = ICON_MVPCrown
+                set StatsBoard.hb[CST_BDCOL_SC][h.bIndex].icon = ICON_MVPCrown
+                call StatsBoard.fb[CST_BDCOL_SC][h.bIndex].setDisplay(true, true)
+                call StatsBoard.hb[CST_BDCOL_SC][h.bIndex].setDisplay(true, true)
+            endif
             set h = h.next
         endloop
         return false
@@ -626,7 +694,7 @@ struct StatsManager extends array
             set f.sr.Rounds = f.sr.Rounds + 1
             set f.sr.Flees = f.sr.Flees + 1
             set f.sr.FarmerPlays = f.sr.FarmerPlays + 1
-            set f.sr.FarmerScore = f.sr.FarmerScore + 2
+            set f.sr.FarmerScore = f.sr.oldFarmerScore + 2
             set f.sr.score = f.sr.score + 2
             call f.sr.save(f.get)
             set f = f.next
@@ -637,7 +705,7 @@ struct StatsManager extends array
             set h.sr.Rounds = f.sr.Rounds + 1
             set h.sr.Flees = f.sr.Flees + 1
             set h.sr.HunterPlays = h.sr.HunterPlays + 1
-            set h.sr.HunterScore = h.sr.HunterScore + 2
+            set h.sr.HunterScore = h.sr.oldHunterScore + 2
             set h.sr.score = h.sr.score + 2
             call h.sr.save(h.get)
             set h = h.next
@@ -652,7 +720,7 @@ struct StatsManager extends array
         local Farmer f = Farmer[Farmer.first]    
         local Hunter h = Hunter[Hunter.first]
 
-        // Here set the magnification
+        // Set the magnification
         call thistype.setMag()
         
         // From now, update scores every minitue
@@ -674,7 +742,13 @@ struct StatsManager extends array
         return false
     endmethod
     
+    private static method init takes nothing returns boolean
+        // Set the magnification
+        call thistype.setMag()
+    endmethod
+    
     private static method onInit takes nothing returns nothing
+        call TimerManager.otDetectionOn.register(Filter(function thistype.init))
         call TimerManager.otDetectionOn.register(Filter(function thistype.afterGameStart))
         call TimerManager.otDetectionOff.register(Filter(function thistype.beforeGameTimeover))
     endmethod

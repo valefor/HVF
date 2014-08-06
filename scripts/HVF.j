@@ -17,7 +17,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     function FarmerWin takes nothing returns boolean
         // Must be set here, before quiting from game, 
         // calculate some stats
-        call StatsManager.updateStats(true)
+        call StatsManager.updateStats(true,true)
         
         /*
         if TimeManager.getPlayedTime() > 10 then
@@ -35,7 +35,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     function HunterWin takes nothing returns boolean
         // Must be set here, before quiting from game, 
         // calculate some stats
-        call StatsManager.updateStats(false)
+        call StatsManager.updateStats(false,true)
         call ShowMsgToAll(MSG_GameWillEnd)
         call TimerStart(CreateTimer(), 10, false, function Farmer.lose)
         call TimerStart(CreateTimer(), 10, false, function Hunter.win)
@@ -1031,6 +1031,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             return true
         endmethod
         
+        method calculateMerit takes nothing returns integer
+            local integer merit = R2I(.killCount * CST_MRT_Mag)
+            
+            if merit > CST_MRT_Max then
+                set merit = CST_MRT_Max
+            endif
+            return merit
+        endmethod
+        
         method calculateScore takes boolean last returns integer
             local integer score = 0
             local integer gold = GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED)
@@ -1115,18 +1124,27 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local string rText
             local string rIcon
             
-            if rl == CST_RL_Soldier then
+            if rl < CST_RL_Soldier and isE then 
+                set rText = CST_STR_HRankEliteHunter
+            elseif rl == CST_RL_Soldier then
                 set rText = CST_STR_HRankSoldier
                 set rIcon = ICON_MEDAL_Soldier
+                if isE then
+                    set rText = CST_STR_HRankEliteSoldier
+                endif
             elseif rl == CST_RL_Rider then
                 set rText = CST_STR_HRankRider
                 set rIcon = ICON_MEDAL_Rider
+                if isE then
+                    set rText = CST_STR_HRankEliteRider
+                endif
             elseif rl == CST_RL_Guard then
                 set rText = CST_STR_HRankGuard
                 set rIcon = ICON_MEDAL_Guard
                 
                 call SetPlayerTechResearched(this.get, CST_TCI_RankGuard, 1)
                 if isE then
+                    set rText = CST_STR_HRankEliteGuard
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
                 endif
             elseif rl == CST_RL_Ranger then
@@ -1136,6 +1154,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call SetPlayerTechResearched(this.get, CST_TCI_RankGuard, 1)
                 call SetPlayerTechResearched(this.get, CST_TCI_RankRanger, 1)
                 if isE then
+                    set rText = CST_STR_HRankEliteRanger
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteRanger, 1)
                 endif
@@ -1147,6 +1166,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call SetPlayerTechResearched(this.get, CST_TCI_RankRanger, 1)
                 call SetPlayerTechResearched(this.get, CST_TCI_RankGeneral, 1)
                 if isE then
+                    set rText = CST_STR_HRankGranGeneral
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteRanger, 1)
                     call SetPlayerTechResearched(this.get, CST_TCI_RankGranGeneral, 1)
@@ -1160,6 +1180,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call SetPlayerTechResearched(this.get, CST_TCI_RankGeneral, 1)
                 call SetPlayerTechResearched(this.get, CST_TCI_RankCaptain, 1)
                 if isE then
+                    set rText = CST_STR_HRankGranCaptain
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteRanger, 1)
                     call SetPlayerTechResearched(this.get, CST_TCI_RankGranGeneral, 1)
@@ -1175,6 +1196,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 call SetPlayerTechResearched(this.get, CST_TCI_RankCaptain, 1)
                 call SetPlayerTechResearched(this.get, CST_TCI_RankMarshal, 1)
                 if isE then
+                    set rText = CST_STR_HRankGranMarshal
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteGuard, 1)
                     call SetPlayerTechResearched(this.get, CST_TCI_RankEliteRanger, 1)
                     call SetPlayerTechResearched(this.get, CST_TCI_RankGranGeneral, 1)
@@ -1349,6 +1371,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
             
             return true
+        endmethod
+        
+        method calculateWealth takes nothing returns integer
+            local integer wealth = R2I(GetPlayerState(.get,PLAYER_STATE_GOLD_GATHERED)/CST_WEL_Mag)
+            
+            if wealth > CST_WEL_Max then
+                set wealth = CST_WEL_Max
+            endif
+            return wealth
         endmethod
         
         method calculateScore takes boolean last returns integer

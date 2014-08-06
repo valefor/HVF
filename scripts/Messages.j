@@ -2,7 +2,7 @@ globals
 
     // *** Version Info
     constant string CST_STR_VersionMain = "7"
-    constant string CST_STR_VersionSub  = "0b"
+    constant string CST_STR_VersionSub  = "0c"
     
     // *** Contact
     constant string CST_STR_ContactQQ   = "2872618576"
@@ -11,7 +11,7 @@ globals
     // *** 11 Platform Profile
     // This 8 stats will be shown on 11 score board
     constant string CST_STR_11ProfRounds= "局数"
-    constant string CST_STR_11ProfWinRate  = "胜率"
+    constant string CST_STR_11ProfWinRate  = "胜率%"
     constant string CST_STR_11ProfHunterScore= "猎人分"
     constant string CST_STR_11ProfFarmerScore= "农民分"
     constant string CST_STR_11ProfWealth= "财富"

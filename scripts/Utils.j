@@ -153,6 +153,11 @@ library Utils/*
         endloop
     endfunction
     
+    // Show game version info
+    function ShowVersionInfo takes nothing returns nothing
+        call ShowMsgToAll(CST_STR_Version+CST_STR_VersionTag+ARGB(CST_COLOR_Beaware).str(CST_STR_VersionMain+"."+CST_STR_VersionSub))
+    endfunction
+    
     function FlyEnable takes unit u returns nothing
         call UnitAddAbility(u,'Amrf')
         call UnitRemoveAbility(u,'Amrf')

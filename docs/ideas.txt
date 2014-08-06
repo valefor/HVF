@@ -4,3 +4,8 @@
     *Hunter spell
     
     Blind trap: When enemy hero enter trap, it gets blinded, reduce its vision greately
+
+
+猎人根据积分等级改变武器外观
+农民根据积分等级改变头冠外观和增加额外隐藏技能
+把UI界面的人口改成
