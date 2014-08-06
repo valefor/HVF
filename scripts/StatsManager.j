@@ -123,7 +123,7 @@ globals
     constant integer CST_WEL_Max    =200
     constant integer CST_WEL_Mag    =1000
     constant integer CST_MRT_Max    =200
-    constant integer CST_WEL_Mag    =10
+    constant integer CST_MRT_Mag    =10
     
     
 endglobals
@@ -373,17 +373,17 @@ struct StatsBoard extends array
         endloop
 
         // Set column width
-        set hb.all.width = 0.02
-        set fb.all.width = 0.02
+        set hb.all.width = 0.03
+        set fb.all.width = 0.03
         set hb.col[CST_BDCOL_PN].width = 0.07
         set hb.col[CST_BDCOL_TT].width = 0.07
         set hb.col[CST_BDCOL_RK].width = 0.07
-        set hb.col[CST_BDCOL_ST].width = 0.03
+        //set hb.col[CST_BDCOL_ST].width = 0.03
         
         set fb.col[CST_BDCOL_PN].width = 0.07
         set fb.col[CST_BDCOL_TT].width = 0.07
         set fb.col[CST_BDCOL_RK].width = 0.07
-        set fb.col[CST_BDCOL_ST].width = 0.03
+        //set fb.col[CST_BDCOL_ST].width = 0.03
         
         // Set column color
         set hb.col[CST_BDCOL_KL].color = COLOR_ARGB_RED
@@ -488,7 +488,7 @@ struct StatsManager extends array
     endmethod
     
     static method isElite takes StatsRecord sr returns boolean
-        return sr.Rounds >= CST_RND_Base and  sr.WinRate >= CST_ELT_Base
+        return sr.Rounds >= CST_RND_Base and sr.WinRate >= CST_ELT_Base
     endmethod
     
     // Set magnification from player/role numbers
@@ -525,6 +525,10 @@ struct StatsManager extends array
         local integer hMaxScore = 0
         local integer temp = 0
         
+        if TimerManager.getPlayedTime() < 10 then
+            return
+        endif
+        
         // Calculate scores and decide who is the MVP
         loop
             exitwhen f.end
@@ -536,9 +540,9 @@ struct StatsManager extends array
                 set f.sr.FarmerWins = f.sr.FarmerWins + 1
                 set f.sr.WinRate = R2I( (f.sr.Wins/f.sr.Rounds)*100 )
             endif
-            set temp = temp + f.calculateScore(true)
+            set temp = temp + f.calculateScore(last)
             set temp = R2I(temp*StatsManager.scoreMag)
-            if TimeManager.getPlayedTime() >= 10 then
+            if TimerManager.getPlayedTime() >= 10 then
                 set temp = temp + 2
             endif
             if f.sr.score < temp then
@@ -552,10 +556,8 @@ struct StatsManager extends array
                     set fMaxScoreIdx = GetPlayerId(f.get)
                 endif
             endif
-            
+
             set f.sr.wealth = f.calculateWealth()
-            call DisplayTimedTextToPlayer(f.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_RED).str(MSG_YouWin))
-            
             endif       // >>
             set f = f.next
         endloop
@@ -567,13 +569,13 @@ struct StatsManager extends array
             
             if last and not farmerWin then
                 set temp = temp + 4
-                set f.sr.Wins = f.sr.Wins + 1 
-                set f.sr.HunterWins = f.sr.HunterWins + 1
-                set f.sr.WinRate = R2I( (f.sr.Wins/f.sr.Rounds)*100 )
+                set h.sr.Wins = h.sr.Wins + 1 
+                set h.sr.HunterWins = h.sr.HunterWins + 1
+                set h.sr.WinRate = R2I( (h.sr.Wins/h.sr.Rounds)*100 )
             endif
-            set temp = temp + f.calculateScore(true)
+            set temp = temp + h.calculateScore(last)
             set temp = R2I(temp*StatsManager.scoreMag)
-            if TimeManager.getPlayedTime() >= 10 then
+            if TimerManager.getPlayedTime() >= 10 then
                 set temp = temp + 2
             endif
             if h.sr.score < temp then
@@ -588,9 +590,8 @@ struct StatsManager extends array
                 endif
             endif
             
-            set f.sr.merit = f.calculateMerit()
-            call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_GREEN).str(MSG_YouLose))
-            
+            set h.sr.merit = h.calculateMerit()
+ 
             endif               // >>
             set h = h.next
         endloop
@@ -625,7 +626,6 @@ struct StatsManager extends array
         
         endif // >>
         call thistype.showAndSaveStats()
-        
     endmethod
     
     static method showAndSaveStats takes nothing returns boolean
@@ -648,12 +648,12 @@ struct StatsManager extends array
             endif
             set f = f.next
         endloop
-        o
+        
         loop
             exitwhen h.end
             set h.sr.HunterScore = h.sr.oldHunterScore + h.sr.score
             set h.sr.Merit = h.sr.Merit + h.sr.merit
-            call h.sr.save(f.get)
+            call h.sr.save(h.get)
             set StatsBoard.fb[CST_BDCOL_SC][h.bIndex].text = I2S(h.sr.HunterScore) + "(+" + I2S(h.sr.score) + ")"
             set StatsBoard.hb[CST_BDCOL_SC][h.bIndex].text = I2S(h.sr.HunterScore) + "(+" + I2S(h.sr.score) + ")"
             if h.sr.isMVP then
@@ -664,22 +664,12 @@ struct StatsManager extends array
             endif
             set h = h.next
         endloop
+
         return false
     endmethod
     
     private static method updateScore takes nothing returns boolean
-        local Farmer f = Farmer[Farmer.first]    
-        local Hunter h = Hunter[Hunter.first]
-
-        loop
-            exitwhen f.end
-            set f = f.next
-        endloop
-        
-        loop
-            exitwhen h.end
-            set h = h.next
-        endloop
+        call StatsManager.updateStats(true,false)
         return false
     endmethod
     
@@ -696,20 +686,22 @@ struct StatsManager extends array
             set f.sr.FarmerPlays = f.sr.FarmerPlays + 1
             set f.sr.FarmerScore = f.sr.oldFarmerScore + 2
             set f.sr.score = f.sr.score + 2
-            call f.sr.save(f.get)
+            //call f.sr.save(f.get)
             set f = f.next
         endloop
         
         loop
             exitwhen h.end
-            set h.sr.Rounds = f.sr.Rounds + 1
-            set h.sr.Flees = f.sr.Flees + 1
+            set h.sr.Rounds = h.sr.Rounds + 1
+            set h.sr.Flees = h.sr.Flees + 1
             set h.sr.HunterPlays = h.sr.HunterPlays + 1
             set h.sr.HunterScore = h.sr.oldHunterScore + 2
             set h.sr.score = h.sr.score + 2
-            call h.sr.save(h.get)
+            //call h.sr.save(h.get)
             set h = h.next
         endloop
+        
+        call showAndSaveStats()
         return false
     endmethod
     
@@ -729,26 +721,28 @@ struct StatsManager extends array
         loop
             exitwhen f.end
             set f.sr.Flees = f.sr.oldFlees
-            call f.sr.save(f.get)
+            //call f.sr.save(f.get)
             set f = f.next
         endloop
         
         loop
             exitwhen h.end
             set h.sr.Flees = h.sr.oldFlees
-            call h.sr.save(h.get)
+            //call h.sr.save(h.get)
             set h = h.next
         endloop
+        call StatsManager.updateStats(true,false)
         return false
     endmethod
     
     private static method init takes nothing returns boolean
         // Set the magnification
         call thistype.setMag()
+        return false
     endmethod
     
     private static method onInit takes nothing returns nothing
-        call TimerManager.otDetectionOn.register(Filter(function thistype.init))
+        //call TimerManager.otDetectionOn.register(Filter(function thistype.init))
         call TimerManager.otDetectionOn.register(Filter(function thistype.afterGameStart))
         call TimerManager.otDetectionOff.register(Filter(function thistype.beforeGameTimeover))
     endmethod

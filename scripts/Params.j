@@ -97,7 +97,7 @@ globals
     constant real CST_PT_30s=30.0
     constant real CST_PT_60s=60.0
     constant real CST_PT_base=CST_PT_5s
-    constant real CST_OT_base=CST_PT_60s
+    constant real CST_OT_base=CST_PT_1s
     constant integer CST_INT_MAXPT = 5
     
     // *** Extra bonus for random hero
@@ -136,7 +136,7 @@ globals
     // *** Items
     constant integer CST_INT_MaxItemCount=30
     
-    // *** Exp increace 100 for 3 tick(minutes)
+    // *** Exp increace 100 for 2 tick(minutes)
     constant integer CST_INT_ExpAddForTick=120
     constant integer CST_INT_ExpTickStep=2
     
@@ -155,7 +155,7 @@ globals
     /* ==============================Variables=============================== */
     // *** Deltas, for debug use
     // 60 seconds, 1 means one minute, 1 means one second in debug mode
-    integer VAR_INT_PlayTimeDelta=60
+    integer VAR_INT_PlayTimeDelta=1
 endglobals
 
 struct Params extends array

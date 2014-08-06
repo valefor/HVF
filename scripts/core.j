@@ -7,6 +7,7 @@ library Core initializer init/* v0.0.1 Xandria
 *   */ uses /*
 *   
 *       */ Utils /*
+*       */ SoundTools /*
 *       */ Glue  /* 
 *       */ Params/*
 *

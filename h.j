@@ -24,6 +24,7 @@
 //! import "scripts\lib\PlayerManager.j"
 //! import "scripts\lib\PlayerAlliance.j"
 //! import "scripts\lib\TimerUtils.j"
+//! import "scripts\lib\SoundTools.j"
 //! import "scripts\lib\TimerPool.j"
 
 // AIDS Library

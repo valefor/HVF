@@ -9,3 +9,6 @@
 猎人根据积分等级改变武器外观
 农民根据积分等级改变头冠外观和增加额外隐藏技能
 把UI界面的人口改成
+
+
+"BeSweet.exe" -core( -input "i:\YouWin.wav" -output "d:\YouWin.wav" -wavmp3 ) -lame( -m s -b 128 -p ) -iobuffer( -in 0 )

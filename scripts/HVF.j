@@ -15,6 +15,21 @@ CreateNeutralPassiveBuildings
 call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
 *******************************************************************************/
     function FarmerWin takes nothing returns boolean
+        local Farmer f = Farmer[Farmer.first]    
+        local Hunter h = Hunter[Hunter.first]
+
+        loop
+            exitwhen f.end
+            call DisplayTimedTextToPlayer(f.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_GREEN).str(MSG_YouWin))
+            set f = f.next
+        endloop
+        
+        loop
+            exitwhen h.end
+            call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_RED).str(MSG_YouLose))
+            set h = h.next
+        endloop
+        
         // Must be set here, before quiting from game, 
         // calculate some stats
         call StatsManager.updateStats(true,true)
@@ -33,6 +48,25 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     endfunction
     
     function HunterWin takes nothing returns boolean
+        local Farmer f = Farmer[Farmer.first]    
+        local Hunter h = Hunter[Hunter.first]
+        local Sound winSound = Sound.create("YouWin.mp3", 10000, false, true)
+        local Sound loseSound = Sound.create("YouLose.wav", 10000, false, true)
+
+        loop
+            exitwhen f.end
+            call DisplayTimedTextToPlayer(f.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_RED).str(MSG_YouLose))
+            call loseSound.runPlayer(f.get)
+            set f = f.next
+        endloop
+        
+        loop
+            exitwhen h.end
+            call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_GREEN).str(MSG_YouWin))
+            call winSound.runPlayer(f.get)
+            set h = h.next
+        endloop
+        
         // Must be set here, before quiting from game, 
         // calculate some stats
         call StatsManager.updateStats(false,true)
@@ -1046,7 +1080,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer surviveTime
             local integer maxLevel
             
-            // Check if hero is still survive 
+            // Check if hero is still survive
             if GetUnitTypeId(.hero) != CST_UTI_HunterHeroSkeleton then
                 set surviveTime = TimerManager.getPlayedTime()
                 set maxLevel = GetHeroLevel(.hero)
@@ -1121,8 +1155,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer rl = StatsManager.evalRankLevel(.sr.HunterScore)
             local integer tci = CST_TCI_RankFirst + rl
             local boolean isE = StatsManager.isElite(.sr)
-            local string rText
-            local string rIcon
+            local string rText = CST_STR_HRankNeophyte
+            local string rIcon = ICON_Empty
             
             if rl < CST_RL_Soldier and isE then 
                 set rText = CST_STR_HRankEliteHunter
@@ -1215,7 +1249,6 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set this.sr = StatsRecord.create(this.get)
             // After stats record being read, update rank and title
             call this.updateRankAndTitle()
-            // call BJDebugMsg("Debug>>>> "+ I2S(this.sr.Rounds))
            
         endmethod
         
