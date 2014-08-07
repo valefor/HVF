@@ -50,7 +50,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     function HunterWin takes nothing returns boolean
         local Farmer f = Farmer[Farmer.first]    
         local Hunter h = Hunter[Hunter.first]
-        local Sound winSound = Sound.create("YouWin.mp3", 10000, false, true)
+        local Sound winSound = Sound.create("YouWin.wav", 10000, false, true)
         local Sound loseSound = Sound.create("YouLose.wav", 10000, false, true)
 
         loop

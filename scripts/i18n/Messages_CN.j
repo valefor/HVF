@@ -30,8 +30,8 @@ globals
     constant string CST_STR_Hunter= "猎人"
     constant string CST_STR_Farmer= "农民"
     
-    constant string CST_STR_Title= "称号"
-    constant string CST_STR_Rank= "勋章"
+    constant string CST_STR_Title= "    称号"
+    constant string CST_STR_Rank= "    积分等级"
     constant string CST_STR_ScoreBoard= "积分榜"
     constant string CST_STR_FarmerScoreBoard= "农民排行榜"
     constant string CST_STR_HunterScoreBoard= "猎人排行榜"

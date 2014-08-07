@@ -495,7 +495,7 @@ struct StatsManager extends array
     static method setMag takes nothing returns nothing
         local integer fn = Farmer.humanPlayerNumber    
         local integer hn = Hunter.humanPlayerNumber
-        local real mag = CST_MAG_4
+        local real mag = CST_MAG_1
 
         if fn < 3 then
             set mag = CST_MAG_1

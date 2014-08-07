@@ -12,3 +12,4 @@
 
 
 "BeSweet.exe" -core( -input "i:\YouWin.wav" -output "d:\YouWin.wav" -wavmp3 ) -lame( -m s -b 128 -p ) -iobuffer( -in 0 )
+"BeSweet.exe" -core( -input "i:\YouWin.wav" -output "d:\YouWin.wav" -wavmp3 ) -lame( -m m -b 96 -p )

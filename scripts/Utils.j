@@ -158,6 +158,12 @@ library Utils/*
         call ShowMsgToAll(CST_STR_Version+CST_STR_VersionTag+ARGB(CST_COLOR_Beaware).str(CST_STR_VersionMain+"."+CST_STR_VersionSub))
     endfunction
     
+    function PlayerMusicToPlayer takes player p,string fileName returns nothing
+        if GetLocalPlayer() == p then
+            call PlayMusic(fileName)
+        endif
+    endfunction
+    
     function FlyEnable takes unit u returns nothing
         call UnitAddAbility(u,'Amrf')
         call UnitRemoveAbility(u,'Amrf')
