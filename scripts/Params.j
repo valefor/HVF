@@ -97,7 +97,7 @@ globals
     constant real CST_PT_30s=30.0
     constant real CST_PT_60s=60.0
     constant real CST_PT_base=CST_PT_5s
-    constant real CST_OT_base=CST_PT_1s
+    constant real CST_OT_base=CST_PT_60s
     constant integer CST_INT_MAXPT = 5
     
     // *** Extra bonus for random hero
@@ -155,7 +155,7 @@ globals
     /* ==============================Variables=============================== */
     // *** Deltas, for debug use
     // 60 seconds, 1 means one minute, 1 means one second in debug mode
-    integer VAR_INT_PlayTimeDelta=1
+    integer VAR_INT_PlayTimeDelta=60
 endglobals
 
 struct Params extends array

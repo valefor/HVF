@@ -1,4 +1,4 @@
-
+ï»¿
 #Abilities:
 
     *Hunter spell
@@ -6,9 +6,9 @@
     Blind trap: When enemy hero enter trap, it gets blinded, reduce its vision greately
 
 
-ÁÔÈË¸ù¾İ»ı·ÖµÈ¼¶¸Ä±äÎäÆ÷Íâ¹Û
-Å©Ãñ¸ù¾İ»ı·ÖµÈ¼¶¸Ä±äÍ·¹ÚÍâ¹ÛºÍÔö¼Ó¶îÍâÒş²Ø¼¼ÄÜ
-°ÑUI½çÃæµÄÈË¿Ú¸Ä³É
+çŒäººæ ¹æ®ç§¯åˆ†ç­‰çº§æ”¹å˜æ­¦å™¨å¤–è§‚
+å†œæ°‘æ ¹æ®ç§¯åˆ†ç­‰çº§æ”¹å˜å¤´å† å¤–è§‚å’Œå¢åŠ é¢å¤–éšè—æŠ€èƒ½
+æŠŠUIç•Œé¢çš„äººå£æ”¹æˆ
 
 
 "BeSweet.exe" -core( -input "i:\YouWin.wav" -output "d:\YouWin.wav" -wavmp3 ) -lame( -m s -b 128 -p ) -iobuffer( -in 0 )

@@ -93,7 +93,7 @@ In multiplayer however, this trigger should work.
         endmethod
         
         static method getPlayedTime takes nothing returns integer
-            return ptTickCount
+            return otTickCount
         endmethod
         
         private static method onPtExpired takes nothing returns nothing
@@ -118,6 +118,15 @@ In multiplayer however, this trigger should work.
             set otTickCount = otTickCount + 1
             
             debug call BJDebugMsg("Single timer timeout")
+            if otTickCount == thistype.otDetectionOff.count then
+                call TriggerEvaluate(thistype.otDetectionOff.trigger)
+            elseif otTickCount == thistype.otDetectionOn.count then
+                call TriggerEvaluate(thistype.otDetectionOn.trigger)
+            elseif otTickCount == thistype.otSelectHero.count then
+                call TriggerEvaluate(thistype.otSelectHero.trigger)
+            endif
+            
+            /* Really bad implementation
             if isTimerValid(otDetectionOff) and IsIntDividableBy(otTickCount, thistype.otDetectionOff.count) then
                 call TriggerEvaluate(thistype.otDetectionOff.trigger)
                 call disableTimer(otDetectionOff)
@@ -128,7 +137,7 @@ In multiplayer however, this trigger should work.
                 call TriggerEvaluate(thistype.otSelectHero.trigger)
                 call disableTimer(otSelectHero)
             endif
-            
+            */
             // If timer is not periodic timer, recycle it
             //if not isPeriodicTimer(tp.timeout) then
             //    call tp.destroy()
