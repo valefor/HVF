@@ -164,6 +164,16 @@ library Utils/*
         endif
     endfunction
     
+    // Disable ability for all player
+    function DisableAbilityForAll takes integer abi returns nothing
+        local integer i = 0
+        loop
+            call SetPlayerAbilityAvailable( Player(i), abi, false )
+            set i = i + 1
+            exitwhen i == 12
+        endloop
+    endfunction
+    
     function FlyEnable takes unit u returns nothing
         call UnitAddAbility(u,'Amrf')
         call UnitRemoveAbility(u,'Amrf')

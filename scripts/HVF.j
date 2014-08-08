@@ -39,7 +39,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set temp = temp + 2
         endif
         */
-        
+        call StatsBoard.redisplay()
         call ShowMsgToAll(MSG_GameWillEnd)
         call TimerStart(CreateTimer(), 10, false, function Farmer.win)
         call TimerStart(CreateTimer(), 10, false, function Hunter.lose)
@@ -50,26 +50,23 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
     function HunterWin takes nothing returns boolean
         local Farmer f = Farmer[Farmer.first]    
         local Hunter h = Hunter[Hunter.first]
-        local Sound winSound = Sound.create("YouWin.wav", 10000, false, true)
-        local Sound loseSound = Sound.create("YouLose.wav", 10000, false, true)
 
         loop
             exitwhen f.end
             call DisplayTimedTextToPlayer(f.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_RED).str(MSG_YouLose))
-            call loseSound.runPlayer(f.get)
             set f = f.next
         endloop
         
         loop
             exitwhen h.end
             call DisplayTimedTextToPlayer(h.get, 0, 0, CST_MSGDUR_Normal, ARGB(COLOR_ARGB_GREEN).str(MSG_YouWin))
-            call winSound.runPlayer(f.get)
             set h = h.next
         endloop
         
         // Must be set here, before quiting from game, 
         // calculate some stats
         call StatsManager.updateStats(false,true)
+        call StatsBoard.redisplay()
         call ShowMsgToAll(MSG_GameWillEnd)
         call TimerStart(CreateTimer(), 10, false, function Farmer.lose)
         call TimerStart(CreateTimer(), 10, false, function Hunter.win)

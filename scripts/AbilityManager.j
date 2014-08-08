@@ -17,13 +17,15 @@ struct AbilityManager
     static method addFarmerAbility takes nothing returns nothing
     endmethod
     
+    static method disableFakeAbilities takes nothing returns nothing
+        call DisableAbilityForAll()
+    endmethod
+    
     static method init takes nothing returns boolean
         local Hunter h = Hunter[Hunter.first]
         
         loop
             exitwhen h.end
-            call TriggerRegisterPlayerUnitEvent(trigHunterUnitDeath, h.get, EVENT_PLAYER_UNIT_DEATH, Filter(function thistype.filterHunterUnitDeath))
-            call TriggerRegisterPlayerUnitEvent(trigPlantTree, h.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
             set h= h.next
         endloop
         
@@ -34,10 +36,10 @@ struct AbilityManager
     private static method onInit takes nothing returns nothing
         // Init triggers
         set thistype.trigABHunterHide = CreateTrigger()
-        // Set up triggers handle function
-        call TriggerAddCondition( trigABHunterHide,Condition(function thistype.onSelectHero) )
         
-        call TimerManager.onGameStart.register(Filter(function thistype.init))
+        call thistype.disableFakeAbilities()
+        
+        // call TimerManager.onGameStart.register(Filter(function thistype.init))
     endmethod
     
 endstruct

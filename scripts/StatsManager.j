@@ -55,8 +55,8 @@ globals
     constant string ICON_Farmer = "ReplaceableTextures\\CommandButtons\\BTNKobold.blp"
     constant string ICON_Gold   = "UI\\Feedback\\Resources\\ResourceGold.blp"
     constant string ICON_Lumber = "UI\\Feedback\\Resources\\ResourceLumber.blp"
-    constant string ICON_GoldCrown  = "ReplaceableTextures\\CommandButtons\\BTNCrownGold.blp"
-    constant string ICON_MVPCrown   = "ReplaceableTextures\\CommandButtons\\BTNCrownGold.blp"
+    constant string ICON_Integral  = "ReplaceableTextures\\CommandButtons\\BTNIntegral.blp"
+    constant string ICON_MVPCrown   = "ReplaceableTextures\\CommandButtons\\BTNCrownMVP.blp"
     // Medals
     constant string ICON_MEDAL_Soldier   = "ReplaceableTextures\\CommandButtons\\BTNMedalSoldier.blp"
     constant string ICON_MEDAL_Rider     = "ReplaceableTextures\\CommandButtons\\BTNMedalRider.blp"
@@ -118,7 +118,7 @@ globals
     // MVP, Wealth, Merit
     constant integer CST_RND_Base   =10
     constant integer CST_ELT_Base   =60
-    constant integer CST_MVP_Base   =20
+    constant integer CST_MVP_Base   =2
     constant integer CST_MVP_Bonus  =10
     constant integer CST_WEL_Max    =200
     constant integer CST_WEL_Mag    =1000
@@ -269,7 +269,7 @@ struct StatsBoard extends array
         call hb[CST_BDCOL_GD][0].setDisplay(false, true)
         set hb[CST_BDCOL_LB][0].icon = ICON_Lumber
         call hb[CST_BDCOL_LB][0].setDisplay(false, true)
-        set hb[CST_BDCOL_SC][0].icon = ICON_GoldCrown
+        set hb[CST_BDCOL_SC][0].icon = ICON_Integral
         call hb[CST_BDCOL_SC][0].setDisplay(false, true)
         set hb[CST_BDCOL_TT][0].text = CST_STR_Title
         set hb[CST_BDCOL_RK][0].text = CST_STR_Rank
@@ -283,7 +283,7 @@ struct StatsBoard extends array
         call fb[CST_BDCOL_GD][0].setDisplay(false, true)
         set fb[CST_BDCOL_LB][0].icon = ICON_Lumber
         call fb[CST_BDCOL_LB][0].setDisplay(false, true)
-        set fb[CST_BDCOL_SC][0].icon = ICON_GoldCrown
+        set fb[CST_BDCOL_SC][0].icon = ICON_Integral
         call fb[CST_BDCOL_SC][0].setDisplay(false, true)
         set fb[CST_BDCOL_TT][0].text = CST_STR_Title
         set fb[CST_BDCOL_RK][0].text = CST_STR_Rank
@@ -373,17 +373,23 @@ struct StatsBoard extends array
         endloop
 
         // Set column width
-        set hb.all.width = 0.03
-        set fb.all.width = 0.03
+        set hb.all.width = 0.02
+        set fb.all.width = 0.02
         set hb.col[CST_BDCOL_PN].width = 0.07
         set hb.col[CST_BDCOL_TT].width = 0.07
         set hb.col[CST_BDCOL_RK].width = 0.07
-        //set hb.col[CST_BDCOL_ST].width = 0.03
+        set hb.col[CST_BDCOL_GD].width = 0.04
+        set hb.col[CST_BDCOL_LB].width = 0.04
+        set hb.col[CST_BDCOL_SC].width = 0.03
+        set hb.col[CST_BDCOL_ST].width = 0.03
         
         set fb.col[CST_BDCOL_PN].width = 0.07
         set fb.col[CST_BDCOL_TT].width = 0.07
         set fb.col[CST_BDCOL_RK].width = 0.07
-        //set fb.col[CST_BDCOL_ST].width = 0.03
+        set fb.col[CST_BDCOL_GD].width = 0.04
+        set fb.col[CST_BDCOL_LB].width = 0.04
+        set fb.col[CST_BDCOL_SC].width = 0.03
+        set fb.col[CST_BDCOL_ST].width = 0.03
         
         // Set column color
         set hb.col[CST_BDCOL_KL].color = COLOR_ARGB_RED
@@ -418,12 +424,14 @@ struct StatsBoard extends array
         loop
             exitwhen f.end
             set fb.visible[f.get] = true
+            set fb.minimized = false
             set f = f.next
         endloop
         
         loop
             exitwhen h.end
             set hb.visible[h.get] = true
+            set hb.minimized = false
             set h = h.next
         endloop
     endmethod
@@ -638,8 +646,10 @@ struct StatsManager extends array
             set f.sr.FarmerScore = f.sr.oldFarmerScore + f.sr.score
             set f.sr.Wealth = f.sr.Wealth + f.sr.wealth
             call f.sr.save(f.get)
-            set StatsBoard.fb[CST_BDCOL_SC][f.bIndex].text = I2S(f.sr.FarmerScore) + "(+" + I2S(f.sr.score) + ")"
-            set StatsBoard.hb[CST_BDCOL_SC][f.bIndex].text = I2S(f.sr.FarmerScore) + "(+" + I2S(f.sr.score) + ")"
+            //set StatsBoard.fb[CST_BDCOL_SC][f.bIndex].text = I2S(f.sr.FarmerScore) + "(+" + I2S(f.sr.score) + ")"
+            //set StatsBoard.hb[CST_BDCOL_SC][f.bIndex].text = I2S(f.sr.FarmerScore) + "(+" + I2S(f.sr.score) + ")"
+            set StatsBoard.fb[CST_BDCOL_SC][f.bIndex].text = "+" + I2S(f.sr.score)
+            set StatsBoard.hb[CST_BDCOL_SC][f.bIndex].text = "+" + I2S(f.sr.score)
             if f.sr.isMVP then
                 set StatsBoard.fb[CST_BDCOL_SC][f.bIndex].icon = ICON_MVPCrown
                 set StatsBoard.hb[CST_BDCOL_SC][f.bIndex].icon = ICON_MVPCrown
@@ -654,8 +664,10 @@ struct StatsManager extends array
             set h.sr.HunterScore = h.sr.oldHunterScore + h.sr.score
             set h.sr.Merit = h.sr.Merit + h.sr.merit
             call h.sr.save(h.get)
-            set StatsBoard.fb[CST_BDCOL_SC][h.bIndex].text = I2S(h.sr.HunterScore) + "(+" + I2S(h.sr.score) + ")"
-            set StatsBoard.hb[CST_BDCOL_SC][h.bIndex].text = I2S(h.sr.HunterScore) + "(+" + I2S(h.sr.score) + ")"
+            //set StatsBoard.fb[CST_BDCOL_SC][h.bIndex].text = I2S(h.sr.HunterScore) + "(+" + I2S(h.sr.score) + ")"
+            //set StatsBoard.hb[CST_BDCOL_SC][h.bIndex].text = I2S(h.sr.HunterScore) + "(+" + I2S(h.sr.score) + ")"
+            set StatsBoard.fb[CST_BDCOL_SC][h.bIndex].text = "+" + I2S(h.sr.score)
+            set StatsBoard.hb[CST_BDCOL_SC][h.bIndex].text = "+" + I2S(h.sr.score)
             if h.sr.isMVP then
                 set StatsBoard.fb[CST_BDCOL_SC][h.bIndex].icon = ICON_MVPCrown
                 set StatsBoard.hb[CST_BDCOL_SC][h.bIndex].icon = ICON_MVPCrown

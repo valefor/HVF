@@ -143,6 +143,18 @@ library Glue initializer init /* v0.0.1 by Xandria
         // Farmers Abilities
         constant integer CST_ABI_FReveal='A00R'
         
+        // Fake Abilities
+        constant integer CST_ABI_FakeAbi1='AFK1'    // Slot1
+        constant integer CST_ABI_FakeAbi2='AFK2'    // Slot2
+        constant integer CST_ABI_FakeAbi3='AFK3'    // Slot3
+        constant integer CST_ABI_FakeAbi4='AFK4'    // Slot4
+        
+        // Learnable Abilities
+        constant integer CST_ABI_LearnScoutEye='ALSE'
+        constant integer CST_ABI_LearnEnhanceAmor='AFK2'
+        constant integer CST_ABI_LearnEvasion='AFK3'
+        constant integer CST_ABI_LearnSeparaAttack='AFK4'
+        
         /***********************************************************************
         * ItemTypeId (ITI)
         ***********************************************************************/
