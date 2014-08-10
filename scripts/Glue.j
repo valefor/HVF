@@ -230,8 +230,25 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_ITI_VultureMeat    ='I018'
         
         constant integer CST_ITI_HunterMiniShop ='I000'
-        constant integer CST_ITI_HewAxe         ='I005'
         constant integer CST_ITI_HunterWood     ='lmbr'
+        
+        // Items in hunter portable shop and base shop
+        constant integer CST_ITI_Rocket         ='I002'
+        constant integer CST_ITI_RocketP        ='I00B'
+        constant integer CST_ITI_StunMine       ='I004'
+        constant integer CST_ITI_StunMineP      ='I00R'
+        constant integer CST_ITI_LandMine       ='gobm'
+        constant integer CST_ITI_LandMineP      ='I009'
+        constant integer CST_ITI_Hellfire       ='infs'
+        constant integer CST_ITI_HellfireP      ='I00E'
+        constant integer CST_ITI_HewAxe         ='I005'
+        constant integer CST_ITI_HewAxeP        ='I007'
+        constant integer CST_ITI_HuntNet        ='silk'
+        constant integer CST_ITI_HuntNetP       ='I00I'
+        constant integer CST_ITI_InvisPotion    ='I011'
+        constant integer CST_ITI_InvisPotionP   ='I012'
+        constant integer CST_ITI_Teleport       ='I016'
+        constant integer CST_ITI_TeleportP      ='I013'
         
         // Ability Book
         constant integer CST_ITI_BookScoutEye       ='I017'

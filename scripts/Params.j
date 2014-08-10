@@ -73,7 +73,7 @@ globals
     // *** Begin resource
     constant integer CST_INT_FarmerBeginGold=43
     constant integer CST_INT_FarmerBeginLumber=0
-    constant integer CST_INT_HunterBeginGold=43
+    constant integer CST_INT_HunterBeginGold=4300
     constant integer CST_INT_HunterBeginLumber=10
     
     // *** Timers - Onetime Timer(postfix must be '.01')

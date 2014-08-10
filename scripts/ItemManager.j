@@ -1,6 +1,6 @@
 library ItemManager initializer init/* v0.0.1 Xandria
 */  uses    TimeManager     /*  
-*/                       /*
+*/          RecipeSYS       /*
 ********************************************************************************
 * HVF item manager
 *******************************************************************************/
@@ -82,7 +82,14 @@ endstruct
 * Library Initiation
 *******************************************************************************/
 private function init takes nothing returns nothing
-
+    call AddRecipeWithCharges(CST_ITI_RocketP, CST_ITI_Rocket, 0, 0, 0, 0, CST_ITI_Rocket, 0)
+    call AddRecipeWithCharges(CST_ITI_StunMineP, CST_ITI_StunMine, 0, 0, 0, 0, CST_ITI_StunMine, 0)
+    call AddRecipeWithCharges(CST_ITI_LandMineP, CST_ITI_LandMine, 0, 0, 0, 0, CST_ITI_LandMine, 0)
+    call AddRecipeWithCharges(CST_ITI_HellfireP, CST_ITI_Hellfire, 0, 0, 0, 0, CST_ITI_Hellfire, 0)
+    call AddRecipeWithCharges(CST_ITI_HewAxeP, CST_ITI_HewAxe, 0, 0, 0, 0, CST_ITI_HewAxe, 0)
+    call AddRecipeWithCharges(CST_ITI_HuntNetP, CST_ITI_HuntNet, 0, 0, 0, 0, CST_ITI_HuntNet, 0)
+    call AddRecipeWithCharges(CST_ITI_InvisPotionP, CST_ITI_InvisPotion, 0, 0, 0, 0, CST_ITI_InvisPotion, 0)
+    call AddRecipeWithCharges(CST_ITI_TeleportP, CST_ITI_Teleport, 0, 0, 0, 0, CST_ITI_Teleport, 0)
 endfunction
 
 endlibrary
