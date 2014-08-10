@@ -57,6 +57,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_UTI_SightDummy         ='e005'
         // *** Hunter
         constant integer CST_INT_MaxHunterHeroType  = 9
+        constant integer CST_UTI_HunterHeroFree     ='U000'
         constant integer CST_UTI_HunterHeroMiner    ='U003'
         constant integer CST_UTI_HunterHeroPeeper   ='U004'
         constant integer CST_UTI_HunterHeroDogger   ='U005'
@@ -69,14 +70,18 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_UTI_HunterHeroRandom   ='U00C'
         constant integer CST_UTI_HunterHeroFirstcode='U002'// First Raw Code of Hunter Hero
         constant integer CST_UTI_HunterHeroLastcode ='U00D'// Last Raw Code of Hunter Hero
-        // Dead
-        constant integer CST_UTI_HunterLGDHeroSyl   ='UH17'// Sylvanas
+        // *** Freedom template
+        constant integer CST_UTI_HunterHeroFreeTP1  ='UTP1'//53333
+        constant integer CST_UTI_HunterHeroFreeTP2  ='UTP2'//533340
+        constant integer CST_UTI_HunterHeroFreeTP3  ='UTP3'//333340
+        constant integer CST_UTI_HunterHeroFreeTP4  ='UTP4'//33333
+        
         // Legendary
+        constant integer CST_UTI_HunterLGDHeroSyl   ='UH17'// Sylvanas
+        // Dead
         constant integer CST_UTI_HunterHeroSkeleton ='nskg'
         
-        // Itembox
-        constant integer CST_UTI_HunterItemBox  ='h00I'
-        constant integer CST_UTI_HunterHeroBox  ='h01M'
+        // Normal Unit
         constant integer CST_UTI_HunterWorker   ='h00B'
         
         // *** Farmer
@@ -106,6 +111,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         /***********************************************************************
         * BuildingTypeId (BTI)
         ***********************************************************************/
+        // Farmer
         constant integer CST_BTI_SheepFold  ='h002'
         constant integer CST_BTI_Pigen      ='h001'
         constant integer CST_BTI_SnakeHole  ='h00U'
@@ -121,6 +127,11 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_BTI_TowerBase  ='h003'
         constant integer CST_BTI_Slaughterhouse = 'h00K'
         constant integer CST_BTI_ArmsRecycler   = 'h014'
+        
+        // Hunter
+        constant integer CST_BTI_HunterItemBox  ='h01N'
+        constant integer CST_BTI_HunterHeroBox  ='h01M'
+        constant integer CST_BTI_HunterAbilityShop  ='h00I'
         
         /***********************************************************************
         * AbilityId (ABI)
@@ -143,18 +154,63 @@ library Glue initializer init /* v0.0.1 by Xandria
         // Farmers Abilities
         constant integer CST_ABI_FReveal='A00R'
         
-        // Fake Abilities
-        constant integer CST_ABI_FakeAbi1='AFK1'    // Slot1
-        constant integer CST_ABI_FakeAbi2='AFK2'    // Slot2
-        constant integer CST_ABI_FakeAbi3='AFK3'    // Slot3
-        constant integer CST_ABI_FakeAbi4='AFK4'    // Slot4
+        // Fake Ability(Placeholder)
+        constant integer CST_ABI_FakeAbiS1L3        ='AF13' // Slot1 Level3
+        constant integer CST_ABI_FakeAbiS1L5        ='AF15' // Slot1 Level5
+        constant integer CST_ABI_FakeAbiS2L3        ='AF23' // Slot2 Level3
+        constant integer CST_ABI_FakeAbiS3L3        ='AF33' // Slot3 Level3
+        constant integer CST_ABI_FakeAbiS4L3        ='AF43' // Slot4 Level3
+        constant integer CST_ABI_FakeAbiS5L3        ='AF53' // Slot5 Level3
+        constant integer CST_ABI_FakeAbiS5L40       ='AF5X' // Slot5 Level40
         
         // Learnable Abilities
-        constant integer CST_ABI_LearnScoutEye='ALSE'
-        constant integer CST_ABI_LearnEnhanceAmor='AFK2'
-        constant integer CST_ABI_LearnEvasion='AFK3'
-        constant integer CST_ABI_LearnSeparaAttack='AFK4'
+        constant integer CST_ABI_LearnScoutEye      ='ALSE' // Slot1
+        constant integer CST_ABI_LearnMindBomb      ='ALB1' // Slot1
+        constant integer CST_ABI_LearnEnhanceArmor  ='ALA1' // Slot1
+        constant integer CST_ABI_LearnEvasion       ='ALE1' // Slot1
+        constant integer CST_ABI_LearnEnsnare       ='ALS1' // Slot1
+        constant integer CST_ABI_LearnFarSight      ='ALF1' // Slot1
+        constant integer CST_ABI_LearnTeleportation ='ALT1' // Slot1
+        constant integer CST_ABI_LearnLandMine      ='ALM1' // Slot1
+        constant integer CST_ABI_LearnInvisibility  ='ALI1' // Slot1
+        constant integer CST_ABI_LearnZergling      ='ALZG' // Slot1
         
+        // Learnable Abilities(Placeholder)
+        // Since level 3 abilities can be placed at any template slot
+        constant integer CST_ABI_LearnMindBombS2    ='ALB2' // Slot2
+        constant integer CST_ABI_LearnMindBombS3    ='ALB3' // Slot3
+        constant integer CST_ABI_LearnMindBombS4    ='ALB4' // Slot4
+        constant integer CST_ABI_LearnMindBombS5    ='ALB5' // Slot5
+        constant integer CST_ABI_LearnEnhanceArmorS2='ALA2' // Slot2
+        constant integer CST_ABI_LearnEnhanceArmorS3='ALA3' // Slot3
+        constant integer CST_ABI_LearnEnhanceArmorS4='ALA4' // Slot4
+        constant integer CST_ABI_LearnEnhanceArmorS5='ALA5' // Slot5
+        constant integer CST_ABI_LearnEvasioS2      ='ALE2' // Slot2
+        constant integer CST_ABI_LearnEvasioS3      ='ALE3' // Slot3
+        constant integer CST_ABI_LearnEvasioS4      ='ALE4' // Slot4
+        constant integer CST_ABI_LearnEvasioS5      ='ALE5' // Slot5
+        constant integer CST_ABI_LearnEnsnareS2     ='ALS2' // Slot2
+        constant integer CST_ABI_LearnEnsnareS3     ='ALS3' // Slot3
+        constant integer CST_ABI_LearnEnsnareS4     ='ALS4' // Slot4
+        constant integer CST_ABI_LearnEnsnareS5     ='ALS5' // Slot5
+        constant integer CST_ABI_LearnFarSightS2    ='ALF2' // Slot2
+        constant integer CST_ABI_LearnFarSightS3    ='ALF3' // Slot3
+        constant integer CST_ABI_LearnFarSightS4    ='ALF4' // Slot4
+        constant integer CST_ABI_LearnFarSightS5    ='ALF5' // Slot5
+        constant integer CST_ABI_LearnFarTeleportationS2='ALT2' // Slot2
+        constant integer CST_ABI_LearnFarTeleportationS3='ALT3' // Slot3
+        constant integer CST_ABI_LearnFarTeleportationS4='ALT4' // Slot4
+        constant integer CST_ABI_LearnFarTeleportationS5='ALT5' // Slot5
+        constant integer CST_ABI_LearnLandMineS2    ='ALM2' // Slot2
+        constant integer CST_ABI_LearnLandMineS3    ='ALM3' // Slot3
+        constant integer CST_ABI_LearnLandMineS4    ='ALM4' // Slot4
+        constant integer CST_ABI_LearnLandMineS5    ='ALM5' // Slot5
+        constant integer CST_ABI_LearnInvisibilityS2='ALI2' // Slot2
+        constant integer CST_ABI_LearnInvisibilityS3='ALI3' // Slot3
+        constant integer CST_ABI_LearnInvisibilityS4='ALI4' // Slot4
+        constant integer CST_ABI_LearnInvisibilityS5='ALI5' // Slot5
+        
+
         /***********************************************************************
         * ItemTypeId (ITI)
         ***********************************************************************/
@@ -176,6 +232,20 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_ITI_HunterMiniShop ='I000'
         constant integer CST_ITI_HewAxe         ='I005'
         constant integer CST_ITI_HunterWood     ='lmbr'
+        
+        // Ability Book
+        constant integer CST_ITI_BookScoutEye       ='I017'
+        constant integer CST_ITI_BookMindBomb       ='I019'
+        constant integer CST_ITI_BookEnhanceArmor   ='I01A'
+        constant integer CST_ITI_BookEvasion        ='I01B'
+        constant integer CST_ITI_BookEnsnare        ='I01C'
+        constant integer CST_ITI_BookFarSight       ='I01D'
+        constant integer CST_ITI_BookTeleportation  ='I01E'
+        constant integer CST_ITI_BookLandMine       ='I01F'
+        constant integer CST_ITI_BookZergling       ='I01G'
+        constant integer CST_ITI_BookInvisibility   ='I01H'
+        constant integer CST_ITI_BtnReset           ='I01I'
+        constant integer CST_ITI_BtnOk              ='I01J'
         
         /***********************************************************************
         * DestructableTypeId (DTI)
@@ -591,7 +661,7 @@ library Glue initializer init /* v0.0.1 by Xandria
     endfunction
     
     function CreateHunterBeginUnits takes player p, integer i returns nothing
-        local unit u = CreateUnit(p, CST_UTI_HunterItemBox, Map.itemBoxXs[i], Map.itemBoxYs[i], CST_Facing_Building)
+        local unit u = CreateUnit(p, CST_BTI_HunterItemBox, Map.itemBoxXs[i], Map.itemBoxYs[i], CST_Facing_Building)
         //call UnitAddItemToSlotById(u, 'I005', 0)
         //call UnitAddItemToSlotById(u, 'shrs', 1)
         //call UnitAddItemToSlotById(u, 'pman', 2)
@@ -602,7 +672,7 @@ library Glue initializer init /* v0.0.1 by Xandria
         // call PanCameraToTimedLocForPlayer(p, Map.heroReviveLoc, 0.50)
         set u = null
     endfunction
-    
+
     function GetHeroAvatar takes unit u returns string
         local integer uti = GetUnitTypeId(u)
         if IsUnitType(u, UNIT_TYPE_DEAD) then
@@ -619,8 +689,7 @@ library Glue initializer init /* v0.0.1 by Xandria
             elseif uti == CST_UTI_HunterLGDHeroSyl then
                 return "ReplaceableTextures\\CommandButtonsDisabled\\DISBTNDarkSylvanas.blp"
             else
-                
-                return ""
+                return "Replaceabletextures\\Commandbuttonsdisabled\\DISBTNRaider.blp"
             endif
         else
             if uti == CST_UTI_FarmerHero then
@@ -636,7 +705,7 @@ library Glue initializer init /* v0.0.1 by Xandria
             elseif uti == CST_UTI_HunterLGDHeroSyl then
                 return "ReplaceableTextures\\CommandButtons\\BTNDarkSylvanas.blp"
             else
-                return ""
+                return "ReplaceableTextures\\CommandButtons\\BTNRaider.blp"
             endif
         endif
         

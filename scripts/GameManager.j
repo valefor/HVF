@@ -167,9 +167,9 @@ library GameManager initializer init /*
 	        call FogEnable(false)
 	        call FogMaskEnable(false)
             call ShowMsgToAll(MSG_GameInitializing)
-	        call TriggerSleepAction(2.0)
+	        call TriggerSleepAction(1.0)
 	        call ShowMsgToAll(CST_STR_Version+CST_STR_VersionTag+ARGB(CST_COLOR_Beaware).str(CST_STR_VersionMain+"."+CST_STR_VersionSub))
-	        call TriggerSleepAction(2.0)
+	        call TriggerSleepAction(1.0)
 
 	        call ShowMsgToAll(MSG_GameInitializingDone)
 	        //debug call BJDebugMsg("Waiting host for chosing game mode...")

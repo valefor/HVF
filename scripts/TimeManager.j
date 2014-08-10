@@ -96,6 +96,23 @@ In multiplayer however, this trigger should work.
             return otTickCount
         endmethod
         
+        // Get remaining time of ot
+        static method getOtRemainingTime takes TimerPointer ot returns real
+            local real result = TimerGetRemaining(thistype.otBase.timer)
+            local integer count = 0
+            if ot == thistype.otSelectHero then
+                set count = thistype.otSelectHero.count - otTickCount - 1
+            elseif ot == thistype.otDetectionOn then
+                set count = thistype.otDetectionOn.count - otTickCount - 1
+            elseif ot == thistype.otDetectionOff then
+                set count = thistype.otDetectionOff.count - otTickCount - 1
+            else
+            endif
+            
+            set result = result + count * thistype.otBase.timeout
+            return result
+        endmethod
+        
         private static method onPtExpired takes nothing returns nothing
             set ptTickCount = ptTickCount + 1
             

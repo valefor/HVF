@@ -269,13 +269,16 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // specific attributes
         integer killCount
         boolean isRandomHero
+        boolean isPending
 
+        integer index   // Index of hunter
         integer heroMaxLevel
         integer heroSurviveTime
         
         unit heroBox    // The hunter hero box
         unit dummy      // The dummy unit
         
+        AbilitySelector as  // Ability selector
         // Instance method
         /***********************************************************************
         * Operators
@@ -349,9 +352,25 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endif
         endmethod
         
+        // Clean up these temp creeps
+        private method cleanUp takes nothing returns nothing
+            if .isPending then
+                call .as.destroy()
+                set .as = -1
+            endif
+            
+            if .heroBox != null then
+                call RemoveUnit(.heroBox)
+                set .heroBox = null
+            endif
+        endmethod
+        
         private method initHero takes nothing returns nothing
             local real x = GetUnitX(.heroBox)
             local real y = GetUnitY(.heroBox)
+            // We are finished
+            call this.cleanUp()
+            set .isPending = false
             // Give hunter hero 3 skill points at beginning
             call UnitModifySkillPoints(this.hero, CST_INT_InitHunterSkillPoints - GetHeroSkillPoints(this.hero))
             // Give items
@@ -362,24 +381,29 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             // Now we are settle down, remember to remove Invulnerable
             call UnitRemoveAbility(.dummy, CST_ABI_Invulnerable)
             set .dummy = null
-            // Add replace the heroBox with itemBox
-            call RemoveUnit(.heroBox)
-            call CreateUnit(this.get, CST_UTI_HunterItemBox, x, y, CST_Facing_Building)
-            set .heroBox = null
+            // Add itemBox and here we go
+            call CreateUnit(this.get, CST_BTI_HunterItemBox, Map.itemBoxXs[.index], Map.itemBoxYs[.index], CST_Facing_Building)
+            // Move camera to hero
+            call PanCameraToTimedForPlayer(this.get, GetLocationX(Map.heroReviveLoc), GetLocationY(Map.heroReviveLoc), 0.50)
         endmethod
         
-        public method createRandomHero takes location l returns nothing
-            local location loc = Location(GetLocationX(Map.heroReviveLoc), GetLocationY(Map.heroReviveLoc))
+        public method createRandomHero takes unit u returns nothing
+
+            // Do clean work
+            if .hero != null then
+                call RemoveUnit(.hero)
+                set .hero = null
+            endif
+            
+            if u != null then
+                call RemoveUnit(u)
+            endif
             
             debug call BJDebugMsg("Center X of Map.regionHeroRevive:" + R2S(GetRectCenterX(Map.regionHeroRevive)))
             debug call BJDebugMsg("Create random hero at location >> X:" + R2S(GetLocationX(loc))+ ", Y:"+ R2S(GetLocationY(loc)) )
-            if l !=null then
-                call RemoveLocation(loc)
-                set loc = l
-            endif
             debug call BJDebugMsg("Create random hero for " + GetPlayerName(this.get))
             
-            set this.hero = CreateUnitAtLoc(this.get, GetRandomHeroUti(), loc, 0)
+            set this.hero = CreateUnit(this.get, GetRandomHeroUti(), GetLocationX(Map.heroReviveLoc), GetLocationY(Map.heroReviveLoc), 0)
             set this.isRandomHero = true
             // Give random hunter hero extra bonus such as life(+2000) agi(+3) int(+2)... 
             set Bonus_Life[hero]=CST_INT_RandomBonusLife
@@ -387,22 +411,32 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set Bonus_Agi[hero]=CST_INT_RandomBonusAgi
             set Bonus_Int[hero]=CST_INT_RandomBonusInt
             call this.initHero()
-            
-            call RemoveLocation(loc)
-            
-            //call PanCameraToTimedForPlayer(this.get, GetLocationX(Map.heroReviveLoc), GetLocationY(Map.heroReviveLoc), 0.50)
-            set loc = null
+
         endmethod
         
         public method setHero takes unit u returns nothing
         
-            if u == null then
-                call this.createRandomHero(null)
-            elseif GetUnitTypeId(u) == CST_UTI_HunterHeroRandom then
-                call this.createRandomHero(GetUnitLoc(u))
-                call RemoveUnit(u)
+            if u == null or GetUnitTypeId(u) == CST_UTI_HunterHeroRandom then
+                call this.createRandomHero(u)
+            elseif GetUnitTypeId(u) == CST_UTI_HunterHeroFree then
+                // First replace heroBox with abilityBox 
+                call this.cleanUp()
+                set .as = AbilitySelector.create( CreateUnit(.get, CST_BTI_HunterAbilityShop, Map.itemBoxXs[.index], Map.itemBoxYs[.index], CST_Facing_Building) )
+                set .hero = u
+                // Pause this unit
+                // call PauseUnit(.hero,true)
+                call SetUnitTurnSpeed(.hero, 0.0)
+                call SetUnitMoveSpeed(.hero, 0.0)
+                // Lock camera
+                call SetCameraTargetControllerNoZForPlayer(.get, .hero, 0, 0, false )
+                // Reset camera
+                // call ResetToGameCameraForPlayer( Player(0), 0 )
+                // Tell player to select abilities within 60 seconds
+                // TimerGetRemaining
+                set this.isPending = true
+                call DisplayTimedTextToPlayer(this.get, 0, 0, CST_MSGDUR_Normal, MSG_PlsSelectAbilities+ ARGB(COLOR_ARGB_RED).str(R2S(TimerManager.getOtRemainingTime(TimerManager.otSelectHero))) +MSG_WithinXSeconds)
             else
-                set this.hero = u
+                set .hero = u
                 call this.initHero()
             endif
         endmethod
@@ -415,9 +449,12 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             set .killCount = 0
             set .hero = null
             set .isRandomHero = false
+            set .isPending  = false
             set .bLeave = false
             set .heroMaxLevel   = 0
             set .heroSurviveTime= 0
+            
+            set .as = -1
             
             call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, this.get)
             call AdjustPlayerStateBJ(CST_INT_HunterBeginGold, this.get, PLAYER_STATE_RESOURCE_GOLD)
@@ -1143,7 +1180,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         private method createBeginUnits takes integer i returns nothing
             local real x = GetLocationX(Map.heroReviveLoc)
             local real y = GetLocationY(Map.heroReviveLoc)
-            set .heroBox = CreateUnit(this.get, CST_UTI_HunterHeroBox, Map.itemBoxXs[i], Map.itemBoxYs[i], CST_Facing_Building)
+            set .index = i
+            set .heroBox = CreateUnit(this.get, CST_BTI_HunterHeroBox, Map.itemBoxXs[i], Map.itemBoxYs[i], CST_Facing_Building)
             set .dummy = CreateUnit(this.get, CST_UTI_HunterWorker, GetRandomReal(GetRectMinX(Map.regionHeroRevive), GetRectMaxX(Map.regionHeroRevive)), GetRandomReal(GetRectMinY(Map.regionHeroRevive), GetRectMaxY(Map.regionHeroRevive)), CST_Facing_Unit)
             call UnitAddAbility(.dummy,CST_ABI_Invulnerable)
         endmethod
@@ -1333,7 +1371,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             debug call BJDebugMsg("Select a random hero for players who haven't select a hero")
             loop
                 exitwhen h.end
-                if h.hero == null then
+                if h.hero == null or h.isPending then
                     debug call BJDebugMsg(GetPlayerName(h.get)+" hasn't selected hero")
                     call h.setHero(null)
                 endif

@@ -118,7 +118,7 @@ globals
     // MVP, Wealth, Merit
     constant integer CST_RND_Base   =10
     constant integer CST_ELT_Base   =60
-    constant integer CST_MVP_Base   =2
+    constant integer CST_MVP_Base   =20
     constant integer CST_MVP_Bonus  =10
     constant integer CST_WEL_Max    =200
     constant integer CST_WEL_Mag    =1000

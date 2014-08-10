@@ -11,6 +11,7 @@ library EventManager initializer init/* v0.0.1 Xandria
 
 struct EventManager
     static trigger trigSelectHero
+    static trigger trigSelectAbility
     static trigger trigPlantTree 
     static trigger trigFinishBuild
     static trigger trigHunterUnitDeath
@@ -62,6 +63,76 @@ struct EventManager
             set f = Farmer[GetPlayerId(GetOwningPlayer(u))]
             set f.woodCount = f.woodCount + 1
         endif
+        
+        set i = null
+        set u = null
+        return false
+    endmethod
+    
+    /***************************************************************************
+    * Hunter hero select ability from ability shop 
+    ***************************************************************************/
+    private static method onSelectAbility takes nothing returns boolean    
+        local item i = GetSoldItem()
+        local unit u = GetBuyingUnit()
+        local real x = 0
+        local real y = 0
+        local integer uti = 0
+        local Hunter h
+        
+        if not Hunter.contain(GetOwningPlayer(u)) then
+            return false
+        endif
+        
+        // If other allies buy ability from the shop, refresh it
+        set h = Hunter[GetPlayerId(GetOwningPlayer(GetSellingUnit()))]
+        if GetOwningPlayer(u) != GetOwningPlayer(GetSellingUnit()) then
+            call h.as.refreshShop()
+            return false
+        endif
+
+        set h = Hunter[GetPlayerId(GetOwningPlayer(u))]
+        
+        if GetItemTypeId(i) == CST_ITI_BookScoutEye then
+            call h.as.addLnbAbility(CST_ABI_LearnScoutEye)
+        elseif GetItemTypeId(i) == CST_ITI_BookEnhanceArmor then
+            call h.as.addLnbAbility(CST_ABI_LearnEnhanceArmor)
+        elseif GetItemTypeId(i) == CST_ITI_BookEvasion then
+            call h.as.addLnbAbility(CST_ABI_LearnEvasion)
+        elseif GetItemTypeId(i) == CST_ITI_BookEnsnare then
+            call h.as.addLnbAbility(CST_ABI_LearnEnsnare)
+        elseif GetItemTypeId(i) == CST_ITI_BookFarSight then
+            call h.as.addLnbAbility(CST_ABI_LearnFarSight)
+        elseif GetItemTypeId(i) == CST_ITI_BookTeleportation then
+            call h.as.addLnbAbility(CST_ABI_LearnTeleportation)
+        elseif GetItemTypeId(i) == CST_ITI_BookLandMine then
+            call h.as.addLnbAbility(CST_ABI_LearnLandMine)
+        elseif GetItemTypeId(i) == CST_ITI_BookMindBomb then
+            call h.as.addLnbAbility(CST_ABI_LearnMindBomb)
+        elseif GetItemTypeId(i) == CST_ITI_BookInvisibility then
+            call h.as.addLnbAbility(CST_ABI_LearnInvisibility)
+        elseif GetItemTypeId(i) == CST_ITI_BookZergling then
+            call h.as.addLnbAbility(CST_ABI_LearnZergling)
+        elseif GetItemTypeId(i) == CST_ITI_BtnReset then
+            call h.as.resetShop()
+        elseif GetItemTypeId(i) == CST_ITI_BtnOk then
+            // We are done here, choose the right template to grant ability
+            set uti = h.as.getHunterHeroTemplate()
+            set x = GetUnitX(u)
+            set y = GetUnitY(u)
+            call RemoveUnit(u)
+            set u = null
+            set u = CreateUnit(h.get, uti, GetLocationX(Map.heroReviveLoc), GetLocationY(Map.heroReviveLoc),CST_Facing_Unit)
+            // Grant chosen ability to hero
+            call h.as.grantAbility(u)
+            call h.setHero(u)
+        else
+        endif
+
+        // call RemoveItemFromStock(AbilityManager.shop, GetItemTypeId(i))
+        // call AddItemToStock(AbilityManager.shop, GetItemTypeId(i), 0,0) 
+        set i = null
+        set u = null
         
         return false
     endmethod
@@ -387,10 +458,10 @@ struct EventManager
         // remove player from group
         call ShowMsgToAll(ARGB.fromPlayer(pLeave).str(GetPlayerName(pLeave)) + ARGB(COLOR_ARGB_RED).str(CST_STR_HasLeftGame))
         if bIsHunter then
-            call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Hunter")
+            debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Hunter")
             call Hunter.markAsLeave(pLeave)
         else
-            call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmer")
+            debug call BJDebugMsg("Removing player:" + GetPlayerName(pLeave) + " from Farmer")
             call Farmer.markAsLeave(pLeave)
         endif
 
@@ -482,6 +553,7 @@ struct EventManager
         loop
             exitwhen h.end
             call TriggerRegisterPlayerUnitEvent(trigSelectHero, h.get, EVENT_PLAYER_UNIT_SELL, null)
+            call TriggerRegisterPlayerUnitEvent(trigSelectAbility, h.get, EVENT_PLAYER_UNIT_SELL_ITEM, null)
             call TriggerRegisterPlayerUnitEvent(trigHunterUnitDeath, h.get, EVENT_PLAYER_UNIT_DEATH, Filter(function thistype.filterHunterUnitDeath))
             call TriggerRegisterPlayerUnitEvent(trigPlantTree, h.get, EVENT_PLAYER_UNIT_CONSTRUCT_START, Filter(function thistype.filterPlantTree))
             set h= h.next
@@ -505,6 +577,7 @@ struct EventManager
         // Init triggers
         set thistype.trigSellItem = CreateTrigger()
         set thistype.trigSelectHero = CreateTrigger()
+        set thistype.trigSelectAbility = CreateTrigger()
         set thistype.trigPlantTree = CreateTrigger()
         set thistype.trigFinishBuild = CreateTrigger()
         set thistype.trigHunterUnitDeath = CreateTrigger()
@@ -520,6 +593,7 @@ struct EventManager
         
         // Set up triggers handle function
         call TriggerAddCondition( trigSellItem,Condition(function thistype.onSellItem) )
+        call TriggerAddCondition( trigSelectAbility,Condition(function thistype.onSelectAbility) )
         call TriggerAddCondition( trigSelectHero,Condition(function thistype.onSelectHero) )
         call TriggerAddCondition( trigPlantTree,Condition(function thistype.onPlantTree) )
         call TriggerAddCondition( trigFinishBuild,Condition(function thistype.onFinishBuild) )

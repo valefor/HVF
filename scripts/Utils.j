@@ -174,6 +174,18 @@ library Utils/*
         endloop
     endfunction
     
+    // Credits for vexorions
+    function StopOrder takes unit u returns nothing
+        if GetIssuedOrderId() == OrderId("stop") or GetUnitUserData(u) == 1 then
+            return
+        endif
+        call SetUnitUserData( u, 1 )
+        call PauseUnit( u, true )
+        call IssueImmediateOrder( u, "stop" )
+        call PauseUnit( u, false)
+        call SetUnitUserData( u, 0 )
+    endfunction
+    
     function FlyEnable takes unit u returns nothing
         call UnitAddAbility(u,'Amrf')
         call UnitRemoveAbility(u,'Amrf')

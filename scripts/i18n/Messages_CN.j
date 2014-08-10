@@ -118,6 +118,8 @@ globals
     constant string MSG_YouWin="恭喜，你胜利了！"
     constant string MSG_YouLose="遗憾，你失败了！"
     constant string MSG_GameWillEnd="游戏将在10秒后结束..."
+    constant string MSG_PlsSelectAbilities="请在英雄旁边的|cff99cc00战术学院|r选择|cffff00005|r个技能，你还有 "
+    constant string MSG_WithinXSeconds="秒时间"
     
     // *** Base
     constant string MSG_Important   = "重要"

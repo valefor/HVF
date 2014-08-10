@@ -11,6 +11,7 @@
 //! import "scripts\lib\TableBC.j"
 //! import "scripts\lib\ORDERID.j"
 //! import "scripts\lib\RecipeSYS.j"
+//! import "scripts\lib\RegisterPlayerUnitEvent.j"
 
 // Spell Lib
 //! import "scripts\lib\xe\xebasic.j"
@@ -25,7 +26,9 @@
 //! import "scripts\lib\PlayerAlliance.j"
 //! import "scripts\lib\TimerUtils.j"
 //! import "scripts\lib\SoundTools.j"
+// import "scripts\lib\ShopSystem.j"
 //! import "scripts\lib\TimerPool.j"
+
 
 // AIDS Library
 // import "scripts\aids\HunterAIDS.j"
@@ -33,6 +36,7 @@
 
 
 // HVF vJass Library - for HVF map only
+//! import "scripts\AbilityManager.j"
 //! import "scripts\List.j"
 //! import "scripts\Core.j"
 //! import "scripts\Utils.j"
