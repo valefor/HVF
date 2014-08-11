@@ -372,7 +372,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local real y = GetUnitY(.heroBox)
             
             // Debug use
-            call SetHeroLevelBJ(this.hero, 4, false)
+            // call SetHeroLevelBJ(this.hero, 4, false)
             // We are finished
             call this.cleanUp()
             set .isPending = false
