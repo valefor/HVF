@@ -2,7 +2,7 @@ globals
 
     // *** Version Info
     constant string CST_STR_VersionMain = "7"
-    constant string CST_STR_VersionSub  = "0c"
+    constant string CST_STR_VersionSub  = "0e"
     
     // *** Contact
     constant string CST_STR_ContactQQ   = "2872618576"

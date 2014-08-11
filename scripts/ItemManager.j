@@ -5,8 +5,16 @@ library ItemManager initializer init/* v0.0.1 Xandria
 * HVF item manager
 *******************************************************************************/
 
+globals
+
+    private constant string EFFECT_ItemCombine  = "Abilities\\Spells\\Items\\AIem\\AIemTarget.mdl"
+    private constant string EFFECT_None         = "Abilities\\Spells\\Items\\AIem\\None.mdl"
+
+endglobals
+
 struct ItemManager extends array
 
+    // Abilities\\Spells\\Items\\AIem\\AIemTarget.mdl
     /***************************************************************************
     * Enumerators
     ***************************************************************************/
@@ -82,14 +90,17 @@ endstruct
 * Library Initiation
 *******************************************************************************/
 private function init takes nothing returns nothing
-    call AddRecipeWithCharges(CST_ITI_RocketP, CST_ITI_Rocket, 0, 0, 0, 0, CST_ITI_Rocket, 0)
-    call AddRecipeWithCharges(CST_ITI_StunMineP, CST_ITI_StunMine, 0, 0, 0, 0, CST_ITI_StunMine, 0)
-    call AddRecipeWithCharges(CST_ITI_LandMineP, CST_ITI_LandMine, 0, 0, 0, 0, CST_ITI_LandMine, 0)
-    call AddRecipeWithCharges(CST_ITI_HellfireP, CST_ITI_Hellfire, 0, 0, 0, 0, CST_ITI_Hellfire, 0)
-    call AddRecipeWithCharges(CST_ITI_HewAxeP, CST_ITI_HewAxe, 0, 0, 0, 0, CST_ITI_HewAxe, 0)
-    call AddRecipeWithCharges(CST_ITI_HuntNetP, CST_ITI_HuntNet, 0, 0, 0, 0, CST_ITI_HuntNet, 0)
-    call AddRecipeWithCharges(CST_ITI_InvisPotionP, CST_ITI_InvisPotion, 0, 0, 0, 0, CST_ITI_InvisPotion, 0)
-    call AddRecipeWithCharges(CST_ITI_TeleportP, CST_ITI_Teleport, 0, 0, 0, 0, CST_ITI_Teleport, 0)
+    call recipe.create(CST_ITI_RocketP, CST_ITI_Rocket, 0, 0, 0, 0, CST_ITI_Rocket, EFFECT_None, "", true, 0)
+    call recipe.create(CST_ITI_StunMineP, CST_ITI_StunMine, 0, 0, 0, 0, CST_ITI_StunMine, EFFECT_None, "", true, 0)
+    call recipe.create(CST_ITI_LandMineP, CST_ITI_LandMine, 0, 0, 0, 0, CST_ITI_LandMine, EFFECT_None, "", true, 0)
+    call recipe.create(CST_ITI_HellfireP, CST_ITI_Hellfire, 0, 0, 0, 0, CST_ITI_Hellfire, EFFECT_None, "", true, 0)
+    call recipe.create(CST_ITI_HewAxeP, CST_ITI_HewAxe, 0, 0, 0, 0, CST_ITI_HewAxe, EFFECT_None, "", true, 0)
+    call recipe.create(CST_ITI_HuntNetP, CST_ITI_HuntNet, 0, 0, 0, 0, CST_ITI_HuntNet, EFFECT_None, "", true, 0)
+    call recipe.create(CST_ITI_InvisPotionP, CST_ITI_InvisPotion, 0, 0, 0, 0, CST_ITI_InvisPotion, EFFECT_None, "", true, 0)
+    call recipe.create(CST_ITI_TeleportP, CST_ITI_Teleport, 0, 0, 0, 0, CST_ITI_Teleport, EFFECT_None, "", true, 0)
+    
+    call recipe.create(CST_ITI_HewAxe, CST_ITI_MagicSeed, 0, 0, 0, 0, CST_ITI_HewAxeP, EFFECT_ItemCombine, "", true, 0)
+    call recipe.create(CST_ITI_HewAxeP, CST_ITI_MagicSeed, 0, 0, 0, 0, CST_ITI_HewAxeP, EFFECT_ItemCombine, "", true, 0)
 endfunction
 
 endlibrary

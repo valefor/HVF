@@ -107,7 +107,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             endloop
             
             // We may be fucked up by the 'Team resource bar', re-display our board
-            call StatsBoard.redisplay()
+            if shareControl then
+                call StatsBoard.redisplay()
+            endif
             // refresh board
             call StatsBoard.refresh()
             return false
@@ -147,7 +149,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             local integer count = 0
             loop
                 exitwhen role.end
-                if GetPlayerController(role.get) == MAP_CONTROL_USER then
+                if GetPlayerController(role.get) == MAP_CONTROL_USER and GetPlayerSlotState(role.get) == PLAYER_SLOT_STATE_PLAYING then
                     set count = count + 1
                 endif
                 set role= role.next
@@ -368,6 +370,9 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         private method initHero takes nothing returns nothing
             local real x = GetUnitX(.heroBox)
             local real y = GetUnitY(.heroBox)
+            
+            // Debug use
+            call SetHeroLevelBJ(this.hero, 4, false)
             // We are finished
             call this.cleanUp()
             set .isPending = false
@@ -1136,15 +1141,15 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 set score = score + 5
             endif
             
-            if gold < 200 then
+            if gold < 500 then
             
-            elseif gold < 500 then
-                set score = score + 1
             elseif gold < 1000 then
+                set score = score + 1
+            elseif gold < 2000 then
                 set score = score + 2
-            elseif gold < 2500 then
+            elseif gold < 3500 then
                 set score = score + 3
-            elseif gold < 4000 then
+            elseif gold < 6000 then
                 set score = score + 4
             else
                 set score = score + 5
@@ -1357,7 +1362,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
                 exitwhen h.end
                 set iGold = CST_INT_GoldMagForKilling * h.killCount
                 set iLumber = h.killCount
-                call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_GOLD_GATHERED, iGold)
+                call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_RESOURCE_GOLD, iGold)
                 call AdjustPlayerStateSimpleBJ(h.get, PLAYER_STATE_RESOURCE_LUMBER, iLumber)
                 set h= h.next
             endloop

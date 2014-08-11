@@ -73,7 +73,7 @@ globals
     // *** Begin resource
     constant integer CST_INT_FarmerBeginGold=43
     constant integer CST_INT_FarmerBeginLumber=0
-    constant integer CST_INT_HunterBeginGold=4300
+    constant integer CST_INT_HunterBeginGold=43
     constant integer CST_INT_HunterBeginLumber=10
     
     // *** Timers - Onetime Timer(postfix must be '.01')
@@ -109,7 +109,7 @@ globals
     
     // *** Magnification of resource bonus(Hunter)
     constant integer CST_INT_GoldMagForDeath=20
-    constant integer CST_INT_GoldMagForKilling=10   
+    constant integer CST_INT_GoldMagForKilling=3   
     constant integer CST_INT_LumberMagForKilling=1
     // *** Magnification of resource bonus(Farmer)
     constant real CST_INT_LumberMagForWoody=0.10

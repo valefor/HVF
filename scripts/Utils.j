@@ -1,4 +1,4 @@
-library Utils/*
+library Utils initializer init/* v0.0.1 by Xandria
 ********************************************************************************
 *     Utils library that contais many functions for miscellaneous use
 *
@@ -7,7 +7,34 @@ library Utils/*
     globals
         private sound errorSound
         private sound hintSound
+        
+        // Use by illusion functions
+        private constant integer DUMMY_ID = 'e000'
+        private unit Dummy
+        private unit lastCreatedIllusion
+        
     endglobals
+
+
+    /***************************************************************************
+    * Illusion Functions
+    ***************************************************************************/
+    function UnitCreateIllusion takes unit u, integer abilityId returns unit
+        call UnitAddAbility(Dummy, abilityId)
+        call SetUnitX(Dummy, GetUnitX(u))
+        call SetUnitY(Dummy, GetUnitY(u))
+        call SetUnitOwner(Dummy, GetOwningPlayer(u), false)
+        call IssueTargetOrderById(Dummy, 852274, u)
+        call UnitRemoveAbility(Dummy, abilityId)
+        return lastCreatedIllusion
+    endfunction
+    
+    private function DetectIllusion takes nothing returns boolean
+        if GetUnitTypeId(GetSummoningUnit()) == DUMMY_ID then
+            set lastCreatedIllusion = GetSummonedUnit()
+        endif
+        return false
+    endfunction
 
     /***************************************************************************
     * Common Use Functions
@@ -192,9 +219,15 @@ library Utils/*
     endfunction
     
     private function init takes nothing returns nothing
+        local trigger detect = CreateTrigger()
+        
         set errorSound=CreateSoundFromLabel("InterfaceError",false,false,false,10,10)
         set hintSound=CreateSoundFromLabel("Hint", false, false, false, 10, 10)
         //call StartSound( error )  //apparently the bug in which you play a sound for the first time
                                     //and it doesn't work is not there anymore in patch 1.22
+        set Dummy = CreateUnit(Player(15), DUMMY_ID, 0, 0, 0)
+        call TriggerRegisterAnyUnitEventBJ(detect, EVENT_PLAYER_UNIT_SUMMON)
+        call TriggerAddCondition(detect, Condition(function DetectIllusion))
     endfunction
+
 endlibrary

@@ -657,7 +657,22 @@ library Glue initializer init /* v0.0.1 by Xandria
     endstruct
     
     function IsUnitHunterHero takes unit u returns boolean
-        return GetUnitTypeId(u) < CST_UTI_HunterHeroLastcode and GetUnitTypeId(u) > CST_UTI_HunterHeroFirstcode
+        local integer uti = GetUnitTypeId(u)
+        
+        // If u is not illusion
+        if IsUnitIllusion(u) then
+            return false
+        endif
+        
+        if uti > CST_UTI_HunterHeroFirstcode and uti < CST_UTI_HunterHeroLastcode then
+            return true
+        endif
+        
+        if uti >= CST_UTI_HunterHeroFreeTP1 and uti <= CST_UTI_HunterHeroFreeTP4 then
+            return true
+        endif
+        
+        return false
     endfunction
     
     function IsUnitFarmerAnimal takes unit u returns boolean

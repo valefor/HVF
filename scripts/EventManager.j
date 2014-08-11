@@ -261,23 +261,27 @@ struct EventManager
     private static method actHunterUnitDeath takes nothing returns boolean
         local unit dyingUnit = GetDyingUnit()
         local unit killingUnit = GetKillingUnit()
-        local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
+        //local Hunter h = Hunter[GetPlayerId(GetTriggerPlayer())]
+        local Hunter h = Hunter[GetPlayerId(GetOwningPlayer(dyingUnit))]
         local Farmer f
         
-        if IsUnitHunterHero(dyingUnit) or GetUnitTypeId(dyingUnit) == CST_UTI_HunterHeroSkeleton then
+        if dyingUnit != h.hero then
+            return false
+        endif
+        
+        debug call BJDebugMsg("actHunterUnitDeath >>>> unit of player:" + GetPlayerName(h.get))
+        if IsUnitHunterHero(dyingUnit) then 
             // Hunter hero was killed, give a giant skeleton as hunter hero
-            // set thistype.tpReviveHunterHero.count = h
-            // In order to display hero death anima, we need to postponed revive
-            // call TimerStart(thistype.tpReviveHunterHero.timer, 1.25, false, function thistype.reviveHunterHero)
-            
-            // Since we are in action, we can use poll wait
-            call PolledWait(1.25)
-            call h.reviveHero()
+            if Farmer.contain(GetOwningPlayer(killingUnit)) then
+                set f = Farmer[GetPlayerId(GetOwningPlayer(killingUnit))]
+                set f.killCount = f.killCount + 1
+            endif
+        // elseif GetUnitTypeId(dyingUnit) == CST_UTI_HunterHeroSkeleton then
         endif
-        if Farmer.contain(GetOwningPlayer(killingUnit)) then
-            set f = Farmer[GetPlayerId(GetOwningPlayer(killingUnit))]
-            set f.killCount = f.killCount + 1
-        endif
+        // Since we are in action, we can use poll wait
+        call PolledWait(1.25)
+        call h.reviveHero()
+        
         set dyingUnit = null
         set killingUnit = null
         return false
