@@ -13,3 +13,23 @@
 
 "BeSweet.exe" -core( -input "i:\YouWin.wav" -output "d:\YouWin.wav" -wavmp3 ) -lame( -m s -b 128 -p ) -iobuffer( -in 0 )
 "BeSweet.exe" -core( -input "i:\YouWin.wav" -output "d:\YouWin.wav" -wavmp3 ) -lame( -m m -b 96 -p )
+
+地形改动：
+右下亡灵埋骨地
+右上精灵之森
+
+
+探测商店去掉，换成英灵殿，旁边有死亡骑士镇守：
+改动原因，
+1，探测商店的探测技能和猎人本身的特色技能重复，导致有这种技能优势的猎人被弃用。
+2，探测太过imba
+
+亡灵猎人buff
+增加真视之眼，出生地可选猎人基地或者英灵殿。
+
+
+
+新加竞技模式：
+
+农民和猎人均无法通过养殖以及击杀来获取金钱和木材
+系统每分钟会发放一定的资源，

@@ -166,7 +166,7 @@ In multiplayer however, this trigger should work.
             call TriggerEvaluate(thistype.otPlayTimeOver.trigger)
         endmethod
         
-        // This should only be call just before timer starts
+        // This should only be called just before timer starts
         private static method setTimerCount takes nothing returns nothing
             set pt10s.count = R2I(pt10s.timeout/CST_PT_base)
             set pt15s.count = R2I(pt15s.timeout/CST_PT_base)

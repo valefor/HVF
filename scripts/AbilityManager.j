@@ -40,18 +40,18 @@ struct AbilitySelector extends array
         endif
         
         loop
-        exitwhen i > abiCount
-        debug call BJDebugMsg("grantAbility >>>> i:"+ I2S(i))
- 
-        if abiList[i] != CST_ABI_LearnScoutEye and abiList[i] != CST_ABI_LearnZergling then
-            set abi = abiList[i] + slot
-            set slot = slot + 1
-            debug call BJDebugMsg("grantAbility >>>> slot:"+ I2S(slot))
-        else
-            set abi = abiList[i]
-        endif
-        call AbilityManager.learn(hero,abi)
-        set i = i + 1
+            exitwhen i > abiCount
+            debug call BJDebugMsg("grantAbility >>>> i:"+ I2S(i))
+     
+            if abiList[i] != CST_ABI_LearnScoutEye and abiList[i] != CST_ABI_LearnZergling then
+                set abi = abiList[i] + slot
+                set slot = slot + 1
+                debug call BJDebugMsg("grantAbility >>>> slot:"+ I2S(slot))
+            else
+                set abi = abiList[i]
+            endif
+            call AbilityManager.learn(hero,abi)
+            set i = i + 1
         endloop
     endmethod
     

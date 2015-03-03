@@ -191,7 +191,7 @@ library Utils initializer init/* v0.0.1 by Xandria
         endif
     endfunction
     
-    // Disable ability for all player
+    // Disable ability for all players
     function DisableAbilityForAll takes integer abi returns nothing
         local integer i = 0
         loop

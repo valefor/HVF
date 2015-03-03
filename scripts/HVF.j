@@ -538,7 +538,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Income for killing all animals
         public method operator allAnimalIncome takes nothing returns integer
             local integer money = (CST_INT_PriceOfSheep*sheepCount) + (CST_INT_PriceOfPig*pigCount) + (CST_INT_PriceOfSnake*snakeCount) + (CST_INT_PriceOfChicken*chickenCount)
-            // Greedy has more money for butcher animal
+            // Greedy has more money for butchering animal
             if this.role == CST_INT_FarmerRoleGreedy then
                 set money = R2I(money * CST_INT_GoldMagForGreedy)
             endif
@@ -548,7 +548,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Income for killing overflow animals
         public method operator overflowIncome takes nothing returns integer
             local integer money = (CST_INT_PriceOfSheep*sheepFoldCount) + (CST_INT_PriceOfPig*pigenCount) + (CST_INT_PriceOfSnake*snakeHoleCount) + (CST_INT_PriceOfChicken*cageCount)
-            // Greedy has more money for butcher animal
+            // Greedy has more money for butchering animal
             if this.role == CST_INT_FarmerRoleGreedy then
                 set money = R2I(money * CST_INT_GoldMagForGreedy)
             endif
@@ -557,7 +557,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         // Income from no spawn buildings
         public method operator noSpawnIncome takes nothing returns integer
             local integer money = (CST_INT_PriceOfSheep*sheepFoldNsCount) + (CST_INT_PriceOfPig*pigenNsCount) + (CST_INT_PriceOfSnake*snakeHoleNsCount) + (CST_INT_PriceOfChicken*cageNsCount)
-            // Greedy has more money for butcher animal
+            // Greedy has more money for butchering animal
             if this.role == CST_INT_FarmerRoleGreedy then
                 set money = R2I(money * CST_INT_GoldMagForGreedy)
             endif
