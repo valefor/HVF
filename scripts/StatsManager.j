@@ -292,7 +292,7 @@ struct StatsBoard extends array
         loop
             exitwhen f.end
             set f.bIndex = i
-            // Farmer
+            // *** Farmer's Board
             set fb[CST_BDCOL_PN][i].text = ARGB.fromPlayer(f.get).str(GetPlayerName(f.get))
             set fb[CST_BDCOL_PN][i].icon = ICON_Farmer
             call fb[CST_BDCOL_PN][i].setDisplay(true, true)
@@ -308,7 +308,7 @@ struct StatsBoard extends array
             set fb[CST_BDCOL_RK][i].icon = ICON_Empty
             call fb[CST_BDCOL_RK][i].setDisplay(true, true)
             set fb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
-            // Hunter
+            // *** Hunter's Board
             set hb[CST_BDCOL_PN][i].text = ARGB.fromPlayer(f.get).str(GetPlayerName(f.get))
             set hb[CST_BDCOL_PN][i].icon = ICON_Farmer
             call hb[CST_BDCOL_PN][i].setDisplay(true, true)
@@ -336,7 +336,7 @@ struct StatsBoard extends array
         loop
             exitwhen h.end
             set h.bIndex = i
-            // Farmer
+            // *** Farmer's Board
             set fb[CST_BDCOL_PN][i].text = ARGB.fromPlayer(h.get).str(GetPlayerName(h.get))
             set fb[CST_BDCOL_PN][i].icon = ICON_Empty
             call fb[CST_BDCOL_PN][i].setDisplay(true, true)
@@ -352,7 +352,7 @@ struct StatsBoard extends array
             set fb[CST_BDCOL_RK][i].icon = ICON_Empty
             call fb[CST_BDCOL_RK][i].setDisplay(true, true)
             set fb[CST_BDCOL_ST][i].text = CST_STR_StatusPlaying
-            // Hunter
+            // *** Hunter's Board
             set hb[CST_BDCOL_PN][i].text = ARGB.fromPlayer(h.get).str(GetPlayerName(h.get))
             set hb[CST_BDCOL_PN][i].icon = ICON_Empty
             call hb[CST_BDCOL_PN][i].setDisplay(true, true)

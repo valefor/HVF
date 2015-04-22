@@ -47,6 +47,10 @@ library Glue initializer init /* v0.0.1 by Xandria
     ***************************************************************************/
 
     /***************************************************************************
+    * Macros
+    ***************************************************************************/
+    
+    /***************************************************************************
     * Globals
     ***************************************************************************/
     globals
@@ -262,6 +266,8 @@ library Glue initializer init /* v0.0.1 by Xandria
         constant integer CST_ITI_BookZergling       ='I01G'
         constant integer CST_ITI_BookInvisibility   ='I01H'
         constant integer CST_ITI_BtnReset           ='I01I'
+        constant integer CST_ITI_BtnNext            ='I01K'
+        constant integer CST_ITI_BtnPrev            ='I01L'
         constant integer CST_ITI_BtnOk              ='I01J'
         
         /***********************************************************************
@@ -308,6 +314,8 @@ library Glue initializer init /* v0.0.1 by Xandria
         ***********************************************************************/
         constant real CST_Facing_Building = 270.0
         constant real CST_Facing_Unit = 90.0
+        constant real CST_LOCATION_INVX = -99999.0
+        constant real CST_LOCATION_INVY = -99999.0
         
     endglobals
 
@@ -319,8 +327,6 @@ library Glue initializer init /* v0.0.1 by Xandria
     struct Preloading extends array
     
         private static group preloadUnits
-        private static real invX = -99999.0
-        private static real invY = -99999.0
         
         // This method must be called in struct's onInit method if other struct
         // wants to preload some units
@@ -329,7 +335,7 @@ library Glue initializer init /* v0.0.1 by Xandria
                 return
             endif
             
-            call GroupAddUnit( preloadUnits ,CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), uti, invX, invY, CST_Facing_Unit) )
+            call GroupAddUnit( preloadUnits ,CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), uti, CST_LOCATION_INVX, CST_LOCATION_INVY, CST_Facing_Unit) )
         endmethod
         
         private static method filterRemoveUnit takes nothing returns nothing

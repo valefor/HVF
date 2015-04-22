@@ -87,12 +87,13 @@ struct EventManager
         // If other allies buy ability from the shop, refresh it
         set h = Hunter[GetPlayerId(GetOwningPlayer(GetSellingUnit()))]
         if GetOwningPlayer(u) != GetOwningPlayer(GetSellingUnit()) then
-            call h.as.refreshShop()
+            call h.as.refresh()
             return false
         endif
 
         set h = Hunter[GetPlayerId(GetOwningPlayer(u))]
         
+        /*
         if GetItemTypeId(i) == CST_ITI_BookScoutEye then
             call h.as.addLnbAbility(CST_ABI_LearnScoutEye)
         elseif GetItemTypeId(i) == CST_ITI_BookEnhanceArmor then
@@ -114,8 +115,9 @@ struct EventManager
         elseif GetItemTypeId(i) == CST_ITI_BookZergling then
             call h.as.addLnbAbility(CST_ABI_LearnZergling)
         elseif GetItemTypeId(i) == CST_ITI_BtnReset then
-            call h.as.resetShop()
-        elseif GetItemTypeId(i) == CST_ITI_BtnOk then
+            call h.as.reset()
+        */
+        if GetItemTypeId(i) == CST_ITI_BtnOk then
             // We are done here, choose the right template to grant ability
             set uti = h.as.getHunterHeroTemplate()
             set x = GetUnitX(u)
@@ -127,6 +129,7 @@ struct EventManager
             call h.as.grantAbility(u)
             call h.setHero(u)
         else
+            call h.as.dispatch(GetItemTypeId(i))
         endif
 
         // call RemoveItemFromStock(AbilityManager.shop, GetItemTypeId(i))
@@ -149,7 +152,6 @@ struct EventManager
             call f.addFarmingBuilding(enteringUnit,false)
             call f.addFarmingAminal(enteringUnit)
         endif
-        
         
         set enteringUnit = null
         return false

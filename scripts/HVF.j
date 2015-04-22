@@ -426,7 +426,8 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
             elseif GetUnitTypeId(u) == CST_UTI_HunterHeroFree then
                 // First replace heroBox with abilityBox 
                 call this.cleanUp()
-                set .as = AbilitySelector.create( CreateUnit(.get, CST_BTI_HunterAbilityShop, Map.itemBoxXs[.index], Map.itemBoxYs[.index], CST_Facing_Building) )
+                // set .as = AbilitySelector.create( CreateUnit(.get, CST_BTI_HunterAbilityShop, Map.itemBoxXs[.index], Map.itemBoxYs[.index], CST_Facing_Building) )
+                set .as = AbilitySelector.create( .get, CST_BTI_HunterAbilityShop, Map.itemBoxXs[.index], Map.itemBoxYs[.index] )
                 set .hero = u
                 // Pause this unit
                 // call PauseUnit(.hero,true)
@@ -1433,7 +1434,7 @@ call SetPlayerMaxHeroesAllowed(1,GetLocalPlayer())
         
         // Instance methods
         
-        // When these 2 hunters have same score, we must distinguish who is better 
+        // When these 2 farmers have same score, we must distinguish who is better 
         method isBetterThan takes thistype f returns boolean
             if .killCount < f.killCount then
                 return false

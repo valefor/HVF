@@ -366,7 +366,7 @@ call ExecuteFunc("s__Dialog_Dialog__DialogInit___onInit")
     /***************************************************************************
 	* Common Use Functions
 	***************************************************************************/
-	function InvalidGameModeCommands takes nothing returns nothing
+	function DisableGameModeCommands takes nothing returns nothing
 	    set ShufflePlayerCmd.valid = false
 	    set DeathRaceCmd.valid = false
 	    set NoVotingCmd.valid = false

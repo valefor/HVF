@@ -190,7 +190,7 @@ library GameManager initializer init /*
 	        call thistype.performGameMode()
 	        
 	        // Disable game mode commands
-	        call InvalidGameModeCommands()
+	        call DisableGameModeCommands()
 	        
 		    // For better performance, generate begin items/neutral unit at beginning
 	        // Do this after map adjustion since these funcions need to know playerable
